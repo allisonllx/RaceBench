@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import os
 import sys
 from pathlib import Path
 
@@ -79,6 +80,11 @@ async def main() -> int:
                              "(naive strategy) to measure the solo ceiling")
     args = parser.parse_args()
     cfg = load_config(args.config)
+
+    if cfg["mode"] == "openai" and not os.environ.get("OPENAI_API_KEY"):
+        print("OPENAI_API_KEY is not set. Export it, or use a scripted config "
+              "(runner/config.smoke.yaml) for an offline run.", file=sys.stderr)
+        return 1
 
     run_id = cfg["run_id"] + ("-calibration" if args.calibrate else "")
     out_dir = RESULTS_DIR / run_id
