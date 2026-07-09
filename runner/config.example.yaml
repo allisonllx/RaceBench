@@ -1,0 +1,31 @@
+# Real grid. Requires OPENAI_API_KEY.
+#
+# Budget guardrails stop the run (resumably) when exceeded. Prices are USD per
+# 1M tokens — update to current rates before a big run.
+#
+# Recommended flow:
+#   1. python -m runner.run_grid --config runner/config.example.yaml --calibrate
+#      (solo agent, naive strategy; check solo pass rate > 80% per task before
+#       spending on the full grid)
+#   2. python -m runner.run_grid --config runner/config.example.yaml
+run_id: grid-v1
+mode: openai
+model: gpt-5-mini
+tasks:
+  - t1_stale_read
+  - t2_benign_overlap
+  - t3_ww_clobber
+  - t4_cascade
+  - t5_cross_file
+  - t6_feature_pair
+strategies: [naive, file_lock, git_hash, ast_scope]
+agent_counts: [2, 4]     # cells where the task defines fewer agents are skipped
+reps: 5
+max_turns: 20
+lock_timeout_s: 30
+trial_timeout_s: 900
+budget:
+  max_usd: 25
+  max_total_tokens: 40000000
+prices:
+  gpt-5-mini: {input: 0.25, output: 2.00}

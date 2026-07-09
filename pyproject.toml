@@ -1,0 +1,29 @@
+[project]
+name = "racebench"
+version = "0.1.0"
+description = "A neutral, reproducible benchmark for multi-agent coding coordination strategies"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.50",
+    "pyyaml>=6.0",
+    "pandas>=2.2",
+    "matplotlib>=3.9",
+    "tabulate>=0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["harness", "harness.strategies", "runner", "analysis"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

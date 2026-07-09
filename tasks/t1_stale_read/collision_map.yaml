@@ -1,0 +1,16 @@
+failure_mode: stale_read_lost_update
+collision_points:
+  - file: config.py
+    symbol: <module>            # DEFAULTS dict — both agents insert a key
+    agents: [agent-timeout, agent-retries]
+    kind: same_symbol_write
+  - file: config.py
+    symbol: validate
+    agents: [agent-timeout, agent-retries]
+    kind: same_symbol_write
+expected_anomaly: >
+  Under naive coordination with whole-file writes, the later write is based on
+  a read taken before the earlier write landed: one key and its validation rule
+  silently disappear (lost update). Anchored edits reduce but do not eliminate
+  the risk (stale anchors fail; both agents extending validate() at the same
+  anchor can interleave).

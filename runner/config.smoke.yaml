@@ -1,0 +1,14 @@
+# Offline smoke run: scripted agents, no API key needed.
+# Validates the full pipeline (trials -> event logs -> metrics -> report).
+run_id: smoke-scripted
+mode: scripted
+script_variant: edit
+tasks:
+  - t1_stale_read
+  - t2_benign_overlap
+strategies: [naive, file_lock, git_hash, ast_scope]
+agent_counts: [2]
+reps: 1
+max_turns: 12
+lock_timeout_s: 10
+trial_timeout_s: 120

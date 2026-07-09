@@ -1,0 +1,23 @@
+name: t3_ww_clobber
+failure_mode: write_write_clobber
+benign: false
+description: >
+  Both agents must modify the SAME function (fetch in api.py): one adds a
+  timeout parameter, the other adds retry logic. The final function needs both
+  changes integrated; whichever agent writes second must build on the first
+  agent's version, not its own stale read.
+agents:
+  - id: agent-timeout
+    prompt: >
+      In api.py, add a keyword parameter timeout=10 to fetch(). fetch must pass
+      the timeout through to the transport by calling it as
+      transport(url, timeout=timeout) instead of transport(url). Keep all other
+      behavior (including any behavior other agents may be adding concurrently)
+      working.
+  - id: agent-retries
+    prompt: >
+      In api.py, add a keyword parameter retries=3 to fetch(). fetch must call
+      the transport and, if it raises TransportError, retry the call up to
+      `retries` additional times, re-raising the last TransportError if every
+      attempt fails. Keep all other behavior (including any behavior other
+      agents may be adding concurrently) working.

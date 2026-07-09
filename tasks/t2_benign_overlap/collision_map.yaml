@@ -1,0 +1,17 @@
+failure_mode: benign_overlap_false_positive
+collision_points:
+  - file: stringutils.py
+    symbol: slugify
+    agents: [agent-slugify]
+    kind: disjoint_symbol_write
+  - file: stringutils.py
+    symbol: truncate
+    agents: [agent-truncate]
+    kind: disjoint_symbol_write
+expected_anomaly: >
+  None — this task is deliberately benign. File-level mechanisms (locks,
+  whole-file conflict detection) stall anyway because both agents touch the
+  same FILE; symbol-level mechanisms should not stall at all. Every
+  coordination event on this task counts toward the false-positive stall rate.
+  The "re" module is pre-imported so neither agent needs to touch module-level
+  code.

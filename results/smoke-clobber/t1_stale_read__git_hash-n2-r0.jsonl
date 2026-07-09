@@ -1,0 +1,23 @@
+{"ts": 0.1299, "event": "trial_start", "task": "t1_stale_read", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "git_hash", "n_agents": 2, "rep": 0, "model": "scripted-clobber", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 0.1304, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.1304, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 0.1306, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 842}
+{"ts": 0.1307, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.1307, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 0.1307, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 842}
+{"ts": 0.1308, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.1308, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\"\"\"\n\nDEFAULTS = {\n    \"host\": \"localhost\",\n    \"port\": 8080,\n    \"timeout\": 30.0,\n}\n\n\ndef get_config(overrides=None):\n    \"\"\"Return the effective c"}}
+{"ts": 0.1987, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": "9d5cbd35f66b"}
+{"ts": 0.1989, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.1989, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\"\"\"\n\nDEFAULTS = {\n    \"host\": \"localhost\",\n    \"retries\": 3,\n    \"port\": 8080,\n}\n\n\ndef get_config(overrides=None):\n    \"\"\"Return the effective conf"}}
+{"ts": 0.2175, "event": "coord", "strategy": "git_hash", "action": "auto_merge", "agent": "agent-retries", "path": "config.py"}
+{"ts": 0.3396, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "overwrite", "status": "merged", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": "895f2a16a485"}
+{"ts": 0.3397, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.3398, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "done", "args": {"summary": "rewrote config.py with timeout support"}}
+{"ts": 0.3398, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 0.3398, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 3, "prompt_tokens": 600, "completion_tokens": 150}
+{"ts": 0.3398, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.3398, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "done", "args": {"summary": "rewrote config.py with retries support"}}
+{"ts": 0.3398, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 0.3399, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 3, "prompt_tokens": 600, "completion_tokens": 150}
+{"ts": 0.6249, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 0.21, "prompt_tokens": 1200, "completion_tokens": 300, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

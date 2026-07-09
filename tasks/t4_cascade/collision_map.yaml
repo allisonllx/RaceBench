@@ -1,0 +1,18 @@
+failure_mode: causal_cascade
+collision_points:
+  - file: datasource.py
+    symbol: parse_records -> parse_dataset
+    agents: [agent-datasource]
+    kind: interface_rename
+  - file: pipeline.py
+    symbol: summarize_text
+    agents: [agent-pipeline]
+    kind: stale_premise_consumer   # calls whatever parse function it read
+expected_anomaly: >
+  agent-pipeline reads datasource.py (possibly before the rename lands) and
+  writes a call to the OLD function name; the final pipeline raises
+  AttributeError end-to-end. Repairs by agent-pipeline can in turn land after
+  agent-report/agent-cli read pipeline.py — a 3+ agent cascade no pairwise
+  benchmark exercises. Note all four strategies in this benchmark coordinate
+  per-file, so NONE of them detects this cross-file invalidation: the task
+  measures the visibility gap, and whether agents recover via test runs.

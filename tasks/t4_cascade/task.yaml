@@ -1,0 +1,32 @@
+name: t4_cascade
+failure_mode: causal_cascade
+benign: false
+min_agents: 4
+description: >
+  Four agents own four files in a dependency chain (datasource -> pipeline ->
+  report -> cli). Agent A renames a function in the chain's root with no
+  backward-compatible alias; every downstream agent that read the old name
+  before the rename is acting on an invalidated premise. Tests whether repairs
+  propagate (or cascade into more breakage) beyond a single agent pair.
+agents:
+  - id: agent-datasource
+    prompt: >
+      In datasource.py, rename parse_records to parse_dataset (no
+      backward-compatible alias may remain), and make it more robust: skip
+      blank lines and lines starting with "#". Keep the same return format.
+      Only change datasource.py.
+  - id: agent-pipeline
+    prompt: >
+      In pipeline.py, implement the two stubs exactly per their docstrings:
+      summarize(records) and summarize_text(text). summarize_text must reuse
+      the record-parsing function that datasource.py provides — read
+      datasource.py to see it. Only change pipeline.py.
+  - id: agent-report
+    prompt: >
+      In report.py, implement the two stubs exactly per their docstrings:
+      format_report(summary) and report_from_text(text). report_from_text must
+      reuse pipeline.summarize_text. Only change report.py.
+  - id: agent-cli
+    prompt: >
+      In cli.py, implement build_report(text) exactly per its docstring by
+      reusing report.report_from_text. Only change cli.py.

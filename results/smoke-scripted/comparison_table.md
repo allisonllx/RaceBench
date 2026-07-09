@@ -1,0 +1,10 @@
+| task              | strategy   |   n_agents |   trials |   correct_rate |   mean_wall_s |   mean_tokens |   wasted_rate |   stalls_per_trial |   fp_stalls_per_trial |   mean_stall_wait_s |
+|:------------------|:-----------|-----------:|---------:|---------------:|--------------:|--------------:|--------------:|-------------------:|----------------------:|--------------------:|
+| t1_stale_read     | ast_scope  |          2 |        1 |            1   |           0.6 |          2500 |             0 |                  1 |                     0 |                0.28 |
+| t1_stale_read     | file_lock  |          2 |        1 |            1   |           0.6 |          2500 |             0 |                  1 |                     0 |                0    |
+| t1_stale_read     | git_hash   |          2 |        2 |            1   |           0.4 |          2000 |             0 |                  0 |                     0 |                0    |
+| t1_stale_read     | naive      |          2 |        2 |            0.5 |           0.2 |          2000 |             0 |                  0 |                     0 |                0    |
+| t2_benign_overlap | ast_scope  |          2 |        1 |            1   |           0   |          1500 |             0 |                  0 |                     0 |                0    |
+| t2_benign_overlap | file_lock  |          2 |        1 |            1   |           0   |          1500 |             0 |                  1 |                     1 |                0    |
+| t2_benign_overlap | git_hash   |          2 |        1 |            1   |           0.2 |          1500 |             0 |                  0 |                     0 |                0    |
+| t2_benign_overlap | naive      |          2 |        1 |            1   |           0   |          1500 |             0 |                  0 |                     0 |                0    |
