@@ -26,11 +26,17 @@ class TestResult:
         return self.total > 0 and self.failed == 0 and self.errored == 0
 
 
+GIT_STORE = ".racebench_git"  # explicit git dir (not ".git": some sandboxes
+                              # write-protect that name, and an explicit
+                              # GIT_DIR disables repo discovery entirely, so a
+                              # trial can never touch an enclosing repository)
+
+
 class Workspace:
     """A throwaway git working directory for one trial."""
 
     def __init__(self, root: Path):
-        self.root = Path(root)
+        self.root = Path(root).resolve()
 
     @classmethod
     def create(cls, task_repo: Path, dest: Path) -> "Workspace":
@@ -40,9 +46,8 @@ class Workspace:
         shutil.copytree(task_repo, dest)
         ws = cls(dest)
         init = ws.git("init", "-q", "-b", "main")
-        # A failed init must be LOUD: with a silently missing .git, later git
-        # commands would resolve against an enclosing repository (e.g. the
-        # benchmark repo itself) and pollute its history.
+        # A failed init must be LOUD: without an isolated repository the
+        # git_hash strategy has no substrate and results would be garbage.
         toplevel = ws.git("rev-parse", "--show-toplevel").stdout.strip()
         if init.returncode != 0 or Path(toplevel or "/nonexistent").resolve() != dest.resolve():
             raise RuntimeError(
@@ -71,17 +76,18 @@ class Workspace:
     def list_files(self) -> list[str]:
         files = []
         for p in sorted(self.root.rglob("*")):
-            if p.is_file() and ".git" not in p.parts and "__pycache__" not in p.parts:
+            if (p.is_file() and ".git" not in p.parts
+                    and GIT_STORE not in p.parts
+                    and "__pycache__" not in p.parts):
                 files.append(str(p.relative_to(self.root)))
         return files
 
     # -- git
 
     def git(self, *args: str) -> subprocess.CompletedProcess:
-        # GIT_CEILING_DIRECTORIES stops repository discovery from walking above
-        # the trial workspace, so trial git operations can never touch an
-        # enclosing repo even if this workspace's .git is missing or broken.
-        env = dict(os.environ, GIT_CEILING_DIRECTORIES=str(self.root.parent))
+        env = dict(os.environ,
+                   GIT_DIR=str(self.root / GIT_STORE),
+                   GIT_WORK_TREE=str(self.root))
         return subprocess.run(
             ["git", *args], cwd=self.root, capture_output=True, text=True,
             check=False, env=env,

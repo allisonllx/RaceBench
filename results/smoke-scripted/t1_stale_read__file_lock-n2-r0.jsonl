@@ -1,35 +1,35 @@
-{"ts": 0.1694, "event": "trial_start", "task": "t1_stale_read", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "file_lock", "n_agents": 2, "rep": 0, "model": "scripted-edit", "agent_ids": ["agent-timeout", "agent-retries"]}
-{"ts": 0.1699, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 200, "completion_tokens": 50}
-{"ts": 0.1699, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
-{"ts": 0.1702, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 842}
-{"ts": 0.1702, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 200, "completion_tokens": 50}
-{"ts": 0.1702, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
-{"ts": 0.1703, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-retries", "path": "config.py", "holder": "agent-timeout"}
-{"ts": 0.1703, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 200, "completion_tokens": 50}
-{"ts": 0.1703, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "edit_file", "args": {"path": "config.py", "old_string": "    \"port\": 8080,\n}", "new_string": "    \"port\": 8080,\n    \"timeout\": 30.0,\n}"}}
-{"ts": 0.1711, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
-{"ts": 0.1712, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 200, "completion_tokens": 50}
-{"ts": 0.1712, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "edit_file", "args": {"path": "config.py", "old_string": "            raise ValueError(\"port must be an int in 1..65535\")", "new_string": "            raise ValueError(\"port must be an int in 1..65535\")\n        if key == \"timeout\" and not (isinstance(value, (int, float)) and value > 0):\n            raise ValueError(\"timeout must be a pos"}}
-{"ts": 0.1717, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["validate"], "message": ""}
-{"ts": 0.1718, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 200, "completion_tokens": 50}
-{"ts": 0.1718, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "run_tests", "args": {}}
-{"ts": 0.4488, "event": "run_tests", "agent": "agent-timeout", "passed": 4, "failed": 0, "errored": 0}
-{"ts": 0.4489, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 200, "completion_tokens": 50}
-{"ts": 0.449, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "done", "args": {"summary": "added timeout key + validation"}}
-{"ts": 0.449, "event": "agent_done_coord", "agent": "agent-timeout"}
-{"ts": 0.449, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 5, "prompt_tokens": 1000, "completion_tokens": 250}
-{"ts": 0.4493, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 1014}
-{"ts": 0.4494, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 200, "completion_tokens": 50}
-{"ts": 0.4494, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "edit_file", "args": {"path": "config.py", "old_string": "    \"host\": \"localhost\",", "new_string": "    \"host\": \"localhost\",\n    \"retries\": 3,"}}
-{"ts": 0.4503, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
-{"ts": 0.4504, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 200, "completion_tokens": 50}
-{"ts": 0.4504, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "edit_file", "args": {"path": "config.py", "old_string": "            raise ValueError(\"host must be a non-empty string\")", "new_string": "            raise ValueError(\"host must be a non-empty string\")\n        if key == \"retries\" and not (isinstance(value, int) and value >= 0):\n            raise ValueError(\"retries must be a non-negativ"}}
-{"ts": 0.4511, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["validate"], "message": ""}
-{"ts": 0.4511, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 200, "completion_tokens": 50}
-{"ts": 0.4511, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "run_tests", "args": {}}
-{"ts": 0.7288, "event": "run_tests", "agent": "agent-retries", "passed": 4, "failed": 0, "errored": 0}
-{"ts": 0.729, "event": "llm_usage", "agent": "agent-retries", "turn": 5, "prompt_tokens": 200, "completion_tokens": 50}
-{"ts": 0.729, "event": "tool_call", "agent": "agent-retries", "turn": 5, "tool": "done", "args": {"summary": "added retries key + validation"}}
-{"ts": 0.7291, "event": "agent_done_coord", "agent": "agent-retries"}
-{"ts": 0.7291, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 5, "prompt_tokens": 1000, "completion_tokens": 250}
-{"ts": 1.0136, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 0.56, "prompt_tokens": 2000, "completion_tokens": 500, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}
+{"ts": 0.268, "event": "trial_start", "task": "t1_stale_read", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "file_lock", "n_agents": 2, "rep": 0, "model": "scripted-edit", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 0.2686, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.2686, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 0.2689, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 842}
+{"ts": 0.2689, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.2689, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 0.269, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-retries", "path": "config.py", "holder": "agent-timeout"}
+{"ts": 0.269, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.269, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "edit_file", "args": {"path": "config.py", "old_string": "    \"port\": 8080,\n}", "new_string": "    \"port\": 8080,\n    \"timeout\": 30.0,\n}"}}
+{"ts": 0.2699, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 0.2699, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.2699, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "edit_file", "args": {"path": "config.py", "old_string": "            raise ValueError(\"port must be an int in 1..65535\")", "new_string": "            raise ValueError(\"port must be an int in 1..65535\")\n        if key == \"timeout\" and not (isinstance(value, (int, float)) and value > 0):\n            raise ValueError(\"timeout must be a pos"}}
+{"ts": 0.2706, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["validate"], "message": ""}
+{"ts": 0.2706, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.2707, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 0.5628, "event": "run_tests", "agent": "agent-timeout", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 0.563, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.563, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "done", "args": {"summary": "added timeout key + validation"}}
+{"ts": 0.5631, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 0.5631, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 5, "prompt_tokens": 1000, "completion_tokens": 250}
+{"ts": 0.5634, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 1014}
+{"ts": 0.5634, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.5635, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "edit_file", "args": {"path": "config.py", "old_string": "    \"host\": \"localhost\",", "new_string": "    \"host\": \"localhost\",\n    \"retries\": 3,"}}
+{"ts": 0.5644, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 0.5644, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.5645, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "edit_file", "args": {"path": "config.py", "old_string": "            raise ValueError(\"host must be a non-empty string\")", "new_string": "            raise ValueError(\"host must be a non-empty string\")\n        if key == \"retries\" and not (isinstance(value, int) and value >= 0):\n            raise ValueError(\"retries must be a non-negativ"}}
+{"ts": 0.5652, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["validate"], "message": ""}
+{"ts": 0.5652, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.5652, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 0.86, "event": "run_tests", "agent": "agent-retries", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 0.8602, "event": "llm_usage", "agent": "agent-retries", "turn": 5, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.8602, "event": "tool_call", "agent": "agent-retries", "turn": 5, "tool": "done", "args": {"summary": "added retries key + validation"}}
+{"ts": 0.8603, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 0.8603, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 5, "prompt_tokens": 1000, "completion_tokens": 250}
+{"ts": 1.162, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 0.59, "prompt_tokens": 2000, "completion_tokens": 500, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}
