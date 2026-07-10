@@ -104,6 +104,11 @@ class Strategy(ABC):
     async def _release(self, agent_id: str) -> None:
         """Release any claims held by a finished agent."""
 
+    def drain_notifications(self, agent_id: str) -> list[str]:
+        """Messages the strategy wants injected into the agent's context before
+        its next model call. Only notification-based strategies use this."""
+        return []
+
     # ---- shared helper ----------------------------------------------------
 
     async def _apply_to_current(self, relpath: str, mutation: Mutation) -> WriteOutcome:

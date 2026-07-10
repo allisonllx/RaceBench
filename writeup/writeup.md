@@ -33,8 +33,12 @@ reads on SWE-bench workloads).
 
 Strategies (each ~100 lines, labeled "X-style" — our reimplementations, not
 the authors' systems): `naive` (floor), `file_lock`, `git_hash`
-(MegaAgent-style read-snapshot + 3-way merge + surfaced conflicts), and
-`ast_scope` (symbol-level write claims via AST diff). The AST idea is prior
+(MegaAgent-style read-snapshot + 3-way merge + surfaced conflicts),
+`ast_scope` (symbol-level write claims via AST diff), and `notify`
+(CoAgent-lite: unblocked writes plus advisory notifications to readers whose
+read set the write intersects, with the reader's LLM judging relevance —
+CoAgent's core idea without its serialization pre-order or saga inverses).
+The AST idea is prior
 art — Grit, Phantom, Weave, and arXiv:2603.24284 all do structural conflict
 detection — but none has been measured against alternatives on fixed tasks;
 that neutral measurement is our contribution, not the mechanism.
@@ -49,8 +53,9 @@ pytest oracle, and a reference solution proving the oracle satisfiable.
 
 **Ruled out and why:** a full CRDT substrate (Yjs infrastructure exceeds the
 window; CodeCRDT's own results are confounded by 82–189% code-volume
-inflation); CoAgent's full MTPO (requires a registry of saga-invertible tools);
-8+ agents (cost). CooperBench (arXiv:2601.13295) already covers the
+inflation); CoAgent's full MTPO (its mechanical undo/reorder requires a
+registry of saga-invertible tools); 8+ agents (cost). CooperBench
+(arXiv:2601.13295) already covers the
 *communication* axis with 652 tasks; we hold communication at zero and vary
 the *mechanism* — complementary, not competing.
 
@@ -96,10 +101,10 @@ over-serializes within classes — visible in t6 and reported, not hidden.
 from real-model trials with the event logs committed. (5) The solo-calibration
 ceiling means results say little about tasks models can't do alone.
 
-Next: notify-style strategy (CoAgent-lite) using the read-write-intersection
-events ast_scope already logs; port 2–3 real CooperBench tasks for external
-validity; a second model family to test mechanism × model interaction; cascade
-tasks at 8 agents.
+Next: port 2–3 real CooperBench tasks for external validity; a second model
+family to test mechanism × model interaction; cascade tasks at 8 agents; a
+cross-file dependency graph (Phantom-style) so t4/t5's visibility gap gets a
+mechanism that can actually see it.
 
 ---
 

@@ -1,0 +1,42 @@
+{"ts": 1.0406, "event": "trial_start", "task": "t1_stale_read", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "notify", "n_agents": 2, "rep": 0, "model": "scripted-edit", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 1.0456, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 1.0459, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 1.0572, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 842}
+{"ts": 1.058, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 1.0586, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 1.0596, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 842}
+{"ts": 1.0598, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 1.0599, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "edit_file", "args": {"path": "config.py", "old_string": "    \"port\": 8080,\n}", "new_string": "    \"port\": 8080,\n    \"timeout\": 30.0,\n}"}}
+{"ts": 1.0617, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-timeout", "reader": "agent-retries", "path": "config.py", "symbols": ["<module>"]}
+{"ts": 1.0618, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 1.0619, "event": "notification_delivered", "agent": "agent-retries", "turn": 2, "note": "[coordination notice] Another agent just modified config.py (changed: <module>). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 1.062, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 1.0621, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "edit_file", "args": {"path": "config.py", "old_string": "    \"host\": \"localhost\",", "new_string": "    \"host\": \"localhost\",\n    \"retries\": 3,"}}
+{"ts": 1.0637, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-retries", "reader": "agent-timeout", "path": "config.py", "symbols": ["<module>"]}
+{"ts": 1.0638, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 1.0642, "event": "notification_delivered", "agent": "agent-timeout", "turn": 3, "note": "[coordination notice] Another agent just modified config.py (changed: <module>). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 1.0644, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 1.0645, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "edit_file", "args": {"path": "config.py", "old_string": "            raise ValueError(\"port must be an int in 1..65535\")", "new_string": "            raise ValueError(\"port must be an int in 1..65535\")\n        if key == \"timeout\" and not (isinstance(value, (int, float)) and value > 0):\n            raise ValueError(\"timeout must be a pos"}}
+{"ts": 1.0671, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-timeout", "reader": "agent-retries", "path": "config.py", "symbols": ["validate"]}
+{"ts": 1.0672, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["validate"], "message": ""}
+{"ts": 1.0672, "event": "notification_delivered", "agent": "agent-retries", "turn": 3, "note": "[coordination notice] Another agent just modified config.py (changed: validate). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 1.0672, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 1.0673, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "edit_file", "args": {"path": "config.py", "old_string": "            raise ValueError(\"host must be a non-empty string\")", "new_string": "            raise ValueError(\"host must be a non-empty string\")\n        if key == \"retries\" and not (isinstance(value, int) and value >= 0):\n            raise ValueError(\"retries must be a non-negativ"}}
+{"ts": 1.0693, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-retries", "reader": "agent-timeout", "path": "config.py", "symbols": ["validate"]}
+{"ts": 1.0693, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["validate"], "message": ""}
+{"ts": 1.0695, "event": "notification_delivered", "agent": "agent-timeout", "turn": 4, "note": "[coordination notice] Another agent just modified config.py (changed: validate). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 1.0695, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 1.0696, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 1.0701, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 1.0702, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 1.8634, "event": "run_tests", "agent": "agent-timeout", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 1.8637, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 1.8637, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "done", "args": {"summary": "added timeout key + validation"}}
+{"ts": 1.8637, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 1.8638, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 5, "prompt_tokens": 1000, "completion_tokens": 250}
+{"ts": 1.8639, "event": "run_tests", "agent": "agent-retries", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 1.8641, "event": "llm_usage", "agent": "agent-retries", "turn": 5, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 1.8642, "event": "tool_call", "agent": "agent-retries", "turn": 5, "tool": "done", "args": {"summary": "added retries key + validation"}}
+{"ts": 1.8642, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 1.8643, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 5, "prompt_tokens": 1000, "completion_tokens": 250}
+{"ts": 2.2029, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 0.82, "prompt_tokens": 2000, "completion_tokens": 500, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

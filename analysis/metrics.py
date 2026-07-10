@@ -49,6 +49,7 @@ def trial_metrics(log_path: Path) -> dict | None:
     refused_turns: set[tuple[str, int]] = set()
     writes_by_agent_path: dict[tuple[str, str], set[str]] = defaultdict(set)
     stalls: list[dict] = []
+    notifications: list[dict] = []
     reads = 0
     stall_wait_s = 0.0
 
@@ -67,6 +68,8 @@ def trial_metrics(log_path: Path) -> dict | None:
             stall_wait_s += float(e.get("waited_s") or 0.0)
         elif e["event"] == "coord" and e.get("action") in STALL_ACTIONS:
             stalls.append(e)
+        elif e["event"] == "coord" and e.get("action") == "notified":
+            notifications.append(e)
 
     total_tokens = sum(turn_tokens.values())
     wasted_tokens = sum(turn_tokens.get(key, 0) for key in refused_turns)
@@ -107,6 +110,9 @@ def trial_metrics(log_path: Path) -> dict | None:
         "wasted_token_rate": (wasted_tokens / total_tokens) if total_tokens else 0.0,
         "stall_events": len(stalls),
         "fp_stall_events": fp_stalls,
+        "notify_events": len(notifications),
+        # on a benign task every notification is unnecessary coordination
+        "fp_notify_events": len(notifications) if benign else 0,
         "stall_wait_s": round(stall_wait_s, 3),
         "reads_observed": reads,
         "read_set_visibility": 1.0,
@@ -139,12 +145,13 @@ def aggregate(df: pd.DataFrame) -> pd.DataFrame:
             wasted_rate=("wasted_token_rate", "mean"),
             stalls_per_trial=("stall_events", "mean"),
             fp_stalls_per_trial=("fp_stall_events", "mean"),
+            notifies_per_trial=("notify_events", "mean"),
             mean_stall_wait_s=("stall_wait_s", "mean"),
         )
         .reset_index()
     )
     for col in ("correct_rate", "wasted_rate", "stalls_per_trial",
-                "fp_stalls_per_trial"):
+                "fp_stalls_per_trial", "notifies_per_trial"):
         agg[col] = agg[col].round(3)
     agg["mean_wall_s"] = agg["mean_wall_s"].round(1)
     agg["mean_tokens"] = agg["mean_tokens"].round(0)

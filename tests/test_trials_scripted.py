@@ -86,6 +86,19 @@ async def test_naive_benign_overlap_correct(tmp_path):
     assert result.correct, "disjoint anchored edits compose even uncoordinated"
 
 
+async def test_notify_never_stalls_but_notifies(tmp_path):
+    result, log = await run_scripted("t2_benign_overlap", "notify", "edit", tmp_path)
+    assert result.correct
+    metrics = trial_metrics(log)
+    assert metrics["stall_events"] == 0, "notify must never block a write"
+    # both agents read the whole file, so each one's read set contains the
+    # other's function: the first write to land notifies the other agent
+    # (unless it already finished) — an unnecessary notification, since the
+    # task is benign. Either 0 (reader already done) or more is a valid
+    # schedule; what must hold is fp_notify == notify on a benign task.
+    assert metrics["fp_notify_events"] == metrics["notify_events"]
+
+
 # ---------------------------------------------------------------- metrics sanity
 
 async def test_metrics_row_shape(tmp_path):

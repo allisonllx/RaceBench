@@ -65,6 +65,13 @@ class Agent:
                 # when the model client resolves without suspending (scripted mode)
                 import asyncio
                 await asyncio.sleep(0)
+
+                # advisory strategies (notify) queue messages for injection
+                for note in self.strategy.drain_notifications(self.id):
+                    self.messages.append({"role": "user", "content": note})
+                    self.log.log("notification_delivered", agent=self.id,
+                                 turn=turn, note=note[:300])
+
                 model_turn = await self.model.complete(self.messages, TOOL_SCHEMAS)
                 self.prompt_tokens += model_turn.prompt_tokens
                 self.completion_tokens += model_turn.completion_tokens
