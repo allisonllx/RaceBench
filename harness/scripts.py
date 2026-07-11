@@ -17,7 +17,7 @@ from __future__ import annotations
 from pathlib import Path
 
 T1_INITIAL = (Path(__file__).resolve().parent.parent
-              / "tasks/t1_stale_read/repo/config.py").read_text(encoding="utf-8")
+              / "tasks/t1_stale_clobber/repo/config.py").read_text(encoding="utf-8")
 
 T1_TIMEOUT_DEFAULT = '    "port": 8080,\n    "timeout": 30.0,\n}'
 T1_RETRIES_DEFAULT = '    "host": "localhost",\n    "retries": 3,'
@@ -46,6 +46,59 @@ def _t1_full_file(with_timeout: bool, with_retries: bool) -> str:
             '            raise ValueError("host must be a non-empty string")',
             T1_RETRIES_RULE, 1)
     return content
+
+
+# ---------------------------------------------------------------- t3 fragments
+
+T3_INITIAL = (Path(__file__).resolve().parent.parent
+              / "tasks/t3_fetch_clobber/repo/api.py").read_text(encoding="utf-8")
+
+T3_TIMEOUT_ONLY = '''"""A tiny client over a pluggable transport (no real network involved).
+
+A transport is any callable taking (url, **kwargs) and returning a response
+object, raising TransportError on failure.
+
+Agents must replace the entire fetch() body/signature via a full-file
+write_file from their last read — do not piecemeal-edit a single line.
+"""
+
+
+class TransportError(Exception):
+    """Raised by a transport when a request fails."""
+
+
+def fetch(url, transport, timeout=10):
+    """Fetch url via the given transport and return the response."""
+    return transport(url, timeout=timeout)
+'''
+
+T3_RETRIES_ONLY = '''"""A tiny client over a pluggable transport (no real network involved).
+
+A transport is any callable taking (url, **kwargs) and returning a response
+object, raising TransportError on failure.
+
+Agents must replace the entire fetch() body/signature via a full-file
+write_file from their last read — do not piecemeal-edit a single line.
+"""
+
+
+class TransportError(Exception):
+    """Raised by a transport when a request fails."""
+
+
+def fetch(url, transport, retries=3):
+    """Fetch url via the given transport and return the response."""
+    last_error = None
+    for _ in range(retries + 1):
+        try:
+            return transport(url)
+        except TransportError as exc:
+            last_error = exc
+    raise last_error
+'''
+
+T3_BOTH = (Path(__file__).resolve().parent.parent
+           / "tasks/t3_fetch_clobber/reference/api.py").read_text(encoding="utf-8")
 
 
 # ---------------------------------------------------------------- t2 fragments
@@ -80,8 +133,8 @@ T2_TRUNCATE_NEW = (
 # ---------------------------------------------------------------- script table
 
 SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
-    # t1 — composing anchored edits (correct under every strategy)
-    ("t1_stale_read", "agent-timeout", "edit"): [
+    # t1_stale_clobber — composing anchored edits (correct under every strategy)
+    ("t1_stale_clobber", "agent-timeout", "edit"): [
         ("read_file", {"path": "config.py"}),
         ("edit_file", {"path": "config.py",
                        "old_string": '    "port": 8080,\n}',
@@ -92,7 +145,7 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         ("run_tests", {}),
         ("done", {"summary": "added timeout key + validation"}),
     ],
-    ("t1_stale_read", "agent-retries", "edit"): [
+    ("t1_stale_clobber", "agent-retries", "edit"): [
         ("read_file", {"path": "config.py"}),
         ("edit_file", {"path": "config.py",
                        "old_string": '    "host": "localhost",',
@@ -104,17 +157,30 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         ("done", {"summary": "added retries key + validation"}),
     ],
     # t1 — stale whole-file rewrites (lost update under naive)
-    ("t1_stale_read", "agent-timeout", "clobber"): [
+    ("t1_stale_clobber", "agent-timeout", "clobber"): [
         ("read_file", {"path": "config.py"}),
         ("write_file", {"path": "config.py",
                         "content": _t1_full_file(with_timeout=True, with_retries=False)}),
         ("done", {"summary": "rewrote config.py with timeout support"}),
     ],
-    ("t1_stale_read", "agent-retries", "clobber"): [
+    ("t1_stale_clobber", "agent-retries", "clobber"): [
         ("read_file", {"path": "config.py"}),
         ("write_file", {"path": "config.py",
                         "content": _t1_full_file(with_timeout=False, with_retries=True)}),
         ("done", {"summary": "rewrote config.py with retries support"}),
+    ],
+    # t3_fetch_clobber — stale whole-file rewrites (lost update under naive).
+    # (No concurrent "edit" scripts: both agents must rewrite the same fetch
+    # region; composing under live models is the grid measurement.)
+    ("t3_fetch_clobber", "agent-timeout", "clobber"): [
+        ("read_file", {"path": "api.py"}),
+        ("write_file", {"path": "api.py", "content": T3_TIMEOUT_ONLY}),
+        ("done", {"summary": "rewrote api.py with timeout-only fetch"}),
+    ],
+    ("t3_fetch_clobber", "agent-retries", "clobber"): [
+        ("read_file", {"path": "api.py"}),
+        ("write_file", {"path": "api.py", "content": T3_RETRIES_ONLY}),
+        ("done", {"summary": "rewrote api.py with retries-only fetch"}),
     ],
     # t2 — disjoint-function edits (any stall is a false positive)
     ("t2_benign_overlap", "agent-slugify", "edit"): [

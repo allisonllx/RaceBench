@@ -5,7 +5,7 @@
 Every published coordination mechanism for parallel LLM coding agents — CRDT merging
 (CodeCRDT), git-hash optimistic concurrency (MegaAgent), notification-based advisory
 control (CoAgent) — is evaluated by its own authors, on its own task suite, with its own
-metrics. Nobody has published the boring comparison table. ConcurBench is that table:
+metrics. Nobody has published the boring comparison table. RaceBench is that table:
 a fixed suite of collision-seeded coding tasks, run under interchangeable coordination
 strategies, with per-mechanism cost accounting.
 
@@ -47,6 +47,15 @@ and add the name to `strategies:` in a runner config. Offline smoke test with
 Full checklist, template, event-schema notes, and testing patterns:
 [`docs/adding-a-strategy.md`](docs/adding-a-strategy.md).
 
+### External systems (Level C)
+
+To score a **third-party multi-agent product** (bring-your-own runtime) against
+RaceBench tasks and oracles — without going through our Agent/Strategy loop —
+see [`docs/adding-an-external-runtime.md`](docs/adding-an-external-runtime.md)
+(`python -m runner.run_external`). Built-ins: `scripted`, `shell`, and a
+**MegaAgent vendor bridge** (`--adapter megaagent`, shared isolation only).
+Correctness and wall clock only unless the adapter emits RaceBench events.
+
 Ruled out for the hackathon window (with reasons, see `writeup/`): full CRDT substrate,
 CoAgent's full MTPO with serialization pre-order and saga inverses, 8+ agent scale;
 lock-on-write-only `file_lock` and `git_hash`+worktree hybrids (redundant with
@@ -60,9 +69,9 @@ pytest oracle, and reference solution.
 
 | Task | Failure mode | Agents | Notes |
 |---|---|---|---|
-| `t1_stale_read` | stale read / lost update | 2 | |
+| `t1_stale_clobber` | stale read / lost update (whole-file rewrite) | 2 | hardened; v1 in `tasks/_archive/` |
 | `t2_benign_overlap` | disjoint functions, same file (FP probe) | 2 | `benign: true` |
-| `t3_ww_clobber` | write-write on the same function | 2 | |
+| `t3_fetch_clobber` | write-write on the same function (whole-fetch rewrite) | 2 | hardened; v1 in `tasks/_archive/` |
 | `t4_cascade` | causal cascade across a dependency chain | 4 | multi-module |
 | `t5_cross_file` | cross-file symbol dependency | 2 | multi-module |
 | `t6_feature_pair` | CooperBench-style feature pair | 2 | multi-module |
@@ -74,6 +83,7 @@ pytest oracle, and reference solution.
 | `t12_split_view` | worktree divergence | 2 | `isolation: worktree` |
 | `rw_c_benign_overlap` | benign same-file on Conduit | 2 | FastAPI+SQLite+Pydantic |
 | `rw_b_signature_drift` | stale-read / signature drift | 2 | Conduit `format_article` |
+| `rw_d_tag_antidependency` | tag filter vs count silent invalidation | 2 | Conduit tags |
 | `rw_e_cascade` | 3-agent causal cascade | 3 | Conduit Article.summary |
 
 The Conduit base lives in `tasks/_conduit_base/` (shared source). Host deps

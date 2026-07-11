@@ -1,4 +1,9 @@
-"""Generate the comparison table (CSV + markdown) and plots for a run.
+"""Generate comparison tables (CSV + markdown) and plots for a run.
+
+Writes:
+  - comparison_table — per (task, strategy, n_agents)
+  - comparison_table_overall — across tasks, per (strategy, n_agents)
+  - comparison_table_by_strategy — across tasks and n, per strategy
 
 Usage:
     python -m analysis.make_report results/<run_id>
@@ -15,9 +20,21 @@ from pathlib import Path
 
 import pandas as pd
 
-from analysis.metrics import aggregate, run_dataframe
+from analysis.metrics import (
+    aggregate,
+    aggregate_by_strategy,
+    aggregate_overall,
+    run_dataframe,
+)
 from analysis.plots import make_all_plots
 from harness.pricing import load_prices, load_prices_from_config, write_run_meta
+
+
+def _write_table(df: pd.DataFrame, out_dir: Path, stem: str) -> str:
+    df.to_csv(out_dir / f"{stem}.csv", index=False)
+    md = df.to_markdown(index=False)
+    (out_dir / f"{stem}.md").write_text(md + "\n", encoding="utf-8")
+    return md
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -56,17 +73,23 @@ def main(argv: list[str] | None = None) -> int:
 
     df.to_csv(out_dir / "trials.csv", index=False)
     agg = aggregate(df)
-    agg.to_csv(out_dir / "comparison_table.csv", index=False)
+    overall = aggregate_overall(df)
+    by_strategy = aggregate_by_strategy(df)
 
-    md = agg.to_markdown(index=False)
-    (out_dir / "comparison_table.md").write_text(md + "\n", encoding="utf-8")
-    print(md)
+    print("=== per task × strategy × n_agents ===")
+    print(_write_table(agg, out_dir, "comparison_table"))
+    print("\n=== overall (all tasks) × strategy × n_agents ===")
+    print(_write_table(overall, out_dir, "comparison_table_overall"))
+    print("\n=== overall (all tasks, all n) × strategy ===")
+    print(_write_table(by_strategy, out_dir, "comparison_table_by_strategy"))
 
     total_usd = df["estimated_usd"].sum()
     total_tokens = df["total_tokens"].sum()
-    figures = make_all_plots(agg)
+    figures = make_all_plots(agg, overall=overall, by_strategy=by_strategy)
     print(f"\nper-trial rows: {len(df)}  ->  {out_dir}/trials.csv")
-    print(f"aggregate table -> {out_dir}/comparison_table.csv|.md")
+    print(f"per-task table -> {out_dir}/comparison_table.csv|.md")
+    print(f"overall table  -> {out_dir}/comparison_table_overall.csv|.md")
+    print(f"by-strategy    -> {out_dir}/comparison_table_by_strategy.csv|.md")
     print(f"run cost (priced trials): ${total_usd:.2f}  ({int(total_tokens):,} tokens)")
     for f in figures:
         print(f"figure -> {f}")

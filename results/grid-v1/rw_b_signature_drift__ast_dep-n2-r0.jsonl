@@ -1,0 +1,119 @@
+{"ts": 3.1742, "event": "trial_start", "task": "rw_b_signature_drift", "failure_mode": "stale_read_signature_drift", "benign": false, "strategy": "ast_dep", "n_agents": 2, "rep": 0, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-reading-time", "agent-i18n"]}
+{"ts": 7.5796, "event": "llm_usage", "agent": "agent-reading-time", "turn": 1, "prompt_tokens": 692, "completion_tokens": 19}
+{"ts": 7.5798, "event": "tool_call", "agent": "agent-reading-time", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 7.647, "event": "llm_usage", "agent": "agent-i18n", "turn": 1, "prompt_tokens": 652, "completion_tokens": 30}
+{"ts": 7.6471, "event": "tool_call", "agent": "agent-i18n", "turn": 1, "tool": "grep", "args": {"pattern": "format_article(", "glob": "**/*"}}
+{"ts": 7.6965, "event": "search", "agent": "agent-i18n", "kind": "grep", "pattern": "format_article(", "n": 5}
+{"ts": 8.8384, "event": "llm_usage", "agent": "agent-i18n", "turn": 2, "prompt_tokens": 789, "completion_tokens": 24}
+{"ts": 8.8426, "event": "tool_call", "agent": "agent-i18n", "turn": 2, "tool": "read_file", "args": {"path": "conduit/serializers/article_format.py"}}
+{"ts": 9.1144, "event": "read", "agent": "agent-i18n", "path": "conduit/serializers/article_format.py", "found": true, "size": 946}
+{"ts": 9.3061, "event": "llm_usage", "agent": "agent-reading-time", "turn": 2, "prompt_tokens": 952, "completion_tokens": 21}
+{"ts": 9.3063, "event": "tool_call", "agent": "agent-reading-time", "turn": 2, "tool": "read_file", "args": {"path": "conduit/services/feed.py"}}
+{"ts": 9.3073, "event": "read", "agent": "agent-reading-time", "path": "conduit/services/feed.py", "found": true, "size": 719}
+{"ts": 10.35, "event": "llm_usage", "agent": "agent-reading-time", "turn": 3, "prompt_tokens": 1139, "completion_tokens": 24}
+{"ts": 10.3501, "event": "tool_call", "agent": "agent-reading-time", "turn": 3, "tool": "read_file", "args": {"path": "conduit/serializers/article_format.py"}}
+{"ts": 10.3518, "event": "read", "agent": "agent-reading-time", "path": "conduit/serializers/article_format.py", "found": true, "size": 946}
+{"ts": 10.3619, "event": "llm_usage", "agent": "agent-i18n", "turn": 3, "prompt_tokens": 1046, "completion_tokens": 22}
+{"ts": 10.362, "event": "tool_call", "agent": "agent-i18n", "turn": 3, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 10.3665, "event": "read", "agent": "agent-i18n", "path": "conduit/api/routes_articles.py", "found": true, "size": 2294}
+{"ts": 11.4885, "event": "llm_usage", "agent": "agent-reading-time", "turn": 4, "prompt_tokens": 1396, "completion_tokens": 22}
+{"ts": 11.489, "event": "tool_call", "agent": "agent-reading-time", "turn": 4, "tool": "read_file", "args": {"path": "conduit/api/routes_feed.py"}}
+{"ts": 11.4927, "event": "read", "agent": "agent-reading-time", "path": "conduit/api/routes_feed.py", "found": true, "size": 914}
+{"ts": 13.0786, "event": "llm_usage", "agent": "agent-reading-time", "turn": 5, "prompt_tokens": 1641, "completion_tokens": 27}
+{"ts": 13.0787, "event": "tool_call", "agent": "agent-reading-time", "turn": 5, "tool": "read_file", "args": {"path": "conduit/db/schema.py"}}
+{"ts": 13.08, "event": "read", "agent": "agent-reading-time", "path": "conduit/db/schema.py", "found": true, "size": 1407}
+{"ts": 14.2922, "event": "llm_usage", "agent": "agent-reading-time", "turn": 6, "prompt_tokens": 1977, "completion_tokens": 21}
+{"ts": 14.2923, "event": "tool_call", "agent": "agent-reading-time", "turn": 6, "tool": "read_file", "args": {"path": "conduit/services/articles.py"}}
+{"ts": 14.2978, "event": "read", "agent": "agent-reading-time", "path": "conduit/services/articles.py", "found": true, "size": 2338}
+{"ts": 14.9777, "event": "llm_usage", "agent": "agent-i18n", "turn": 4, "prompt_tokens": 1596, "completion_tokens": 331}
+{"ts": 14.9777, "event": "tool_call", "agent": "agent-i18n", "turn": 4, "tool": "edit_file", "args": {"path": "conduit/serializers/article_format.py", "old_string": "def format_article(article: dict[str, Any]) -> dict[str, Any]:", "new_string": "def format_article(article: dict[str, Any], locale: str) -> dict[str, Any]:"}}
+{"ts": 14.9836, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-i18n", "reader": "agent-reading-time", "path": "conduit/serializers/article_format.py", "symbols": ["conduit/serializers/article_format.py:format_article"]}
+{"ts": 15.0246, "event": "write", "agent": "agent-i18n", "path": "conduit/serializers/article_format.py", "kind": "replace", "status": "applied", "waited_s": 0.013, "changed_symbols": ["format_article"], "message": ""}
+{"ts": 15.4457, "event": "llm_usage", "agent": "agent-reading-time", "turn": 7, "prompt_tokens": 2608, "completion_tokens": 21}
+{"ts": 15.4458, "event": "tool_call", "agent": "agent-reading-time", "turn": 7, "tool": "read_file", "args": {"path": "conduit/db/store.py"}}
+{"ts": 15.4468, "event": "read", "agent": "agent-reading-time", "path": "conduit/db/store.py", "found": true, "size": 687}
+{"ts": 16.3892, "event": "llm_usage", "agent": "agent-i18n", "turn": 5, "prompt_tokens": 1681, "completion_tokens": 25}
+{"ts": 16.3892, "event": "tool_call", "agent": "agent-i18n", "turn": 5, "tool": "grep", "args": {"pattern": "estimate_reading_minutes", "glob": "**/*"}}
+{"ts": 16.4001, "event": "search", "agent": "agent-i18n", "kind": "grep", "pattern": "estimate_reading_minutes", "n": 4}
+{"ts": 16.7904, "event": "llm_usage", "agent": "agent-reading-time", "turn": 8, "prompt_tokens": 2811, "completion_tokens": 21}
+{"ts": 16.7905, "event": "tool_call", "agent": "agent-reading-time", "turn": 8, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 16.7916, "event": "read", "agent": "agent-reading-time", "path": "tests/test_smoke.py", "found": true, "size": 961}
+{"ts": 18.0167, "event": "llm_usage", "agent": "agent-reading-time", "turn": 9, "prompt_tokens": 3083, "completion_tokens": 22}
+{"ts": 18.0168, "event": "tool_call", "agent": "agent-reading-time", "turn": 9, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 18.0189, "event": "read", "agent": "agent-reading-time", "path": "conduit/api/routes_articles.py", "found": true, "size": 2294}
+{"ts": 18.4107, "event": "llm_usage", "agent": "agent-i18n", "turn": 6, "prompt_tokens": 1830, "completion_tokens": 25}
+{"ts": 18.4109, "event": "tool_call", "agent": "agent-i18n", "turn": 6, "tool": "read_file", "args": {"path": "conduit/serializers/__init__.py"}}
+{"ts": 18.4115, "event": "read", "agent": "agent-i18n", "path": "conduit/serializers/__init__.py", "found": true, "size": 217}
+{"ts": 19.2767, "event": "llm_usage", "agent": "agent-reading-time", "turn": 10, "prompt_tokens": 3633, "completion_tokens": 22}
+{"ts": 19.2768, "event": "tool_call", "agent": "agent-reading-time", "turn": 10, "tool": "read_file", "args": {"path": "conduit/services/favorites.py"}}
+{"ts": 19.2778, "event": "read", "agent": "agent-reading-time", "path": "conduit/services/favorites.py", "found": true, "size": 1035}
+{"ts": 19.3774, "event": "llm_usage", "agent": "agent-i18n", "turn": 7, "prompt_tokens": 1909, "completion_tokens": 21}
+{"ts": 19.3777, "event": "tool_call", "agent": "agent-i18n", "turn": 7, "tool": "read_file", "args": {"path": "conduit/services/feed.py"}}
+{"ts": 19.3786, "event": "read", "agent": "agent-i18n", "path": "conduit/services/feed.py", "found": true, "size": 719}
+{"ts": 22.7286, "event": "llm_usage", "agent": "agent-i18n", "turn": 8, "prompt_tokens": 2096, "completion_tokens": 222}
+{"ts": 22.729, "event": "tool_call", "agent": "agent-i18n", "turn": 8, "tool": "read_file", "args": {"path": "conduit/serializers/article_format.py"}}
+{"ts": 22.7318, "event": "read", "agent": "agent-i18n", "path": "conduit/serializers/article_format.py", "found": true, "size": 959}
+{"ts": 32.851, "event": "llm_usage", "agent": "agent-i18n", "turn": 9, "prompt_tokens": 2357, "completion_tokens": 882}
+{"ts": 32.8511, "event": "tool_call", "agent": "agent-i18n", "turn": 9, "tool": "edit_file", "args": {"path": "conduit/serializers/article_format.py", "old_string": "def format_article(article: dict[str, Any], locale: str) -> dict[str, Any]:\n    \"\"\"Return the public article payload used by list/get endpoints.\n\n    Keys: slug, title, description, body, author_id, t", "new_string": "def format_article(article: dict[str, Any], locale: str) -> dict[str, Any]:\n    \"\"\"Return the public article payload used by list/get endpoints.\n\n    Keys: slug, title, description, body, author_id, t"}}
+{"ts": 32.8557, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-i18n", "reader": "agent-reading-time", "path": "conduit/serializers/article_format.py", "symbols": ["conduit/api/routes_articles.py:create_article", "conduit/api/routes_articles.py:favorite_article", "conduit/api/routes_articles.py:get_article", "conduit/api/routes_articles.py:list_articles", "conduit/serializers/article_format.py:format_article"]}
+{"ts": 32.9992, "event": "write", "agent": "agent-i18n", "path": "conduit/serializers/article_format.py", "kind": "replace", "status": "applied", "waited_s": 0.008, "changed_symbols": ["format_article"], "message": ""}
+{"ts": 33.069, "event": "llm_usage", "agent": "agent-reading-time", "turn": 11, "prompt_tokens": 3911, "completion_tokens": 1133}
+{"ts": 33.0691, "event": "tool_call", "agent": "agent-reading-time", "turn": 11, "tool": "edit_file", "args": {"path": "conduit/services/feed.py", "old_string": "\"\"\"Feed / reading-time helpers — stubs for agent tasks.\"\"\"\nfrom __future__ import annotations\n\nimport sqlite3\n\n\ndef reading_time_for_slug(conn: sqlite3.Connection, slug: str) -> dict:\n    \"\"\"Return {s", "new_string": "\"\"\"Feed / reading-time helpers — stubs for agent tasks.\"\"\"\nfrom __future__ import annotations\n\nimport sqlite3\n\nfrom conduit.services.articles import get_article_by_slug\nfrom conduit.serializers.articl"}}
+{"ts": 33.0709, "event": "coord", "strategy": "ast_dep", "action": "blocked", "agent": "agent-reading-time", "path": "conduit/services/feed.py", "symbols": ["conduit/serializers/article_format.py:format_article"], "holders": ["agent-i18n"]}
+{"ts": 34.2584, "event": "llm_usage", "agent": "agent-i18n", "turn": 10, "prompt_tokens": 2801, "completion_tokens": 25}
+{"ts": 34.2585, "event": "tool_call", "agent": "agent-i18n", "turn": 10, "tool": "grep", "args": {"pattern": "format_article(", "glob": "conduit/api/**"}}
+{"ts": 34.2623, "event": "search", "agent": "agent-i18n", "kind": "grep", "pattern": "format_article(", "n": 4}
+{"ts": 35.553, "event": "llm_usage", "agent": "agent-i18n", "turn": 11, "prompt_tokens": 2914, "completion_tokens": 22}
+{"ts": 35.5531, "event": "tool_call", "agent": "agent-i18n", "turn": 11, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 35.5735, "event": "read", "agent": "agent-i18n", "path": "conduit/api/routes_articles.py", "found": true, "size": 2294}
+{"ts": 37.2526, "event": "llm_usage", "agent": "agent-i18n", "turn": 12, "prompt_tokens": 3464, "completion_tokens": 64}
+{"ts": 37.2527, "event": "tool_call", "agent": "agent-i18n", "turn": 12, "tool": "edit_file", "args": {"path": "conduit/api/routes_articles.py", "old_string": "return {\"articles\": [format_article(r) for r in rows]}", "new_string": "return {\"articles\": [format_article(r, locale=\"en\") for r in rows]}"}}
+{"ts": 37.2589, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-i18n", "reader": "agent-reading-time", "path": "conduit/api/routes_articles.py", "symbols": ["conduit/api/deps.py:get_db", "conduit/api/routes_articles.py:list_articles", "conduit/serializers/article_format.py:format_article", "conduit/services/__init__.py:articles"]}
+{"ts": 37.3288, "event": "write", "agent": "agent-i18n", "path": "conduit/api/routes_articles.py", "kind": "replace", "status": "applied", "waited_s": 0.051, "changed_symbols": ["list_articles"], "message": ""}
+{"ts": 38.808, "event": "llm_usage", "agent": "agent-i18n", "turn": 13, "prompt_tokens": 3544, "completion_tokens": 53}
+{"ts": 38.8081, "event": "tool_call", "agent": "agent-i18n", "turn": 13, "tool": "edit_file", "args": {"path": "conduit/api/routes_articles.py", "old_string": "return {\"article\": format_article(article)}", "new_string": "return {\"article\": format_article(article, locale=\"en\")}"}}
+{"ts": 38.8126, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-i18n", "reader": "agent-reading-time", "path": "conduit/api/routes_articles.py", "symbols": ["conduit/api/deps.py:get_db", "conduit/api/routes_articles.py:get_article", "conduit/serializers/article_format.py:format_article", "conduit/services/__init__.py:articles"]}
+{"ts": 38.8339, "event": "write", "agent": "agent-i18n", "path": "conduit/api/routes_articles.py", "kind": "replace", "status": "applied", "waited_s": 0.006, "changed_symbols": ["get_article"], "message": ""}
+{"ts": 40.1362, "event": "llm_usage", "agent": "agent-i18n", "turn": 14, "prompt_tokens": 3613, "completion_tokens": 22}
+{"ts": 40.1365, "event": "tool_call", "agent": "agent-i18n", "turn": 14, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 40.1411, "event": "read", "agent": "agent-i18n", "path": "conduit/api/routes_articles.py", "found": true, "size": 2320}
+{"ts": 43.6662, "event": "llm_usage", "agent": "agent-i18n", "turn": 15, "prompt_tokens": 4171, "completion_tokens": 187}
+{"ts": 43.6665, "event": "tool_call", "agent": "agent-i18n", "turn": 15, "tool": "edit_file", "args": {"path": "conduit/api/routes_articles.py", "old_string": "return {\"article\": format_article(article)}", "new_string": "return {\"article\": format_article(article, locale=\"en\")}"}}
+{"ts": 43.8013, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-i18n", "reader": "agent-reading-time", "path": "conduit/api/routes_articles.py", "symbols": ["conduit/api/deps.py:get_db", "conduit/api/deps.py:require_user", "conduit/api/routes_articles.py:create_article", "conduit/schemas/article.py:ArticleCreate", "conduit/serializers/article_format.py:format_article", "conduit/services/__init__.py:articles"]}
+{"ts": 44.142, "event": "write", "agent": "agent-i18n", "path": "conduit/api/routes_articles.py", "kind": "replace", "status": "applied", "waited_s": 0.199, "changed_symbols": ["create_article"], "message": ""}
+{"ts": 45.4777, "event": "llm_usage", "agent": "agent-i18n", "turn": 16, "prompt_tokens": 4240, "completion_tokens": 22}
+{"ts": 45.4778, "event": "tool_call", "agent": "agent-i18n", "turn": 16, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 45.4849, "event": "read", "agent": "agent-i18n", "path": "conduit/api/routes_articles.py", "found": true, "size": 2333}
+{"ts": 48.4246, "event": "llm_usage", "agent": "agent-i18n", "turn": 17, "prompt_tokens": 4802, "completion_tokens": 53}
+{"ts": 48.4248, "event": "tool_call", "agent": "agent-i18n", "turn": 17, "tool": "edit_file", "args": {"path": "conduit/api/routes_articles.py", "old_string": "return {\"article\": format_article(article)}", "new_string": "return {\"article\": format_article(article, locale=\"en\")}"}}
+{"ts": 48.44, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-i18n", "reader": "agent-reading-time", "path": "conduit/api/routes_articles.py", "symbols": ["conduit/api/deps.py:get_db", "conduit/api/deps.py:require_user", "conduit/api/routes_articles.py:favorite_article", "conduit/serializers/article_format.py:format_article", "conduit/services/__init__.py:favorites"]}
+{"ts": 48.4654, "event": "write", "agent": "agent-i18n", "path": "conduit/api/routes_articles.py", "kind": "replace", "status": "applied", "waited_s": 0.019, "changed_symbols": ["favorite_article"], "message": ""}
+{"ts": 50.0124, "event": "llm_usage", "agent": "agent-i18n", "turn": 18, "prompt_tokens": 4871, "completion_tokens": 23}
+{"ts": 50.0125, "event": "tool_call", "agent": "agent-i18n", "turn": 18, "tool": "grep", "args": {"pattern": "format_article(", "glob": "**/*"}}
+{"ts": 50.0248, "event": "search", "agent": "agent-i18n", "kind": "grep", "pattern": "format_article(", "n": 5}
+{"ts": 51.7531, "event": "llm_usage", "agent": "agent-i18n", "turn": 19, "prompt_tokens": 5028, "completion_tokens": 13}
+{"ts": 51.7546, "event": "tool_call", "agent": "agent-i18n", "turn": 19, "tool": "run_tests", "args": {}}
+{"ts": 52.3434, "event": "run_tests", "agent": "agent-i18n", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 53.7867, "event": "llm_usage", "agent": "agent-i18n", "turn": 20, "prompt_tokens": 5199, "completion_tokens": 44}
+{"ts": 53.7868, "event": "tool_call", "agent": "agent-i18n", "turn": 20, "tool": "done", "args": {"summary": "Change format_article signature to accept locale and prefix French titles; updated article route calls under conduit/api to pass locale=\"en\"; tests passed."}}
+{"ts": 53.7869, "event": "agent_done_coord", "agent": "agent-i18n"}
+{"ts": 53.7869, "event": "agent_done", "agent": "agent-i18n", "status": "done", "turns": 20, "prompt_tokens": 58603, "completion_tokens": 2110}
+{"ts": 53.8103, "event": "write", "agent": "agent-reading-time", "path": "conduit/services/feed.py", "kind": "replace", "status": "applied", "waited_s": 20.72, "changed_symbols": ["<module>", "reading_time_for_slug"], "message": ""}
+{"ts": 55.2153, "event": "llm_usage", "agent": "agent-reading-time", "turn": 12, "prompt_tokens": 4478, "completion_tokens": 19}
+{"ts": 55.2153, "event": "tool_call", "agent": "agent-reading-time", "turn": 12, "tool": "run_tests", "args": {}}
+{"ts": 55.8184, "event": "run_tests", "agent": "agent-reading-time", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 56.8439, "event": "llm_usage", "agent": "agent-reading-time", "turn": 13, "prompt_tokens": 4649, "completion_tokens": 22}
+{"ts": 56.844, "event": "tool_call", "agent": "agent-reading-time", "turn": 13, "tool": "read_file", "args": {"path": "conduit/api/routes_feed.py"}}
+{"ts": 56.8466, "event": "read", "agent": "agent-reading-time", "path": "conduit/api/routes_feed.py", "found": true, "size": 914}
+{"ts": 62.1397, "event": "llm_usage", "agent": "agent-reading-time", "turn": 14, "prompt_tokens": 4894, "completion_tokens": 354}
+{"ts": 62.1398, "event": "tool_call", "agent": "agent-reading-time", "turn": 14, "tool": "edit_file", "args": {"path": "conduit/api/routes_feed.py", "old_string": "@router.get(\"/articles/{slug}/reading-time\")\ndef reading_time(slug: str, conn: Annotated[sqlite3.Connection, Depends(get_db)]):\n    try:\n        return feed_svc.reading_time_for_slug(conn, slug)\n    e", "new_string": "@router.get(\"/articles/{slug}/reading-time\")\ndef reading_time(slug: str, conn: Annotated[sqlite3.Connection, Depends(get_db)]):\n    try:\n        return feed_svc.reading_time_for_slug(conn, slug)\n    e"}}
+{"ts": 62.1711, "event": "write", "agent": "agent-reading-time", "path": "conduit/api/routes_feed.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["reading_time"], "message": ""}
+{"ts": 63.3874, "event": "llm_usage", "agent": "agent-reading-time", "turn": 15, "prompt_tokens": 5130, "completion_tokens": 13}
+{"ts": 63.3876, "event": "tool_call", "agent": "agent-reading-time", "turn": 15, "tool": "run_tests", "args": {}}
+{"ts": 63.9628, "event": "run_tests", "agent": "agent-reading-time", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 65.889, "event": "llm_usage", "agent": "agent-reading-time", "turn": 16, "prompt_tokens": 5301, "completion_tokens": 88}
+{"ts": 67.7967, "event": "llm_usage", "agent": "agent-reading-time", "turn": 17, "prompt_tokens": 5405, "completion_tokens": 115}
+{"ts": 67.7968, "event": "tool_call", "agent": "agent-reading-time", "turn": 17, "tool": "done", "args": {"summary": "Implemented reading_time_for_slug to return slug, minutes, title; raise ValueError for missing article and map to 404 in route; tests pass."}}
+{"ts": 67.7968, "event": "agent_done_coord", "agent": "agent-reading-time"}
+{"ts": 67.7968, "event": "agent_done", "agent": "agent-reading-time", "status": "done", "turns": 17, "prompt_tokens": 53700, "completion_tokens": 1964}
+{"ts": 74.1333, "event": "trial_end", "correct": false, "oracle_passed": 2, "oracle_total": 3, "wall_clock_s": 62.08, "prompt_tokens": 112303, "completion_tokens": 4074, "agent_statuses": {"agent-reading-time": "done", "agent-i18n": "done"}, "oracle_output": ".F.                                                                      [100%]\n=================================== FAILURES ===================================\nE   TypeError: format_article() missing 1 required positional argument: 'locale'\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/rw_b_signature_drift-ast_dep-n2-r0/conduit/services/feed.py:19: TypeError: format_article() missing 1 required positional argument: 'locale'\n=============================== warnings summary ===============================\n../../.venv/lib/python3.13/site-packages/fastapi/testclient.py:1\n  /Users/allisonlawlixuan/Documents/repos/ai-launchpad/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED oracle_tests/test_oracle_rw_b.py::test_reading_time_endpoint - TypeErr...\n1 failed, 2 passed, 1 warning in 0.24s\n"}

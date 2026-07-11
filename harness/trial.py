@@ -13,7 +13,7 @@ from harness.events import EventLogger
 from harness.registry import ToolRegistry
 from harness.strategies import get_strategy
 from harness.task import Task
-from harness.workspace import Workspace
+from harness.workspace import TestResult, Workspace
 
 
 @dataclass
@@ -42,6 +42,64 @@ class TrialResult:
     prompt_tokens: int
     completion_tokens: int
     agent_statuses: dict[str, str]
+
+
+async def merge_and_score(
+    task: Task,
+    ws: Workspace,
+    logger: EventLogger,
+) -> TestResult:
+    """Merge worktrees if needed, copy hidden oracle tests, run pytest.
+
+    Shared by the in-process Agent path and Level C external runtimes.
+    """
+    if task.isolation == "worktree":
+        merge = ws.merge_agent_trees()
+        logger.log("worktree_merge", ok=merge.ok, conflicts=merge.conflicts,
+                   message=merge.message)
+
+    oracle_dst = ws.root / "oracle_tests"
+    if oracle_dst.exists():
+        shutil.rmtree(oracle_dst)
+    shutil.copytree(task.oracle_tests, oracle_dst)
+    return await ws.run_pytest("oracle_tests")
+
+
+def finish_trial(
+    *,
+    cfg: TrialConfig,
+    logger: EventLogger,
+    ws: Workspace,
+    test_result: TestResult,
+    wall: float,
+    prompt_tokens: int,
+    completion_tokens: int,
+    agent_statuses: dict[str, str],
+) -> TrialResult:
+    """Log trial_end, cleanup workspace, return TrialResult."""
+    result = TrialResult(
+        trial_id=cfg.trial_id,
+        correct=test_result.all_passed,
+        oracle_passed=test_result.passed,
+        oracle_total=test_result.total,
+        wall_clock_s=wall,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        agent_statuses=agent_statuses,
+    )
+    logger.log("trial_end", correct=result.correct,
+               oracle_passed=result.oracle_passed, oracle_total=result.oracle_total,
+               wall_clock_s=round(wall, 2),
+               prompt_tokens=result.prompt_tokens,
+               completion_tokens=result.completion_tokens,
+               agent_statuses=result.agent_statuses,
+               oracle_output=test_result.output[-2000:])
+    logger.close()
+    if os.environ.get("RACEBENCH_KEEP_WORKSPACE") == "1":
+        print(f"  kept workspace at {ws.root}", flush=True)
+    else:
+        ws.cleanup()
+    return result
 
 
 async def run_trial(task: Task, cfg: TrialConfig,
@@ -89,16 +147,7 @@ async def run_trial(task: Task, cfg: TrialConfig,
         timed_out = True
     wall = time.monotonic() - t0
 
-    if task.isolation == "worktree":
-        merge = ws.merge_agent_trees()
-        logger.log("worktree_merge", ok=merge.ok, conflicts=merge.conflicts,
-                   message=merge.message)
-
-    oracle_dst = ws.root / "oracle_tests"
-    if oracle_dst.exists():
-        shutil.rmtree(oracle_dst)
-    shutil.copytree(task.oracle_tests, oracle_dst)
-    test_result = await ws.run_pytest("oracle_tests")
+    test_result = await merge_and_score(task, ws, logger)
 
     # On timeout, gather is cancelled so AgentResults are lost — recover
     # token counters from the still-alive Agent objects (updated each turn).
@@ -113,26 +162,13 @@ async def run_trial(task: Task, cfg: TrialConfig,
             a.id: ("timeout" if timed_out else "unknown") for a in agents
         }
 
-    result = TrialResult(
-        trial_id=cfg.trial_id,
-        correct=test_result.all_passed,
-        oracle_passed=test_result.passed,
-        oracle_total=test_result.total,
-        wall_clock_s=wall,
+    return finish_trial(
+        cfg=cfg,
+        logger=logger,
+        ws=ws,
+        test_result=test_result,
+        wall=wall,
         prompt_tokens=prompt_tokens,
         completion_tokens=completion_tokens,
         agent_statuses=agent_statuses,
     )
-    logger.log("trial_end", correct=result.correct,
-               oracle_passed=result.oracle_passed, oracle_total=result.oracle_total,
-               wall_clock_s=round(wall, 2),
-               prompt_tokens=result.prompt_tokens,
-               completion_tokens=result.completion_tokens,
-               agent_statuses=result.agent_statuses,
-               oracle_output=test_result.output[-2000:])
-    logger.close()
-    if os.environ.get("RACEBENCH_KEEP_WORKSPACE") == "1":
-        print(f"  kept workspace at {ws.root}", flush=True)
-    else:
-        ws.cleanup()
-    return result

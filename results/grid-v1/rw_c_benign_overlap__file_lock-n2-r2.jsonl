@@ -1,0 +1,133 @@
+{"ts": 0.2084, "event": "trial_start", "task": "rw_c_benign_overlap", "failure_mode": "benign_overlap_false_positive", "benign": true, "strategy": "file_lock", "n_agents": 2, "rep": 2, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-favorite", "agent-listfix"]}
+{"ts": 1.3399, "event": "llm_usage", "agent": "agent-favorite", "turn": 1, "prompt_tokens": 671, "completion_tokens": 19}
+{"ts": 1.34, "event": "tool_call", "agent": "agent-favorite", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 1.5759, "event": "llm_usage", "agent": "agent-listfix", "turn": 1, "prompt_tokens": 632, "completion_tokens": 23}
+{"ts": 1.5761, "event": "tool_call", "agent": "agent-listfix", "turn": 1, "tool": "glob", "args": {"pattern": "**/*"}}
+{"ts": 1.5881, "event": "search", "agent": "agent-listfix", "kind": "glob", "pattern": "**/*", "n": 32}
+{"ts": 2.6905, "event": "llm_usage", "agent": "agent-favorite", "turn": 2, "prompt_tokens": 931, "completion_tokens": 22}
+{"ts": 2.6906, "event": "tool_call", "agent": "agent-favorite", "turn": 2, "tool": "read_file", "args": {"path": "conduit/services/favorites.py"}}
+{"ts": 2.6908, "event": "read", "agent": "agent-favorite", "path": "conduit/services/favorites.py", "found": true, "size": 1035}
+{"ts": 2.7597, "event": "llm_usage", "agent": "agent-listfix", "turn": 2, "prompt_tokens": 887, "completion_tokens": 22}
+{"ts": 2.7598, "event": "tool_call", "agent": "agent-listfix", "turn": 2, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 2.76, "event": "read", "agent": "agent-listfix", "path": "conduit/api/routes_articles.py", "found": true, "size": 2433}
+{"ts": 3.763, "event": "llm_usage", "agent": "agent-favorite", "turn": 3, "prompt_tokens": 1209, "completion_tokens": 22}
+{"ts": 3.7631, "event": "tool_call", "agent": "agent-favorite", "turn": 3, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 3.7634, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "holder": "agent-listfix"}
+{"ts": 4.3728, "event": "llm_usage", "agent": "agent-listfix", "turn": 3, "prompt_tokens": 1472, "completion_tokens": 27}
+{"ts": 4.3728, "event": "tool_call", "agent": "agent-listfix", "turn": 3, "tool": "read_file", "args": {"path": "conduit/services/articles.py"}}
+{"ts": 4.3839, "event": "read", "agent": "agent-listfix", "path": "conduit/services/articles.py", "found": true, "size": 2338}
+{"ts": 5.7168, "event": "llm_usage", "agent": "agent-listfix", "turn": 4, "prompt_tokens": 2103, "completion_tokens": 24}
+{"ts": 5.7174, "event": "tool_call", "agent": "agent-listfix", "turn": 4, "tool": "read_file", "args": {"path": "conduit/serializers/article_format.py"}}
+{"ts": 5.7186, "event": "read", "agent": "agent-listfix", "path": "conduit/serializers/article_format.py", "found": true, "size": 946}
+{"ts": 6.9426, "event": "llm_usage", "agent": "agent-listfix", "turn": 5, "prompt_tokens": 2360, "completion_tokens": 22}
+{"ts": 6.9428, "event": "tool_call", "agent": "agent-listfix", "turn": 5, "tool": "read_file", "args": {"path": "conduit/services/favorites.py"}}
+{"ts": 6.943, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "holder": "agent-favorite"}
+{"ts": 33.7647, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "waited_s": 30.001}
+{"ts": 33.7649, "event": "read", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "found": false, "size": 0}
+{"ts": 34.9695, "event": "llm_usage", "agent": "agent-favorite", "turn": 4, "prompt_tokens": 1257, "completion_tokens": 22}
+{"ts": 34.9697, "event": "tool_call", "agent": "agent-favorite", "turn": 4, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 34.97, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "holder": "agent-listfix"}
+{"ts": 36.9445, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "waited_s": 30.001}
+{"ts": 36.9447, "event": "read", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "found": false, "size": 0}
+{"ts": 38.3485, "event": "llm_usage", "agent": "agent-listfix", "turn": 6, "prompt_tokens": 2408, "completion_tokens": 19}
+{"ts": 38.3486, "event": "tool_call", "agent": "agent-listfix", "turn": 6, "tool": "glob", "args": {"pattern": "conduit/services/*"}}
+{"ts": 38.3618, "event": "search", "agent": "agent-listfix", "kind": "glob", "pattern": "conduit/services/*", "n": 7}
+{"ts": 39.5836, "event": "llm_usage", "agent": "agent-listfix", "turn": 7, "prompt_tokens": 2482, "completion_tokens": 22}
+{"ts": 39.5837, "event": "tool_call", "agent": "agent-listfix", "turn": 7, "tool": "read_file", "args": {"path": "conduit/services/favorites.py"}}
+{"ts": 39.5838, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "holder": "agent-favorite"}
+{"ts": 64.9722, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "waited_s": 30.002}
+{"ts": 64.9726, "event": "read", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "found": false, "size": 0}
+{"ts": 66.555, "event": "llm_usage", "agent": "agent-favorite", "turn": 5, "prompt_tokens": 1305, "completion_tokens": 22}
+{"ts": 66.5551, "event": "tool_call", "agent": "agent-favorite", "turn": 5, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 66.5552, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "holder": "agent-listfix"}
+{"ts": 69.6819, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "waited_s": 30.098}
+{"ts": 69.682, "event": "read", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "found": false, "size": 0}
+{"ts": 71.3089, "event": "llm_usage", "agent": "agent-listfix", "turn": 8, "prompt_tokens": 2530, "completion_tokens": 29}
+{"ts": 71.3093, "event": "tool_call", "agent": "agent-listfix", "turn": 8, "tool": "grep", "args": {"pattern": "favorites.py", "glob": "**/*"}}
+{"ts": 71.3363, "event": "search", "agent": "agent-listfix", "kind": "grep", "pattern": "favorites.py", "n": 0}
+{"ts": 72.6244, "event": "llm_usage", "agent": "agent-listfix", "turn": 9, "prompt_tokens": 2566, "completion_tokens": 22}
+{"ts": 72.6245, "event": "tool_call", "agent": "agent-listfix", "turn": 9, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 72.6247, "event": "read", "agent": "agent-listfix", "path": "conduit/api/routes_articles.py", "found": true, "size": 2433}
+{"ts": 74.3117, "event": "llm_usage", "agent": "agent-listfix", "turn": 10, "prompt_tokens": 3151, "completion_tokens": 29}
+{"ts": 74.3131, "event": "tool_call", "agent": "agent-listfix", "turn": 10, "tool": "read_file", "args": {"path": "conduit/services/__init__.py"}}
+{"ts": 74.3149, "event": "read", "agent": "agent-listfix", "path": "conduit/services/__init__.py", "found": true, "size": 136}
+{"ts": 75.7636, "event": "llm_usage", "agent": "agent-listfix", "turn": 11, "prompt_tokens": 3218, "completion_tokens": 32}
+{"ts": 75.7638, "event": "tool_call", "agent": "agent-listfix", "turn": 11, "tool": "read_file", "args": {"path": "conduit/services/favorites.py", "line_start": 1, "line_end": 400}}
+{"ts": 75.7639, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "holder": "agent-favorite"}
+{"ts": 96.5558, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "waited_s": 30.001}
+{"ts": 96.5559, "event": "read", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "found": false, "size": 0}
+{"ts": 97.7462, "event": "llm_usage", "agent": "agent-favorite", "turn": 6, "prompt_tokens": 1353, "completion_tokens": 22}
+{"ts": 97.7463, "event": "tool_call", "agent": "agent-favorite", "turn": 6, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 97.7466, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "holder": "agent-listfix"}
+{"ts": 105.7651, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "waited_s": 30.001}
+{"ts": 105.7652, "event": "read", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "found": false, "size": 0}
+{"ts": 107.2812, "event": "llm_usage", "agent": "agent-listfix", "turn": 12, "prompt_tokens": 3276, "completion_tokens": 19}
+{"ts": 107.2814, "event": "tool_call", "agent": "agent-listfix", "turn": 12, "tool": "list_files", "args": {}}
+{"ts": 108.6342, "event": "llm_usage", "agent": "agent-listfix", "turn": 13, "prompt_tokens": 3536, "completion_tokens": 22}
+{"ts": 108.6343, "event": "tool_call", "agent": "agent-listfix", "turn": 13, "tool": "read_file", "args": {"path": "conduit/services/favorites.py"}}
+{"ts": 108.6344, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "holder": "agent-favorite"}
+{"ts": 127.7477, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "waited_s": 30.001}
+{"ts": 127.7478, "event": "read", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "found": false, "size": 0}
+{"ts": 129.1715, "event": "llm_usage", "agent": "agent-favorite", "turn": 7, "prompt_tokens": 1401, "completion_tokens": 19}
+{"ts": 129.1715, "event": "tool_call", "agent": "agent-favorite", "turn": 7, "tool": "list_files", "args": {}}
+{"ts": 130.3906, "event": "llm_usage", "agent": "agent-favorite", "turn": 8, "prompt_tokens": 1661, "completion_tokens": 22}
+{"ts": 130.3907, "event": "tool_call", "agent": "agent-favorite", "turn": 8, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 130.3908, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "holder": "agent-listfix"}
+{"ts": 139.0678, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "waited_s": 30.433}
+{"ts": 139.0785, "event": "read", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "found": false, "size": 0}
+{"ts": 142.2534, "event": "llm_usage", "agent": "agent-listfix", "turn": 14, "prompt_tokens": 3584, "completion_tokens": 29}
+{"ts": 142.2535, "event": "tool_call", "agent": "agent-listfix", "turn": 14, "tool": "grep", "args": {"pattern": "favorite_article", "glob": "**/*"}}
+{"ts": 142.2967, "event": "search", "agent": "agent-listfix", "kind": "grep", "pattern": "favorite_article", "n": 6}
+{"ts": 143.654, "event": "llm_usage", "agent": "agent-listfix", "turn": 15, "prompt_tokens": 3751, "completion_tokens": 32}
+{"ts": 143.6542, "event": "tool_call", "agent": "agent-listfix", "turn": 15, "tool": "read_file", "args": {"path": "conduit/services/favorites.py", "line_start": 1, "line_end": 200}}
+{"ts": 143.6545, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "holder": "agent-favorite"}
+{"ts": 160.3976, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "waited_s": 30.005}
+{"ts": 160.3992, "event": "read", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "found": false, "size": 0}
+{"ts": 162.2465, "event": "llm_usage", "agent": "agent-favorite", "turn": 9, "prompt_tokens": 1709, "completion_tokens": 30}
+{"ts": 162.2467, "event": "tool_call", "agent": "agent-favorite", "turn": 9, "tool": "grep", "args": {"pattern": "unfavorite_article", "glob": "**/*"}}
+{"ts": 162.2661, "event": "search", "agent": "agent-favorite", "kind": "grep", "pattern": "unfavorite_article", "n": 3}
+{"ts": 163.7116, "event": "llm_usage", "agent": "agent-favorite", "turn": 10, "prompt_tokens": 1809, "completion_tokens": 32}
+{"ts": 163.7117, "event": "tool_call", "agent": "agent-favorite", "turn": 10, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py", "line_start": 1, "line_end": 400}}
+{"ts": 163.7118, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "holder": "agent-listfix"}
+{"ts": 173.6547, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "waited_s": 30.0}
+{"ts": 173.6548, "event": "read", "agent": "agent-listfix", "path": "conduit/services/favorites.py", "found": false, "size": 0}
+{"ts": 178.1518, "event": "llm_usage", "agent": "agent-listfix", "turn": 16, "prompt_tokens": 3809, "completion_tokens": 401}
+{"ts": 178.1519, "event": "tool_call", "agent": "agent-listfix", "turn": 16, "tool": "edit_file", "args": {"path": "conduit/api/routes_articles.py", "old_string": "    # Seeded bug for rw_c (agent-listfix): returns slug-only stubs.\n    # Correct implementation returns format_article(r) for each row.\n    return {\"articles\": [{\"slug\": r[\"slug\"]} for r in rows]}\n", "new_string": "    # Seeded bug for rw_c (agent-listfix): returns slug-only stubs.\n    # Correct implementation returns format_article(r) for each row.\n    return {\"articles\": [format_article(r) for r in rows]}\n"}}
+{"ts": 178.1564, "event": "write", "agent": "agent-listfix", "path": "conduit/api/routes_articles.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["list_articles"], "message": ""}
+{"ts": 179.476, "event": "llm_usage", "agent": "agent-listfix", "turn": 17, "prompt_tokens": 3964, "completion_tokens": 32}
+{"ts": 179.4761, "event": "tool_call", "agent": "agent-listfix", "turn": 17, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py", "line_start": 1, "line_end": 200}}
+{"ts": 179.4764, "event": "read", "agent": "agent-listfix", "path": "conduit/api/routes_articles.py", "found": true, "size": 2431}
+{"ts": 180.8992, "event": "llm_usage", "agent": "agent-listfix", "turn": 18, "prompt_tokens": 4556, "completion_tokens": 13}
+{"ts": 180.8993, "event": "tool_call", "agent": "agent-listfix", "turn": 18, "tool": "run_tests", "args": {}}
+{"ts": 181.5087, "event": "run_tests", "agent": "agent-listfix", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 182.9791, "event": "llm_usage", "agent": "agent-listfix", "turn": 19, "prompt_tokens": 4727, "completion_tokens": 29}
+{"ts": 182.9792, "event": "tool_call", "agent": "agent-listfix", "turn": 19, "tool": "done", "args": {"summary": "Fix list_articles to return full formatted articles using format_article for each row"}}
+{"ts": 182.9792, "event": "agent_done_coord", "agent": "agent-listfix"}
+{"ts": 182.9792, "event": "agent_done", "agent": "agent-listfix", "status": "done", "turns": 19, "prompt_tokens": 55012, "completion_tokens": 848}
+{"ts": 182.9795, "event": "read", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "found": true, "size": 2431}
+{"ts": 185.5925, "event": "llm_usage", "agent": "agent-favorite", "turn": 11, "prompt_tokens": 2401, "completion_tokens": 91}
+{"ts": 185.5926, "event": "tool_call", "agent": "agent-favorite", "turn": 11, "tool": "read_file", "args": {"path": "conduit/services/articles.py"}}
+{"ts": 185.5945, "event": "read", "agent": "agent-favorite", "path": "conduit/services/articles.py", "found": true, "size": 2338}
+{"ts": 186.9087, "event": "llm_usage", "agent": "agent-favorite", "turn": 12, "prompt_tokens": 3032, "completion_tokens": 21}
+{"ts": 186.9088, "event": "tool_call", "agent": "agent-favorite", "turn": 12, "tool": "read_file", "args": {"path": "conduit/db/store.py"}}
+{"ts": 186.9091, "event": "read", "agent": "agent-favorite", "path": "conduit/db/store.py", "found": true, "size": 687}
+{"ts": 192.2732, "event": "llm_usage", "agent": "agent-favorite", "turn": 13, "prompt_tokens": 3235, "completion_tokens": 358}
+{"ts": 192.2734, "event": "tool_call", "agent": "agent-favorite", "turn": 13, "tool": "read_file", "args": {"path": "conduit/services/favorites.py", "line_start": 1, "line_end": 200}}
+{"ts": 192.2744, "event": "read", "agent": "agent-favorite", "path": "conduit/services/favorites.py", "found": true, "size": 1035}
+{"ts": 199.1877, "event": "llm_usage", "agent": "agent-favorite", "turn": 14, "prompt_tokens": 3523, "completion_tokens": 629}
+{"ts": 199.1879, "event": "tool_call", "agent": "agent-favorite", "turn": 14, "tool": "edit_file", "args": {"path": "conduit/services/favorites.py", "old_string": "def unfavorite_article(conn: sqlite3.Connection, user_id: int, slug: str) -> dict | None:\n    \"\"\"Remove a favorite. Implemented by agents in the benign-overlap task.\"\"\"\n    raise NotImplementedError(\"", "new_string": "def unfavorite_article(conn: sqlite3.Connection, user_id: int, slug: str) -> dict | None:\n    \"\"\"Remove a favorite for (user_id, article_id).\n\n    Returns the updated article (via get_article_by_slug)"}}
+{"ts": 199.1909, "event": "write", "agent": "agent-favorite", "path": "conduit/services/favorites.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["unfavorite_article"], "message": ""}
+{"ts": 200.5892, "event": "llm_usage", "agent": "agent-favorite", "turn": 15, "prompt_tokens": 3778, "completion_tokens": 32}
+{"ts": 200.5893, "event": "tool_call", "agent": "agent-favorite", "turn": 15, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py", "line_start": 1, "line_end": 200}}
+{"ts": 200.5897, "event": "read", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "found": true, "size": 2431}
+{"ts": 203.9968, "event": "llm_usage", "agent": "agent-favorite", "turn": 16, "prompt_tokens": 4370, "completion_tokens": 245}
+{"ts": 203.9969, "event": "tool_call", "agent": "agent-favorite", "turn": 16, "tool": "edit_file", "args": {"path": "conduit/api/routes_articles.py", "old_string": "@router.delete(\"/articles/{slug}/favorite\")\ndef unfavorite_article(\n    slug: str,\n    conn: Annotated[sqlite3.Connection, Depends(get_db)],\n    user: Annotated[dict, Depends(require_user)],\n):\n    \"\"", "new_string": "@router.delete(\"/articles/{slug}/favorite\")\ndef unfavorite_article(\n    slug: str,\n    conn: Annotated[sqlite3.Connection, Depends(get_db)],\n    user: Annotated[dict, Depends(require_user)],\n):\n    \"\""}}
+{"ts": 203.9993, "event": "write", "agent": "agent-favorite", "path": "conduit/api/routes_articles.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["unfavorite_article"], "message": ""}
+{"ts": 205.3219, "event": "llm_usage", "agent": "agent-favorite", "turn": 17, "prompt_tokens": 4631, "completion_tokens": 13}
+{"ts": 205.322, "event": "tool_call", "agent": "agent-favorite", "turn": 17, "tool": "run_tests", "args": {}}
+{"ts": 206.0173, "event": "run_tests", "agent": "agent-favorite", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 207.675, "event": "llm_usage", "agent": "agent-favorite", "turn": 18, "prompt_tokens": 4802, "completion_tokens": 60}
+{"ts": 207.6751, "event": "tool_call", "agent": "agent-favorite", "turn": 18, "tool": "done", "args": {"summary": "Implemented unfavorite_article in conduit/services/favorites.py to delete favorites row and return updated article; wired DELETE /api/articles/{slug}/favorite in conduit/api/routes_articles.py to call"}}
+{"ts": 207.6751, "event": "agent_done_coord", "agent": "agent-favorite"}
+{"ts": 207.6751, "event": "agent_done", "agent": "agent-favorite", "status": "done", "turns": 18, "prompt_tokens": 43078, "completion_tokens": 1681}
+{"ts": 208.4084, "event": "trial_end", "correct": true, "oracle_passed": 2, "oracle_total": 2, "wall_clock_s": 207.43, "prompt_tokens": 98090, "completion_tokens": 2529, "agent_statuses": {"agent-favorite": "done", "agent-listfix": "done"}, "oracle_output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../.venv/lib/python3.13/site-packages/fastapi/testclient.py:1\n  /Users/allisonlawlixuan/Documents/repos/ai-launchpad/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 1 warning in 0.06s\n"}

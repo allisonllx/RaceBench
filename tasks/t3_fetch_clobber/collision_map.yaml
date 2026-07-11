@@ -1,0 +1,11 @@
+failure_mode: write_write_clobber
+critical_paths:
+  - api.py
+collision_points:
+  - file: api.py
+    symbol: fetch
+    agents: [agent-timeout, agent-retries]
+    kind: same_symbol_write
+expected_anomaly: >
+  Whole-file / whole-fetch rewrites from a stale read under naive drop either
+  timeout or retries. Coordinated strategies serialize or merge so both land.

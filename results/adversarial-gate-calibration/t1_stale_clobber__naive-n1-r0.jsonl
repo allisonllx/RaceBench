@@ -1,0 +1,15 @@
+{"ts": 0.1123, "event": "trial_start", "task": "t1_stale_clobber", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 0, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["solo"]}
+{"ts": 4.3529, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 825, "completion_tokens": 24}
+{"ts": 4.353, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 4.3533, "event": "read", "agent": "solo", "path": "config.py", "found": true, "size": 1056}
+{"ts": 16.2983, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 1096, "completion_tokens": 748}
+{"ts": 16.2984, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 16.3049, "event": "write", "agent": "solo", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 17.5154, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 1534, "completion_tokens": 13}
+{"ts": 17.5154, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "run_tests", "args": {}}
+{"ts": 17.9624, "event": "run_tests", "agent": "solo", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 19.2347, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 1573, "completion_tokens": 25}
+{"ts": 19.2348, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "done", "args": {"summary": "Added timeout and retries defaults and validation to config.py"}}
+{"ts": 19.2348, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 19.2348, "event": "agent_done", "agent": "solo", "status": "done", "turns": 4, "prompt_tokens": 5028, "completion_tokens": 810}
+{"ts": 19.6424, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 18.66, "prompt_tokens": 5028, "completion_tokens": 810, "agent_statuses": {"solo": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

@@ -1,0 +1,21 @@
+# Gate smoke for hardened adversarial tasks: calibrate solo + naive n=2.
+# Keep a task if naive correct_rate <= 0.4 or naive is >=0.4 below notify/file_lock.
+run_id: adversarial-gate
+mode: openai
+model: gpt-5-mini
+tasks:
+  - t1_stale_clobber
+  - t3_fetch_clobber
+  - rw_d_tag_antidependency
+strategies: [naive, notify, file_lock]
+agent_counts: [2]
+reps: 5
+max_turns: 40
+lock_timeout_s: 30
+trial_timeout_s: 900
+parallel: 3
+budget:
+  max_usd: 8
+  max_total_tokens: 8000000
+prices:
+  gpt-5-mini: {input: 0.25, output: 2.00}

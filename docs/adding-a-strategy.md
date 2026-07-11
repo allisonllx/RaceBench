@@ -167,6 +167,7 @@ run `python -m runner.run_grid --config ...`, then
 |--------|-------|
 | New strategy | `harness/strategies/` (this doc) |
 | New task | `tasks/<name>/` — `task.yaml`, `repo/`, `oracle_tests/`, `collision_map.yaml` |
+| External multi-agent system | Level C — [adding-an-external-runtime.md](adding-an-external-runtime.md) |
 | Different LLM | Implement `ModelClient` in `harness/models.py`; wire `make_model_factory` in `runner/run_grid.py` |
 | Agent tools / loop | `harness/agent.py`, `harness/tools.py` (not pluggable via config today) |
 

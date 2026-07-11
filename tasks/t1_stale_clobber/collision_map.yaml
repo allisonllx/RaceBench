@@ -1,0 +1,15 @@
+failure_mode: stale_read_lost_update
+critical_paths:
+  - config.py
+collision_points:
+  - file: config.py
+    symbol: "<module>"
+    agents: [agent-timeout, agent-retries]
+    kind: same_symbol_write
+  - file: config.py
+    symbol: validate
+    agents: [agent-timeout, agent-retries]
+    kind: same_symbol_write
+expected_anomaly: >
+  Whole-file write_file from a stale read under naive drops the peer's
+  DEFAULTS key / validate rule. Coordinated strategies force re-read or merge.

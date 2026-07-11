@@ -35,17 +35,17 @@ async def run_scripted(task_name, strategy, variant, tmp_path, rep=0):
     return result, log_path
 
 
-# ---------------------------------------------------------------- t1 stale read
+# ---------------------------------------------------------------- t1 stale clobber
 
 async def test_naive_clobber_loses_update(tmp_path):
-    result, _ = await run_scripted("t1_stale_read", "naive", "clobber", tmp_path)
+    result, _ = await run_scripted("t1_stale_clobber", "naive", "clobber", tmp_path)
     assert not result.correct, \
         "naive + stale whole-file writes should lose one agent's key"
     assert 0 < result.oracle_passed < result.oracle_total
 
 
 async def test_git_hash_clobber_never_silently_loses(tmp_path):
-    result, log = await run_scripted("t1_stale_read", "git_hash", "clobber", tmp_path)
+    result, log = await run_scripted("t1_stale_clobber", "git_hash", "clobber", tmp_path)
     events = read_events(log)
     conflicts = [e for e in events if e["event"] == "coord"
                  and e.get("action") == "merge_conflict"]
@@ -59,8 +59,27 @@ async def test_git_hash_clobber_never_silently_loses(tmp_path):
 
 @pytest.mark.parametrize("strategy", ["naive", "file_lock", "git_hash", "ast_scope"])
 async def test_composing_edits_correct_everywhere(strategy, tmp_path):
-    result, _ = await run_scripted("t1_stale_read", strategy, "edit", tmp_path)
+    result, _ = await run_scripted("t1_stale_clobber", strategy, "edit", tmp_path)
     assert result.correct, f"anchored edits should succeed under {strategy}"
+
+
+# ---------------------------------------------------------------- t3 fetch clobber
+
+async def test_t3_naive_clobber_loses_update(tmp_path):
+    result, _ = await run_scripted("t3_fetch_clobber", "naive", "clobber", tmp_path)
+    assert not result.correct, \
+        "naive + stale whole-file fetch rewrites should drop timeout or retries"
+    assert 0 < result.oracle_passed < result.oracle_total
+
+
+async def test_t3_git_hash_clobber_never_silently_loses(tmp_path):
+    result, log = await run_scripted("t3_fetch_clobber", "git_hash", "clobber", tmp_path)
+    events = read_events(log)
+    conflicts = [e for e in events if e["event"] == "coord"
+                 and e.get("action") == "merge_conflict"]
+    assert result.correct or conflicts, (
+        "git_hash must not silently lose a fetch feature: "
+        f"correct={result.correct} conflicts={len(conflicts)}")
 
 
 # ---------------------------------------------------------------- t2 benign overlap
@@ -103,9 +122,9 @@ async def test_notify_never_stalls_but_notifies(tmp_path):
 # ---------------------------------------------------------------- metrics sanity
 
 async def test_metrics_row_shape(tmp_path):
-    _, log = await run_scripted("t1_stale_read", "naive", "edit", tmp_path)
+    _, log = await run_scripted("t1_stale_clobber", "naive", "edit", tmp_path)
     m = trial_metrics(log)
-    assert m["task"] == "t1_stale_read"
+    assert m["task"] == "t1_stale_clobber"
     assert m["strategy"] == "naive"
     assert m["total_tokens"] > 0
     assert m["prompt_tokens"] > 0

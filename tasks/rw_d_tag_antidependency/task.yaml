@@ -1,0 +1,24 @@
+name: rw_d_tag_antidependency
+failure_mode: antidependency_silent_invalidation
+benign: false
+description: >
+  FastAPI Conduit: agent A normalizes tags to lowercase and makes list filter
+  case-insensitive; agent B implements a tag count endpoint that must match
+  list semantics. Stale case-sensitive counts silently disagree with list
+  (wrong counts, not crashes).
+agents:
+  - id: agent-tag-semantics
+    prompt: >
+      Normalize article tags to lowercase in
+      conduit/services/articles.py::create_article when inserting into the tags
+      table. Change list_articles' tag filter to case-insensitive exact match
+      (LOWER(t.tag) = LOWER(?)). Do not implement feed tag counts. Only change
+      articles.py (and schemas only if needed).
+  - id: agent-tag-stats
+    prompt: >
+      Implement conduit/services/feed.py::tag_article_count(conn, tag) -> int
+      and wire GET /api/feed/tags/{tag}/count in routes_feed.py to return
+      {"tag": tag, "count": N}. Count must equal the number of articles
+      returned by GET /api/articles?tag=<same path param>. Re-read
+      articles.py tag storage/filter before finishing — semantics may change
+      while you work. Do not edit create_article or list_articles.

@@ -19,6 +19,11 @@ Definitions (also quoted in the write-up):
   observed. 1.0 by construction in this harness (all reads flow through the
   strategy); reported to make the comparison with HTTP-sniffing approaches
   explicit.
+
+Level C external-runtime trials (`mode: external` on trial_start) bypass the
+Strategy layer. Do not mix them into strategy comparison tables without
+filtering — stalls / read-set are not comparable; use correctness and wall
+clock only unless the adapter emits compatible events.
 """
 from __future__ import annotations
 
@@ -184,31 +189,63 @@ def run_dataframe(run_dir: Path, prices: dict | None = None) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def aggregate(df: pd.DataFrame) -> pd.DataFrame:
-    """The comparison table: one row per (task, strategy, n_agents)."""
-    if df.empty:
-        return df
-    agg = (
-        df.groupby(["task", "strategy", "n_agents"])
-        .agg(
-            trials=("correct", "size"),
-            correct_rate=("correct", "mean"),
-            mean_wall_s=("wall_clock_s", "mean"),
-            mean_tokens=("total_tokens", "mean"),
-            mean_usd=("estimated_usd", "mean"),
-            wasted_rate=("wasted_token_rate", "mean"),
-            stalls_per_trial=("stall_events", "mean"),
-            fp_stalls_per_trial=("fp_stall_events", "mean"),
-            notifies_per_trial=("notify_events", "mean"),
-            mean_stall_wait_s=("stall_wait_s", "mean"),
-        )
-        .reset_index()
-    )
+def _round_agg(agg: pd.DataFrame) -> pd.DataFrame:
     for col in ("correct_rate", "wasted_rate", "stalls_per_trial",
                 "fp_stalls_per_trial", "notifies_per_trial"):
-        agg[col] = agg[col].round(3)
-    agg["mean_wall_s"] = agg["mean_wall_s"].round(1)
-    agg["mean_tokens"] = agg["mean_tokens"].round(0)
-    agg["mean_usd"] = agg["mean_usd"].round(4)
-    agg["mean_stall_wait_s"] = agg["mean_stall_wait_s"].round(2)
+        if col in agg.columns:
+            agg[col] = agg[col].round(3)
+    if "mean_wall_s" in agg.columns:
+        agg["mean_wall_s"] = agg["mean_wall_s"].round(1)
+    if "mean_tokens" in agg.columns:
+        agg["mean_tokens"] = agg["mean_tokens"].round(0)
+    if "mean_usd" in agg.columns:
+        agg["mean_usd"] = agg["mean_usd"].round(4)
+    if "mean_stall_wait_s" in agg.columns:
+        agg["mean_stall_wait_s"] = agg["mean_stall_wait_s"].round(2)
     return agg
+
+
+_AGG_SPECS = dict(
+    trials=("correct", "size"),
+    correct_rate=("correct", "mean"),
+    mean_wall_s=("wall_clock_s", "mean"),
+    mean_tokens=("total_tokens", "mean"),
+    mean_usd=("estimated_usd", "mean"),
+    wasted_rate=("wasted_token_rate", "mean"),
+    stalls_per_trial=("stall_events", "mean"),
+    fp_stalls_per_trial=("fp_stall_events", "mean"),
+    notifies_per_trial=("notify_events", "mean"),
+    mean_stall_wait_s=("stall_wait_s", "mean"),
+)
+
+
+def _groupby_metrics(df: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
+    specs = dict(_AGG_SPECS)
+    if "task" not in keys and "task" in df.columns:
+        specs = {"n_tasks": ("task", "nunique"), **specs}
+    return df.groupby(keys, dropna=False).agg(**specs).reset_index()
+
+
+def aggregate(df: pd.DataFrame) -> pd.DataFrame:
+    """Per-task comparison table: one row per (task, strategy, n_agents)."""
+    if df.empty:
+        return df
+    return _round_agg(_groupby_metrics(df, ["task", "strategy", "n_agents"]))
+
+
+def aggregate_overall(df: pd.DataFrame) -> pd.DataFrame:
+    """Across-task rollup: one row per (strategy, n_agents).
+
+    Pools every trial for that strategy/n cell (micro-average). ``n_tasks``
+    is how many distinct tasks contributed.
+    """
+    if df.empty:
+        return df
+    return _round_agg(_groupby_metrics(df, ["strategy", "n_agents"]))
+
+
+def aggregate_by_strategy(df: pd.DataFrame) -> pd.DataFrame:
+    """Across-task rollup pooling all n_agents: one row per strategy."""
+    if df.empty:
+        return df
+    return _round_agg(_groupby_metrics(df, ["strategy"]))

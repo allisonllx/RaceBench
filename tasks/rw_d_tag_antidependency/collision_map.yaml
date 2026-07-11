@@ -1,0 +1,17 @@
+failure_mode: antidependency_silent_invalidation
+critical_paths:
+  - conduit/services/articles.py
+  - conduit/services/feed.py
+  - conduit/api/routes_feed.py
+collision_points:
+  - file: conduit/services/articles.py
+    symbols: [create_article, list_articles]
+    agents: [agent-tag-semantics]
+    kind: filter_semantics_change
+  - file: conduit/services/feed.py
+    symbol: tag_article_count
+    agents: [agent-tag-stats]
+    kind: stale_premise_consumer
+expected_anomaly: >
+  B counts with case-sensitive equality while A lowercases stored tags and
+  makes list_articles case-insensitive — list returns rows, count returns 0.

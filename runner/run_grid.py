@@ -68,6 +68,8 @@ def calibration_task(task):
     merged = "\n\n".join(
         f"Subtask {i + 1}: {a.prompt}" for i, a in enumerate(task.agents))
     task.agents = [TaskAgentSpec(id="solo", prompt=merged)]
+    # min_agents gates multi-agent grid cells only; solo calibration is n=1.
+    task.min_agents = 1
     return task
 
 
@@ -101,7 +103,10 @@ def collect_pending(cfg: dict, out_dir: Path, calibrate: bool) -> list[PendingTr
                 task = load_task(task_name)
                 if calibrate:
                     task = calibration_task(task)
-                elif n > len(task.agents):
+                elif n < task.min_agents or n > len(task.agents):
+                    # Causal-cascade (and similar) tasks need the full agent
+                    # chain; truncating drops later consumers and makes the
+                    # oracle unreachable regardless of strategy.
                     continue
                 for rep in range(cfg["reps"]):
                     trial_cfg = TrialConfig(
