@@ -183,8 +183,78 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
                         "content": 'def shout(name):\n    return f"{name}!".upper()\n'}),
         ("done", {"summary": "mod_b features"}),
     ],
+    # t5 — models rename + services implement (correct final state)
+    ("t5_cross_file", "agent-models", "edit"): [
+        ("write_file", {"path": "models/user.py", "content": (
+            '"""User factory functions."""\n'
+            "from models.validators import looks_like_email\n\n\n"
+            "def create_user(name, email):\n"
+            '    """Create a user record with a validated email."""\n'
+            "    if not looks_like_email(email):\n"
+            '        raise ValueError("invalid email")\n'
+            '    return {"name": name, "email": email, "active": True}\n'
+        )}),
+        ("write_file", {"path": "models/__init__.py", "content": (
+            '"""Models package — re-exports the public user factory."""\n'
+            "from models.user import create_user\n\n"
+            '__all__ = ["create_user"]\n'
+        )}),
+        ("done", {"summary": "renamed make_user to create_user"}),
+    ],
+    ("t5_cross_file", "agent-services", "edit"): [
+        ("write_file", {"path": "services/registration.py", "content": (
+            '"""Registration service."""\n'
+            "import models\n"
+            "from db import append_user\n\n\n"
+            "def register(name, email):\n"
+            '    """Create a user via the user-factory function models provides."""\n'
+            "    user = models.create_user(name, email)\n"
+            "    return append_user(user)\n"
+        )}),
+        ("write_file", {"path": "services/queries.py", "content": (
+            '"""Query helpers over the user store."""\n'
+            "from db import all_users\n\n\n"
+            "def active_users():\n"
+            '    """Return stored users whose active flag is True."""\n'
+            '    return [u for u in all_users() if u["active"]]\n'
+        )}),
+        ("done", {"summary": "services use create_user"}),
+    ],
+    # t5 race — models holds claims during run_tests so services can block under ast_dep
+    ("t5_cross_file", "agent-models", "race"): [
+        ("write_file", {"path": "models/user.py", "content": (
+            '"""User factory functions."""\n'
+            "from models.validators import looks_like_email\n\n\n"
+            "def create_user(name, email):\n"
+            "    if not looks_like_email(email):\n"
+            '        raise ValueError("invalid email")\n'
+            '    return {"name": name, "email": email, "active": True}\n'
+        )}),
+        ("run_tests", {}),
+        ("write_file", {"path": "models/__init__.py", "content": (
+            "from models.user import create_user\n\n"
+            '__all__ = ["create_user"]\n'
+        )}),
+        ("done", {"summary": "models rename with hold"}),
+    ],
+    ("t5_cross_file", "agent-services", "race"): [
+        # Delay so agent-models can claim create_user before this write.
+        ("run_tests", {}),
+        ("write_file", {"path": "services/registration.py", "content": (
+            "import models\n"
+            "from db import append_user\n\n\n"
+            "def register(name, email):\n"
+            "    user = models.create_user(name, email)\n"
+            "    return append_user(user)\n"
+        )}),
+        ("write_file", {"path": "services/queries.py", "content": (
+            "from db import all_users\n\n\n"
+            "def active_users():\n"
+            '    return [u for u in all_users() if u["active"]]\n'
+        )}),
+        ("done", {"summary": "services during models hold"}),
+    ],
 }
-
 
 def get_script(task: str, agent_id: str, variant: str) -> list[tuple[str, dict]]:
     key = (task, agent_id, variant)

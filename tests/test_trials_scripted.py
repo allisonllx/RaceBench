@@ -7,6 +7,7 @@ The claims these tests pin down:
   - composing edits                  -> correct under every strategy
   - benign overlap: file_lock stalls (false positive), ast_scope does not
 """
+import asyncio
 from pathlib import Path
 
 import pytest
@@ -138,3 +139,75 @@ async def test_t7_composing_edits_correct(tmp_path):
 async def test_t8_composing_edits_correct_under_naive(tmp_path):
     result, _ = await run_scripted("t8_livelock", "naive", "edit", tmp_path)
     assert result.correct
+
+
+# ---------------------------------------------------------------- ast_dep vs ast_scope on t5
+
+async def test_ast_dep_blocks_cross_file_claim_deterministic(tmp_path):
+    """Direct strategy test: services write blocks while models holds create_user."""
+    import shutil
+    from harness.events import EventLogger
+    from harness.strategies.ast_dep import AstDepStrategy
+    from harness.strategies.base import Mutation
+    from harness.task import load_task
+    from harness.workspace import Workspace
+
+    task = load_task("t5_cross_file")
+    dest = tmp_path / "ws"
+    ws = Workspace.create(task.repo, dest)
+    log_path = tmp_path / "e.jsonl"
+    logger = EventLogger(log_path)
+    strat = AstDepStrategy(ws, logger, ["agent-models", "agent-services"],
+                           lock_timeout_s=5.0)
+
+    user_src = (
+        "from models.validators import looks_like_email\n\n\n"
+        "def create_user(name, email):\n"
+        "    if not looks_like_email(email):\n"
+        '        raise ValueError("invalid email")\n'
+        '    return {"name": name, "email": email, "active": True}\n'
+    )
+    await strat.write("agent-models", "models/user.py",
+                      Mutation(kind="overwrite", content=user_src))
+
+    reg_src = (
+        "import models\n"
+        "from db import append_user\n\n\n"
+        "def register(name, email):\n"
+        "    user = models.create_user(name, email)\n"
+        "    return append_user(user)\n"
+    )
+    write_task = asyncio.create_task(
+        strat.write("agent-services", "services/registration.py",
+                    Mutation(kind="overwrite", content=reg_src)))
+    await asyncio.sleep(0.15)
+    events = read_events(log_path)
+    blocked = [e for e in events if e["event"] == "coord" and e.get("action") == "blocked"]
+    assert blocked, "services must block on claimed models.create_user"
+    await strat.agent_done("agent-models")
+    outcome = await write_task
+    assert outcome.ok
+    await strat.agent_done("agent-services")
+    logger.close()
+    ws.cleanup()
+
+
+async def test_ast_scope_blind_on_t5_race(tmp_path):
+    result, log = await run_scripted("t5_cross_file", "ast_scope", "race", tmp_path)
+    events = read_events(log)
+    blocked = [e for e in events if e["event"] == "coord" and e.get("action") == "blocked"]
+    assert not blocked, "ast_scope is same-file only — t5 race must not stall"
+    assert result.correct
+
+
+async def test_ast_dep_t5_edit_correct(tmp_path):
+    result, _ = await run_scripted("t5_cross_file", "ast_dep", "edit", tmp_path)
+    assert result.correct
+
+
+async def test_ast_dep_silent_on_benign_overlap(tmp_path):
+    result, log = await run_scripted("t2_benign_overlap", "ast_dep", "edit", tmp_path)
+    assert result.correct
+    metrics = trial_metrics(log)
+    assert metrics["stall_events"] == 0, \
+        "ast_dep must not FP-stall on disjoint same-file symbols"

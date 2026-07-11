@@ -34,14 +34,17 @@ reads on SWE-bench workloads).
 Strategies (each ~100 lines, labeled "X-style" — our reimplementations, not
 the authors' systems): `naive` (floor), `file_lock`, `git_hash`
 (MegaAgent-style read-snapshot + 3-way merge + surfaced conflicts),
-`ast_scope` (symbol-level write claims via AST diff), and `notify`
-(CoAgent-lite: unblocked writes plus advisory notifications to readers whose
-read set the write intersects, with the reader's LLM judging relevance —
-CoAgent's core idea without its serialization pre-order or saga inverses).
-The AST idea is prior
-art — Grit, Phantom, Weave, and arXiv:2603.24284 all do structural conflict
-detection — but none has been measured against alternatives on fixed tasks;
-that neutral measurement is our contribution, not the mechanism.
+`ast_scope` (same-file symbol claims via AST diff), `ast_dep` (same claims
+plus a workspace import/use dep graph so t4/t5/t7 cross-file races become
+visible), and `notify` (CoAgent-lite: unblocked writes plus advisory
+notifications to readers whose read set the write intersects — without
+serialization pre-order or saga inverses). The AST idea is prior art — Grit,
+Phantom, Weave, and arXiv:2603.24284 — but none has been measured against
+alternatives on fixed tasks; that neutral measurement is our contribution.
+We keep `ast_scope` and `ast_dep` as separate columns so the grid measures
+the incremental value of the dep graph. Lock-on-write-only file locks and
+`git_hash`+worktree hybrids were considered and skipped as redundant with
+existing axes.
 
 Twelve tasks cover the taxonomy from arXiv:2606.17182 / CoAgent plus three
 harness-extension modes. Core modes: stale-read/lost-update, **benign
@@ -64,15 +67,17 @@ the *mechanism* — complementary, not competing.
 
 ## 3. Evidence
 
-Mechanics are pinned by 72 automated tests plus deterministic scripted-agent
+Mechanics are pinned by automated tests plus deterministic scripted-agent
 trials (no API needed, committed under `results/smoke-*`):
 
 - naive + stale whole-file writes silently loses one agent's feature
   (oracle 3/6) — the textbook lost update, reproduced;
 - git_hash on identical writes: merged, 6/6, **zero silent losses**;
-- benign overlap: file_lock stalls (1 FP stall/trial), ast_scope zero stalls;
-  the FP classifier correctly labels t1's same-symbol stalls as true positives.
-
+- benign overlap: file_lock stalls (1 FP stall/trial), ast_scope / ast_dep
+  zero stalls; the FP classifier correctly labels t1's same-symbol stalls
+  as true positives;
+- t5 cross-file race: `ast_scope` stays blind (0 blocks); `ast_dep` stalls
+  on the claimed def↔use edge and still completes after release.
 Real-model grid (gpt-5-mini, 6 tasks × 4 strategies × {2,4} agents × 5 reps):
 correctness [TBD], tokens [TBD], wasted-work rate [TBD], FP stall rate [TBD].
 Headline metric: **false-positive stall rate** — coordination events between
@@ -104,19 +109,19 @@ Known limits: (1) twelve purpose-built tasks are a probe suite that isolates
 failure modes, not a general benchmark — external validity is bounded and we
 say so. (2) Strategies are our minimal reimplementations; results
 characterize the *mechanism class*, not the cited systems. (3) Symbol
-granularity is top-level only (a class is one symbol), so ast_scope
-over-serializes within classes — visible in t6 and reported, not hidden.
-(4) Scripted-agent results validate mechanics only; all headline claims come
-from real-model trials with the event logs committed. (5) The solo-calibration
-ceiling means results say little about tasks models can't do alone.
-(6) Split-view merge is sequential git merge (force-integrate on conflict);
-we do not claim a production CRDT/OT integrator.
+granularity is top-level only (a class is one symbol), so ast_scope /
+ast_dep over-serialize within classes — visible in t6 and reported, not
+hidden. (4) Scripted-agent results validate mechanics only; all headline
+claims come from real-model trials with the event logs committed. (5) The
+solo-calibration ceiling means results say little about tasks models can't
+do alone. (6) Split-view merge is sequential git merge (force-integrate on
+conflict); we do not claim a production CRDT/OT integrator. (7) `ast_dep`'s
+import resolver is best-effort (package re-exports + submodule scan); it is
+not a full type checker.
 
-Next: re-run the paid grid on t1–t12; port 2–3 real CooperBench tasks for
-external validity; a second model family; cascade at 8 agents; deepen
-`ast_scope` with a cross-file dep graph so t4/t5's visibility gap gets a
-mechanism that can see it.
-
+Next: re-run the paid grid on t1–t12 including `ast_dep`; port 2–3 real
+CooperBench tasks for external validity; a second model family; cascade at
+8 agents.
 ---
 
 *Appendix pointers (not counted): metric definitions in `analysis/metrics.py`

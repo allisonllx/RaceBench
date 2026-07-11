@@ -31,11 +31,15 @@ original authors' systems.
    merge on write, surface conflicts back to the agent.
 4. `ast_scope` — symbol-level write claims via Python AST diff (Grit/Phantom/Weave-style,
    see prior art below): two agents editing disjoint functions in the same file never stall.
-5. `notify` — CoAgent-lite advisory notifications: writes land immediately; agents whose
+5. `ast_dep` — `ast_scope` plus a workspace import/use dependency graph: stalls when a
+   write races a claimed cross-file definition or use-site (sees t4/t5/t7; keeps t2 silent).
+6. `notify` — CoAgent-lite advisory notifications: writes land immediately; agents whose
    read set intersects a landed write get a notice injected into context and self-judge.
 
 Ruled out for the hackathon window (with reasons, see `writeup/`): full CRDT substrate,
-CoAgent's full MTPO with serialization pre-order and saga inverses, 8+ agent scale.
+CoAgent's full MTPO with serialization pre-order and saga inverses, 8+ agent scale;
+lock-on-write-only `file_lock` and `git_hash`+worktree hybrids (redundant with
+`ast_scope` / task-level `isolation: worktree`).
 
 ## Tasks
 
