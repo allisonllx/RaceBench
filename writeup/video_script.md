@@ -15,7 +15,7 @@ all commands so nothing stalls on camera. Rehearse to 2:40 to leave buffer.
 
 Run:
 
-    python -m runner.run_grid --config runner/config.smoke-clobber.yaml
+    python -m runner.run_grid --config runner/config.smoke.yaml
 
 > "Here are two agents adding two config keys to the same file. Under naive
 > parallelism — what you get by default — the run LOOKS fine: no error, no

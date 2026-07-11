@@ -76,9 +76,9 @@ t01–t12 are intentionally **probes**, not stand-ins for production codebases.
 The original compose-friendly `t01_stale_read` / `t03_ww_clobber` trees live under
 `tasks/_archive/` for audit: live gpt-5-mini `edit_file` composed under naive
 (100% on those v1 cells), so we replaced them with hardened siblings that
-**require whole-file `write_file`** from the last read. Gate smoke
-(`results/adversarial-gate/`): naive **0/5** on both hardened probes; file_lock
-**5/5**. Solo calibration remained **5/5**.
+**require whole-file `write_file`** from the last read. Pre-grid gate smoke
+confirmed naive **0/5** on both hardened probes; file_lock **5/5**. Solo
+calibration remained **5/5**.
 
 After running early cells we judged that a suite of tiny synthetic packages
 does not reflect the shape of today’s agent targets: multi-module apps,
@@ -315,8 +315,7 @@ bypass the strategy (documented in the strategy guide); read-set visibility
 is 1.0 only for `read_file`. (11) High pooled `naive` correctness on early grid cells did **not** mean the
 suite failed to seed races — see §3 “Reading a strong `naive` column”. We
 archived compose-friendly v1 `t01`/`t03` and shipped hardened whole-file
-siblings plus `rw_d` after an adversarial gate smoke
-(`results/adversarial-gate/`). (12) Cascade tasks require the full agent chain (`min_agents`; e.g.
+siblings plus `rw_d` after pre-grid gate smoke. (12) Cascade tasks require the full agent chain (`min_agents`; e.g.
 `rw_e_cascade` at n=3, `t04_cascade` at n=4). Truncating drops later consumers
 and makes the oracle unreachable regardless of strategy; those cells were
 archived, not cited.
@@ -341,6 +340,4 @@ truncated `rw_e_cascade` n=2 cells and prior calib:
 `results/_archive/rw_e_cascade/`. Archived truncated `t04_cascade` n=2 cells:
 `results/_archive/t04_cascade_n2/`. Archived compose-friendly v1 probes and
 their grid logs: `tasks/_archive/{t01_stale_read,t03_ww_clobber}/`,
-`results/_archive/t01_stale_read_v1/`, `results/_archive/t03_ww_clobber_v1/`.
-Adversarial gate smoke for hardened siblings + `rw_d`:
-`results/adversarial-gate/` and `results/adversarial-gate-calibration/`.*
+`results/_archive/t01_stale_read_v1/`, `results/_archive/t03_ww_clobber_v1/`.*
