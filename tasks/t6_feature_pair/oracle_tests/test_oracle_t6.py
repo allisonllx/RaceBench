@@ -14,10 +14,11 @@ class FakeClock:
 def _fake_time(monkeypatch):
     fake = FakeClock()
     monkeypatch.setattr(clock, "now", lambda: fake.t)
+    # Cache may import clock_adapter directly
+    import cache.clock_adapter as ca
+    monkeypatch.setattr(ca, "now", lambda: fake.t)
     return fake
 
-
-# ---- feature 1: TTL
 
 def test_ttl_expiry(monkeypatch):
     fake = _fake_time(monkeypatch)
@@ -35,8 +36,6 @@ def test_no_ttl_never_expires(monkeypatch):
     fake.advance(10**6)
     assert c.get("k") == "v"
 
-
-# ---- feature 2: bounded-size eviction
 
 def test_eviction_oldest_first():
     evicted = []
@@ -59,8 +58,6 @@ def test_update_existing_never_evicts():
     assert c.get("a") == 99
 
 
-# ---- both features must coexist
-
 def test_ttl_and_eviction_compose(monkeypatch):
     fake = _fake_time(monkeypatch)
     evicted = []
@@ -68,8 +65,8 @@ def test_ttl_and_eviction_compose(monkeypatch):
     c.set("a", 1, ttl=5)
     c.set("b", 2)
     fake.advance(6)
-    assert c.get("a", "gone") == "gone"   # ttl still works with eviction present
-    c.set("c", 3)                          # capacity behavior still works
+    assert c.get("a", "gone") == "gone"
+    c.set("c", 3)
     assert c.get("c") == 3
 
 

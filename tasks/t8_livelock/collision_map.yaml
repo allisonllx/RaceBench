@@ -1,0 +1,12 @@
+failure_mode: livelock_deadlock
+collision_points:
+  - file: alpha.py
+    agents: [agent-ab, agent-ba]
+    kind: opposite_order_lock
+  - file: beta.py
+    agents: [agent-ab, agent-ba]
+    kind: opposite_order_lock
+expected_anomaly: >
+  Under file_lock, agent-ab holds alpha while agent-ba holds beta → wait-cycle
+  until lock_timeout. Naive/ast_scope (disjoint symbols within each file for
+  some edits) may still succeed without stalls depending on timing.

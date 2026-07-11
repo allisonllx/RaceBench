@@ -55,13 +55,15 @@ class FileLockStrategy(Strategy):
             self._released.notify_all()
 
     async def _coordinate_read(self, agent_id: str, relpath: str) -> str | None:
-        if self.ws.exists(relpath):
+        if self.ws.exists(relpath, agent_id=agent_id):
             acquired, waited = await self._acquire(agent_id, relpath)
             if not acquired:
                 self.log.log("coord", strategy=self.name, action="lock_timeout",
                              agent=agent_id, path=relpath, waited_s=round(waited, 3))
                 return None
-        return self.ws.read_file(relpath) if self.ws.exists(relpath) else None
+        if not self.ws.exists(relpath, agent_id=agent_id):
+            return None
+        return self.ws.read_file(relpath, agent_id=agent_id)
 
     async def _coordinate_write(self, agent_id: str, relpath: str,
                                 mutation: Mutation) -> WriteOutcome:
@@ -72,6 +74,6 @@ class FileLockStrategy(Strategy):
                 message=f"file {relpath} is locked by another agent; "
                         "work on something else and retry later",
             )
-        outcome = await self._apply_to_current(relpath, mutation)
+        outcome = await self._apply_to_current(relpath, mutation, agent_id=agent_id)
         outcome.waited_s += waited
         return outcome

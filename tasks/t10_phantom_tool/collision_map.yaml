@@ -1,0 +1,9 @@
+failure_mode: phantom_tool_registry_drift
+collision_points:
+  - kind: registry_mutation
+    remove: format_report
+    add: format_report_v2
+    after_global_writes: 1
+expected_anomaly: >
+  Agent that cached format_report fails after mutation; must discover
+  format_report_v2 via list_tools.

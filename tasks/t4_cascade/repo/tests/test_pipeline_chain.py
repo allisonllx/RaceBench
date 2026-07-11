@@ -1,10 +1,8 @@
-"""Visible tests. The chain test is skipped while stubs are unimplemented, but
-once implementations land it exercises the WHOLE chain — this is the signal an
-agent gets (via run_tests) that an upstream rename invalidated its work."""
+"""Visible tests. The chain test is skipped while stubs are unimplemented."""
 import pytest
 
 
-def test_modules_import():
+def test_packages_import():
     import cli  # noqa: F401
     import datasource  # noqa: F401
     import pipeline  # noqa: F401

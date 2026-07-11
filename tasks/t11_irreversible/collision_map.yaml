@@ -1,0 +1,7 @@
+failure_mode: irreversible_effect_reordering
+collision_points:
+  - kind: effect_order
+    required: [charge, deploy, send_email]
+expected_anomaly: >
+  If send_email lands before deploy/charge, oracle fails. File-only strategies
+  cannot repair the effects log.

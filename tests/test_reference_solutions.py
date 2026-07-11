@@ -19,6 +19,18 @@ def _pytest(cwd: Path, target: str) -> tuple[int, str]:
     return proc.returncode, proc.stdout + proc.stderr
 
 
+def _overlay_reference(reference: Path, dst: Path) -> None:
+    """Copy reference files/dirs onto dst, preserving package layout."""
+    for item in reference.iterdir():
+        target = dst / item.name
+        if item.is_dir():
+            if target.exists():
+                shutil.rmtree(target)
+            shutil.copytree(item, target)
+        else:
+            shutil.copy2(item, target)
+
+
 @pytest.mark.parametrize("task_name", list_tasks())
 def test_reference_solution_passes_oracle(task_name, tmp_path):
     task = load_task(task_name)
@@ -27,8 +39,7 @@ def test_reference_solution_passes_oracle(task_name, tmp_path):
 
     dst = tmp_path / "repo"
     shutil.copytree(task.repo, dst)
-    for ref_file in reference.iterdir():
-        shutil.copy(ref_file, dst / ref_file.name)
+    _overlay_reference(reference, dst)
     shutil.copytree(task.oracle_tests, dst / "oracle_tests")
 
     code, out = _pytest(dst, "tests")

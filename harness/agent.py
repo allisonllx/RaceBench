@@ -1,14 +1,13 @@
-"""Instrumented agent loop: model turn -> tool dispatch (through the
-coordination strategy) -> tool result -> next turn. Every model call's token
-usage and every tool outcome is written to the event log."""
+"""Instrumented agent loop."""
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 from harness.events import EventLogger
 from harness.models import ModelClient, ToolCall
+from harness.registry import ToolRegistry
 from harness.strategies.base import Mutation, Strategy
-from harness.tools import TOOL_SCHEMAS
+from harness.tools import FILE_TOOL_SCHEMAS
 from harness.workspace import Workspace
 
 SYSTEM_PROMPT = """You are a coding agent working inside a shared repository. \
@@ -16,11 +15,16 @@ Other agents are working on OTHER subtasks in this same repository AT THE SAME \
 TIME, so files may change between your reads. You cannot talk to them.
 
 Rules:
+- Use glob/grep to find files before editing when the repo has many modules.
 - Read a file before editing it.
 - Prefer edit_file (exact string replacement) over write_file for existing files: \
 whole-file overwrites destroy other agents' concurrent work.
 - If an edit fails or is refused because of another agent's activity, re-read the \
 file and reapply your change on top of the current content.
+- If list_tools / invoke_tool are available, use them for registered external tools; \
+tools can appear or disappear mid-run — re-list if invoke fails.
+- Irreversible tools (send_email, deploy, charge) cannot be undone — call them only \
+when the required order is correct.
 - Only make changes needed for YOUR subtask.
 - Run the tests when you believe you are done, fix what your subtask broke, then \
 call done with a one-line summary.
@@ -33,7 +37,7 @@ Your subtask:
 @dataclass
 class AgentResult:
     agent_id: str
-    status: str  # done | max_turns | error
+    status: str
     turns: int
     prompt_tokens: int
     completion_tokens: int
@@ -42,13 +46,15 @@ class AgentResult:
 class Agent:
     def __init__(self, agent_id: str, subtask: str, model: ModelClient,
                  strategy: Strategy, workspace: Workspace, logger: EventLogger,
-                 max_turns: int = 20):
+                 max_turns: int = 40,
+                 registry: ToolRegistry | None = None):
         self.id = agent_id
         self.model = model
         self.strategy = strategy
         self.ws = workspace
         self.log = logger
         self.max_turns = max_turns
+        self.registry = registry
         self.messages: list[dict] = [
             {"role": "system", "content": SYSTEM_PROMPT.format(subtask=subtask)},
             {"role": "user", "content": "Begin your subtask now."},
@@ -56,23 +62,27 @@ class Agent:
         self.prompt_tokens = 0
         self.completion_tokens = 0
 
+    def _tool_schemas(self) -> list[dict]:
+        schemas = list(FILE_TOOL_SCHEMAS)
+        if self.registry is not None:
+            schemas.extend(self.registry.openai_tool_schemas())
+        return schemas
+
     async def run(self) -> AgentResult:
         status = "max_turns"
         turn = 0
         try:
             for turn in range(1, self.max_turns + 1):
-                # yield to the event loop so concurrent agents interleave even
-                # when the model client resolves without suspending (scripted mode)
                 import asyncio
                 await asyncio.sleep(0)
 
-                # advisory strategies (notify) queue messages for injection
                 for note in self.strategy.drain_notifications(self.id):
                     self.messages.append({"role": "user", "content": note})
                     self.log.log("notification_delivered", agent=self.id,
                                  turn=turn, note=note[:300])
 
-                model_turn = await self.model.complete(self.messages, TOOL_SCHEMAS)
+                model_turn = await self.model.complete(
+                    self.messages, self._tool_schemas())
                 self.prompt_tokens += model_turn.prompt_tokens
                 self.completion_tokens += model_turn.completion_tokens
                 self.log.log("llm_usage", agent=self.id, turn=turn,
@@ -80,7 +90,6 @@ class Agent:
                              completion_tokens=model_turn.completion_tokens)
 
                 if not model_turn.tool_calls:
-                    # nudge a text-only reply back into tool use
                     self.messages.append({"role": "assistant",
                                           "content": model_turn.text or ""})
                     self.messages.append({"role": "user",
@@ -113,7 +122,7 @@ class Agent:
                 if finished:
                     status = "done"
                     break
-        except Exception as exc:  # noqa: BLE001 — a crashed agent is a trial datum
+        except Exception as exc:  # noqa: BLE001
             status = "error"
             self.log.log("agent_error", agent=self.id, error=repr(exc)[:500])
         finally:
@@ -130,7 +139,19 @@ class Agent:
                      args={k: (v[:200] if isinstance(v, str) else v)
                            for k, v in args.items()})
         if name == "list_files":
-            return "\n".join(self.ws.list_files()), False
+            files = self.ws.list_files(agent_id=self.id)
+            return "\n".join(files), False
+        if name == "glob":
+            hits = self.ws.glob_files(args.get("pattern", "*"), agent_id=self.id)
+            self.log.log("search", agent=self.id, kind="glob",
+                         pattern=args.get("pattern", ""), n=len(hits))
+            return "\n".join(hits) or "(no matches)", False
+        if name == "grep":
+            hits = self.ws.grep(args.get("pattern", ""), agent_id=self.id,
+                                glob=args.get("glob") or "*")
+            self.log.log("search", agent=self.id, kind="grep",
+                         pattern=args.get("pattern", ""), n=len(hits))
+            return "\n".join(hits) or "(no matches)", False
         if name == "read_file":
             content = await self.strategy.read(self.id, args.get("path", ""))
             if content is None:
@@ -141,17 +162,33 @@ class Agent:
                 self.id, args.get("path", ""),
                 Mutation(kind="replace", old_string=args.get("old_string", ""),
                          new_string=args.get("new_string", "")))
+            if outcome.ok and self.registry:
+                self.registry.note_write()
             return _describe(outcome), False
         if name == "write_file":
             outcome = await self.strategy.write(
                 self.id, args.get("path", ""),
                 Mutation(kind="overwrite", content=args.get("content", "")))
+            if outcome.ok and self.registry:
+                self.registry.note_write()
             return _describe(outcome), False
         if name == "run_tests":
-            result = await self.ws.run_pytest("tests")
+            result = await self.ws.run_pytest("tests", agent_id=self.id)
             self.log.log("run_tests", agent=self.id, passed=result.passed,
                          failed=result.failed, errored=result.errored)
             return result.output[-4000:] or "(no output)", False
+        if name == "list_tools":
+            if not self.registry:
+                return "ERROR: no tool registry on this task", False
+            return "\n".join(self.registry.list_names()) or "(none)", False
+        if name == "invoke_tool":
+            if not self.registry:
+                return "ERROR: no tool registry on this task", False
+            return self.registry.invoke(
+                self.id, args.get("name", ""),
+                args.get("arguments") or {}), False
+        if name in ("send_email", "deploy", "charge") and self.registry:
+            return self.registry.invoke(self.id, name, args), False
         if name == "done":
             return "acknowledged", True
         return f"ERROR: unknown tool {name}", False

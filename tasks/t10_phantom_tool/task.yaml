@@ -1,0 +1,31 @@
+name: t10_phantom_tool
+failure_mode: phantom_tool_registry_drift
+benign: false
+description: >
+  Ops console: agents must produce out/report.txt by invoking a registered
+  format_report tool. After the first file write, format_report is removed and
+  format_report_v2 (requires a title) is added — agents must re-list tools.
+registry:
+  tools: [format_report, send_email]
+  mutations:
+    - after_global_writes: 1
+      remove: [format_report]
+      add: [format_report_v2]
+agents:
+  - id: agent-pipeline
+    prompt: >
+      Explore data/, metrics/, pipeline/, and console/ with glob/grep.
+      Implement pipeline/build.py::build_summary() using data.records.SAMPLE
+      and metrics.stats.summarize so it returns {"count": 2, "total": 10,
+      "mean": 5.0}. Then use list_tools / invoke_tool to format that summary
+      into a report string and write it to out/report.txt. Prefer the live
+      formatting tool — tools may change mid-run. If format_report disappears,
+      use format_report_v2 with title "Ops Report". Only change pipeline/ and
+      out/.
+  - id: agent-console
+    prompt: >
+      Explore console/ and out/. In console/cli.py, implement run() to read
+      out/report.txt (create a placeholder "PENDING" first if missing) and
+      return it prefixed with "CONSOLE: ". Keep trying until the report file
+      looks like a finished report (not PENDING). Only change files under
+      console/.

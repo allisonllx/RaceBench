@@ -1,0 +1,26 @@
+{"ts": 0.1723, "event": "trial_start", "task": "t6_feature_pair", "failure_mode": "realistic_feature_pair", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 0, "model": "gpt-5-mini", "agent_ids": ["solo"]}
+{"ts": 1.411, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 636, "completion_tokens": 19}
+{"ts": 1.4112, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 3.0483, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 676, "completion_tokens": 18}
+{"ts": 3.0486, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "read_file", "args": {"path": "cache.py"}}
+{"ts": 3.0492, "event": "read", "agent": "solo", "path": "cache.py", "found": true, "size": 531}
+{"ts": 4.4634, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 840, "completion_tokens": 18}
+{"ts": 4.4635, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "read_file", "args": {"path": "clock.py"}}
+{"ts": 4.4638, "event": "read", "agent": "solo", "path": "clock.py", "found": true, "size": 178}
+{"ts": 5.6804, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 908, "completion_tokens": 20}
+{"ts": 5.6807, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "read_file", "args": {"path": "conftest.py"}}
+{"ts": 5.6813, "event": "read", "agent": "solo", "path": "conftest.py", "found": true, "size": 92}
+{"ts": 7.0913, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 962, "completion_tokens": 21}
+{"ts": 7.0915, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "read_file", "args": {"path": "tests/test_cache_basic.py"}}
+{"ts": 7.0917, "event": "read", "agent": "solo", "path": "tests/test_cache_basic.py", "found": true, "size": 379}
+{"ts": 34.6892, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 1108, "completion_tokens": 2177}
+{"ts": 34.6899, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "edit_file", "args": {"path": "cache.py", "old_string": "\"\"\"A tiny in-memory cache with pluggable time source (see clock.py).\"\"\"\nimport clock  # use clock.now() for any time measurement; tests fake it\n\n\nclass Cache:\n    def __init__(self, max_size=128):\n   ", "new_string": "\"\"\"A tiny in-memory cache with pluggable time source (see clock.py).\"\"\"\nimport clock  # use clock.now() for any time measurement; tests fake it\nfrom collections import OrderedDict\n\n\nclass Cache:\n    d"}}
+{"ts": 34.7083, "event": "write", "agent": "solo", "path": "cache.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "Cache"], "message": ""}
+{"ts": 35.9707, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 2079, "completion_tokens": 13}
+{"ts": 35.971, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "run_tests", "args": {}}
+{"ts": 36.3398, "event": "run_tests", "agent": "solo", "passed": 3, "failed": 0, "errored": 0}
+{"ts": 37.5261, "event": "llm_usage", "agent": "solo", "turn": 8, "prompt_tokens": 2118, "completion_tokens": 40}
+{"ts": 37.5262, "event": "tool_call", "agent": "solo", "turn": 8, "tool": "done", "args": {"summary": "Added ttl support and bounded-size eviction with on_evict callback to Cache in cache.py; preserved existing behavior and tests pass."}}
+{"ts": 37.5262, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 37.5262, "event": "agent_done", "agent": "solo", "status": "done", "turns": 8, "prompt_tokens": 9327, "completion_tokens": 2326}
+{"ts": 38.0281, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 37.33, "prompt_tokens": 9327, "completion_tokens": 2326, "agent_statuses": {"solo": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.19s\n"}

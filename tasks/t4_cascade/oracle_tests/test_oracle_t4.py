@@ -1,16 +1,16 @@
 """Hidden oracle: the rename landed everywhere, the chain works end to end."""
-import pytest
-
-import cli
 import datasource
 import pipeline
 import report
+import cli
 
 
 def test_rename_completed():
     assert hasattr(datasource, "parse_dataset"), "parse_dataset missing"
     assert not hasattr(datasource, "parse_records"), \
         "old name must be removed (no alias)"
+    assert hasattr(datasource.parser, "parse_dataset")
+    assert not hasattr(datasource.parser, "parse_records")
 
 
 def test_parse_dataset_skips_comments_and_blanks():
@@ -25,8 +25,6 @@ def test_summarize():
 
 
 def test_summarize_text_uses_current_parser():
-    # comment lines only parse under the NEW parser: a stale call to the old
-    # name raises AttributeError, an inlined old parser chokes on '#'
     s = pipeline.summarize_text("# c\na,1\nb,2\n")
     assert s["count"] == 2 and s["total"] == 3.0
 

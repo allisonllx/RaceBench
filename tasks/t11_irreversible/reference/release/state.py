@@ -1,0 +1,2 @@
+RELEASE_VERSION = "1.2.0"
+READY = True

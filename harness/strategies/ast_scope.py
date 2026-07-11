@@ -31,9 +31,9 @@ class AstScopeStrategy(Strategy):
         self._released = asyncio.Condition()
 
     async def _coordinate_read(self, agent_id: str, relpath: str) -> str | None:
-        if not self.ws.exists(relpath):
+        if not self.ws.exists(relpath, agent_id=agent_id):
             return None
-        content = self.ws.read_file(relpath)
+        content = self.ws.read_file(relpath, agent_id=agent_id)
         reads = self._read_sets.setdefault(agent_id, set())
         for sym in file_symbols(content):
             reads.add((relpath, sym))
@@ -44,8 +44,8 @@ class AstScopeStrategy(Strategy):
         t0 = time.monotonic()
         logged_block = False
         while True:
-            # compute the symbols this write would change, against current disk
-            base = self.ws.read_file(relpath) if self.ws.exists(relpath) else None
+            base = (self.ws.read_file(relpath, agent_id=agent_id)
+                    if self.ws.exists(relpath, agent_id=agent_id) else None)
             new = mutation.apply(base)
             if new is None:
                 return WriteOutcome(
@@ -65,7 +65,6 @@ class AstScopeStrategy(Strategy):
                 async with self._released:
                     for s in changed:
                         self._claims[(relpath, s)] = agent_id
-                # log read-write intersections (would-be notifications)
                 for other, reads in self._read_sets.items():
                     if other == agent_id or other not in self.active:
                         continue
@@ -76,7 +75,8 @@ class AstScopeStrategy(Strategy):
                                      action="read_write_intersection",
                                      writer=agent_id, reader=other,
                                      path=relpath, symbols=overlap)
-                outcome = await self._apply_to_current(relpath, mutation)
+                outcome = await self._apply_to_current(
+                    relpath, mutation, agent_id=agent_id)
                 outcome.waited_s = time.monotonic() - t0
                 return outcome
 

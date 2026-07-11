@@ -39,17 +39,33 @@ CoAgent's full MTPO with serialization pre-order and saga inverses, 8+ agent sca
 
 ## Tasks
 
-Six purpose-built mini-repos in `tasks/`, one per failure mode, each with a documented
-collision map and a hidden pytest oracle:
+Twelve purpose-built mini-repos in `tasks/`, covering the concurrency-anomaly
+taxonomy plus harness-extension modes (phantom tools, irreversible effects,
+split-view worktrees). Each has a collision map, hidden pytest oracle, and
+reference solution:
 
-| Task | Failure mode | Agents |
-|---|---|---|
-| `t1_stale_read` | stale read / lost update | 2 |
-| `t2_benign_overlap` | disjoint functions, same file (false-positive probe) | 2 |
-| `t3_ww_clobber` | write-write on the same function | 2 |
-| `t4_cascade` | causal cascade across a dependency chain | 4 |
-| `t5_cross_file` | cross-file symbol dependency | 2 |
-| `t6_feature_pair` | CooperBench-style realistic feature pair | 2 |
+| Task | Failure mode | Agents | Notes |
+|---|---|---|---|
+| `t1_stale_read` | stale read / lost update | 2 | |
+| `t2_benign_overlap` | disjoint functions, same file (FP probe) | 2 | `benign: true` |
+| `t3_ww_clobber` | write-write on the same function | 2 | |
+| `t4_cascade` | causal cascade across a dependency chain | 4 | multi-module |
+| `t5_cross_file` | cross-file symbol dependency | 2 | multi-module |
+| `t6_feature_pair` | CooperBench-style feature pair | 2 | multi-module |
+| `t7_rw_canary` | antidependency / silent invalidation | 2 | |
+| `t8_livelock` | lock wait-cycle / livelock stress | 2 | opposite edit order |
+| `t9_overhead` | overhead-masks-benefit (disjoint pkgs) | 2 | `benign: true` |
+| `t10_phantom_tool` | tool-registry drift | 2 | needs `list_tools` |
+| `t11_irreversible` | external-effect reordering | 2 | `.effects.jsonl` order |
+| `t12_split_view` | worktree divergence | 2 | `isolation: worktree` |
+
+## Tools
+
+Agents get instrumented file tools (`read_file`, `write_file`, `edit_file`,
+`list_files`, `run_tests`, `done`) plus `grep` / `glob`. Tasks with a
+`registry:` block also expose `list_tools` / `invoke_tool` and irreversible
+effect tools (`send_email`, `deploy`, `charge`). Workspace isolation is
+`shared` (default) or `worktree` (per-agent trees merged before the oracle).
 
 ## Quickstart
 
@@ -63,8 +79,8 @@ pytest
 # single trial with scripted agents (offline demo)
 python -m runner.run_grid --config runner/config.smoke.yaml
 
-# real grid (needs OPENAI_API_KEY)
-export OPENAI_API_KEY=sk-...
+# real grid (needs OPENAI_API_KEY in .env or your shell)
+# echo 'OPENAI_API_KEY=sk-...' > .env
 python -m runner.run_grid --config runner/config.example.yaml
 
 # report + plots from event logs

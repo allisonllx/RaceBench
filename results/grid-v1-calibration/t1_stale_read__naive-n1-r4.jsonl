@@ -1,0 +1,20 @@
+{"ts": 0.5101, "event": "trial_start", "task": "t1_stale_read", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 4, "model": "gpt-5-mini", "agent_ids": ["solo"]}
+{"ts": 1.7308, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 585, "completion_tokens": 19}
+{"ts": 1.7309, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.7062, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 621, "completion_tokens": 18}
+{"ts": 2.7064, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 2.7067, "event": "read", "agent": "solo", "path": "config.py", "found": true, "size": 842}
+{"ts": 12.054, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 843, "completion_tokens": 811}
+{"ts": 12.0544, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "edit_file", "args": {"path": "config.py", "old_string": "\"\"\"Application configuration with validated defaults.\"\"\"\n\nDEFAULTS = {\n    \"host\": \"localhost\",\n    \"port\": 8080,\n}\n\n\ndef get_config(overrides=None):\n    \"\"\"Return the effective config: DEFAULTS updat", "new_string": "\"\"\"Application configuration with validated defaults.\"\"\"\n\nDEFAULTS = {\n    \"host\": \"localhost\",\n    \"port\": 8080,\n    \"timeout\": 30.0,\n    \"retries\": 3,\n}\n\n\ndef get_config(overrides=None):\n    \"\"\"Retu"}}
+{"ts": 12.057, "event": "write", "agent": "solo", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 13.9896, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 1472, "completion_tokens": 20}
+{"ts": 13.9898, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "read_file", "args": {"path": "tests/test_config.py"}}
+{"ts": 13.9909, "event": "read", "agent": "solo", "path": "tests/test_config.py", "found": true, "size": 458}
+{"ts": 15.7282, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 1615, "completion_tokens": 13}
+{"ts": 15.7283, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 16.0686, "event": "run_tests", "agent": "solo", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 17.7307, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 1654, "completion_tokens": 61}
+{"ts": 17.7313, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "done", "args": {"summary": "Added 'timeout' and 'retries' defaults to DEFAULTS and extended validate() to enforce 'timeout' > 0 (int/float) and 'retries' >= 0 (int) with appropriate ValueErrors."}}
+{"ts": 17.7315, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 17.7315, "event": "agent_done", "agent": "solo", "status": "done", "turns": 6, "prompt_tokens": 6790, "completion_tokens": 942}
+{"ts": 18.2437, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 17.17, "prompt_tokens": 6790, "completion_tokens": 942, "agent_statuses": {"solo": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

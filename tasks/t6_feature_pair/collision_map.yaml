@@ -1,12 +1,10 @@
 failure_mode: realistic_feature_pair
 collision_points:
-  - file: cache.py
-    symbol: Cache            # both features rewrite set(); one also rewrites __init__
+  - file: cache/core.py
+    symbol: Cache
     agents: [agent-ttl, agent-evict]
     kind: same_symbol_write
 expected_anomaly: >
-  Both agents rewrite methods of the same class. Note that top-level symbol
-  granularity treats the whole class as ONE symbol, so ast_scope serializes
-  here (correctly — the methods genuinely interact: eviction order vs expired
-  entries). Under naive, the second whole-class rewrite drops the first
-  feature. The oracle requires both features present AND composing.
+  Both agents rewrite Cache in cache/core.py. Top-level symbol granularity
+  treats the whole class as one symbol. Supporting modules increase navigation
+  cost without changing the true conflict locus.

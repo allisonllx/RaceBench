@@ -1,0 +1,13 @@
+failure_mode: antidependency_silent_invalidation
+collision_points:
+  - file: schema/constants.py
+    symbol: STATUS_ACTIVE
+    agents: [agent-schema]
+    kind: constant_rename
+  - file: handlers/report.py
+    symbol: filter_active
+    agents: [agent-handlers]
+    kind: stale_premise_consumer
+expected_anomaly: >
+  If handlers embeds the literal "active" or an old import value after schema
+  renames to "enabled", filter_active silently returns empty on valid data.

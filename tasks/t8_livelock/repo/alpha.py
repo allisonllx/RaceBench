@@ -1,0 +1,2 @@
+GREETING = "hi"
+VERSION = "0.1"

@@ -1,7 +1,4 @@
-"""Injectable time source so cache behavior is testable deterministically."""
-import time
+"""Top-level clock shim for tests that `import clock`."""
+from cache.clock_adapter import now
 
-
-def now():
-    """Current time in seconds (monotonic)."""
-    return time.monotonic()
+__all__ = ["now"]

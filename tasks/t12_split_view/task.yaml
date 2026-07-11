@@ -1,0 +1,23 @@
+name: t12_split_view
+failure_mode: split_view_divergence
+benign: false
+isolation: worktree
+description: >
+  Two agents edit overlapping public API in isolated worktrees. End-of-trial
+  merge must produce a coherent library. Use grep/glob to find all call sites.
+agents:
+  - id: agent-core
+    prompt: >
+      You work in an isolated worktree. Explore lib/, apps/, and services/ with
+      grep/glob. Add method greet(name: str) -> str to lib/api.py::Greeter
+      immediately ABOVE the existing ping method; it must return f"hello,{name}".
+      Update apps/cli.py::welcome to call greet instead of ping. Do not implement
+      farewell and do not move ping. Prefer editing files under lib/ and apps/.
+  - id: agent-ext
+    prompt: >
+      You work in an isolated worktree. Explore lib/, apps/, and services/ with
+      grep/glob. Add method farewell(name: str) -> str to lib/api.py::Greeter
+      immediately BELOW the existing ping method; it must return f"bye,{name}".
+      Update services/worker.py::goodbye to call farewell instead of ping. Do not
+      implement greet and do not move ping. Prefer editing files under lib/ and
+      services/.

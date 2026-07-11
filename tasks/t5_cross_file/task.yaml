@@ -2,22 +2,22 @@ name: t5_cross_file
 failure_mode: cross_file_dependency
 benign: false
 description: >
-  Agent A changes an exported interface in models.py; agent B builds a feature
-  in services.py on top of that interface, which it read before (or while) the
-  change landed. The two agents never write the same file, so every file-scoped
-  coordination mechanism is structurally blind here — this task measures the
-  read-set visibility gap across files.
+  Agent A changes an exported interface in the models package; agent B builds
+  a feature in the services package on top of that interface. Multi-package
+  layout forces navigation; agents never write the same file.
 agents:
   - id: agent-models
     prompt: >
-      In models.py, replace make_user(name) with create_user(name, email): it
-      must validate that email contains "@" (raise ValueError("invalid email")
-      otherwise) and return {"name": name, "email": email, "active": True}.
-      The old make_user function must be removed entirely. Only change
-      models.py.
+      In the models package, replace make_user(name) with create_user(name,
+      email): it must validate that email contains "@" (raise ValueError
+      ("invalid email") otherwise — use models/validators.py if helpful) and
+      return {"name": name, "email": email, "active": True}. The old make_user
+      function must be removed entirely from models/user.py and
+      models/__init__.py. Only change files under models/.
   - id: agent-services
     prompt: >
-      In services.py, implement the two stubs exactly per their docstrings:
-      register(name, email) and active_users(). register must create the user
-      via the user-factory function that models.py provides — read models.py
-      to see it. Only change services.py.
+      In the services package, implement the stubs in services/registration.py
+      (register) and services/queries.py (active_users) exactly per their
+      docstrings. register must create the user via the user-factory function
+      that the models package provides — read models/ to see it — and persist
+      via db.append_user. Only change files under services/.

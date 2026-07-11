@@ -1,17 +1,18 @@
-"""Visible tests. The integration test skips until implemented, then becomes
-the recovery signal for a stale cross-file premise."""
+"""Visible tests."""
 import pytest
 
 
-def test_modules_import():
+def test_packages_import():
     import models  # noqa: F401
     import services  # noqa: F401
+    import db  # noqa: F401
 
 
 def test_register_when_implemented():
+    import db
     import services
 
-    services._USERS.clear()
+    db.clear()
     try:
         user = services.register("ada", "ada@example.com")
     except NotImplementedError:

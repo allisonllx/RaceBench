@@ -1,0 +1,2 @@
+FAREWELL = "bye"
+COUNT = 1

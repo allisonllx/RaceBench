@@ -2,8 +2,9 @@
 and collision_map.yaml (documentation of the seeded collision points)."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -21,8 +22,10 @@ class Task:
     name: str
     path: Path
     failure_mode: str
-    benign: bool               # True => zero coordination is the correct behavior
+    benign: bool
     agents: list[TaskAgentSpec]
+    isolation: str = "shared"          # shared | worktree
+    registry: dict[str, Any] = field(default_factory=dict)
 
     @property
     def repo(self) -> Path:
@@ -42,12 +45,18 @@ class Task:
 def load_task(name: str, tasks_dir: Path = TASKS_DIR) -> Task:
     path = Path(tasks_dir) / name
     spec = yaml.safe_load((path / "task.yaml").read_text(encoding="utf-8"))
+    isolation = spec.get("isolation", "shared")
+    if isolation not in ("shared", "worktree"):
+        raise ValueError(f"task {name}: isolation must be shared|worktree, "
+                         f"got {isolation!r}")
     return Task(
         name=spec["name"],
         path=path,
         failure_mode=spec["failure_mode"],
         benign=bool(spec.get("benign", False)),
         agents=[TaskAgentSpec(id=a["id"], prompt=a["prompt"]) for a in spec["agents"]],
+        isolation=isolation,
+        registry=dict(spec.get("registry") or {}),
     )
 
 

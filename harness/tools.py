@@ -1,14 +1,41 @@
-"""Tool schemas exposed to agents. Reads and writes route through the trial's
-coordination strategy; nothing touches the workspace directly."""
+"""Tool schemas exposed to agents."""
 from __future__ import annotations
 
-TOOL_SCHEMAS: list[dict] = [
+FILE_TOOL_SCHEMAS: list[dict] = [
     {
         "type": "function",
         "function": {
             "name": "list_files",
             "description": "List all files in the repository.",
             "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "glob",
+            "description": "Find files matching a glob pattern (e.g. '**/*.py', 'mod_a/*').",
+            "parameters": {
+                "type": "object",
+                "properties": {"pattern": {"type": "string"}},
+                "required": ["pattern"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "grep",
+            "description": "Search for a literal substring across files. Returns path:line:text hits.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "pattern": {"type": "string"},
+                    "glob": {"type": "string",
+                             "description": "optional filename glob, default *"},
+                },
+                "required": ["pattern"],
+            },
         },
     },
     {
@@ -29,8 +56,7 @@ TOOL_SCHEMAS: list[dict] = [
             "name": "edit_file",
             "description": (
                 "Replace one exact occurrence of old_string with new_string in a file. "
-                "Preferred over write_file for existing files: localized edits compose "
-                "with other agents' concurrent changes."
+                "Preferred over write_file for existing files."
             ),
             "parameters": {
                 "type": "object",
@@ -79,3 +105,6 @@ TOOL_SCHEMAS: list[dict] = [
         },
     },
 ]
+
+# Back-compat alias
+TOOL_SCHEMAS = FILE_TOOL_SCHEMAS

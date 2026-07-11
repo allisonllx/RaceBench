@@ -18,6 +18,7 @@ from pathlib import Path
 
 import yaml
 
+from harness.env import ENV_FILE, load_env
 from harness.models import OpenAIModel, ScriptedModel
 from harness.scripts import get_script
 from harness.task import TaskAgentSpec, load_task
@@ -32,7 +33,7 @@ def load_config(path: str) -> dict:
     cfg.setdefault("script_variant", "edit")
     cfg.setdefault("agent_counts", [2])
     cfg.setdefault("reps", 1)
-    cfg.setdefault("max_turns", 20)
+    cfg.setdefault("max_turns", 40)
     cfg.setdefault("lock_timeout_s", 30)
     cfg.setdefault("trial_timeout_s", 900)
     cfg.setdefault("budget", {})
@@ -79,11 +80,13 @@ async def main() -> int:
                         help="run each task with ONE agent doing all subtasks "
                              "(naive strategy) to measure the solo ceiling")
     args = parser.parse_args()
+    load_env()
     cfg = load_config(args.config)
 
     if cfg["mode"] == "openai" and not os.environ.get("OPENAI_API_KEY"):
-        print("OPENAI_API_KEY is not set. Export it, or use a scripted config "
-              "(runner/config.smoke.yaml) for an offline run.", file=sys.stderr)
+        print("OPENAI_API_KEY is not set. Add it to .env at the repo root "
+              f"({ENV_FILE}) or export it in your shell. For an offline run, "
+              "use runner/config.smoke.yaml.", file=sys.stderr)
         return 1
 
     run_id = cfg["run_id"] + ("-calibration" if args.calibrate else "")

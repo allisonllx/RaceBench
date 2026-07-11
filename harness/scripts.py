@@ -129,6 +129,60 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
                        "old_string": T2_TRUNCATE_OLD, "new_string": T2_TRUNCATE_NEW}),
         ("done", {"summary": "implemented truncate"}),
     ],
+    # t7 — schema rename + handler that reads live constant
+    ("t7_rw_canary", "agent-schema", "edit"): [
+        ("read_file", {"path": "schema/constants.py"}),
+        ("edit_file", {"path": "schema/constants.py",
+                       "old_string": 'STATUS_ACTIVE = "active"',
+                       "new_string": 'STATUS_ACTIVE = "enabled"'}),
+        ("done", {"summary": "renamed STATUS_ACTIVE to enabled"}),
+    ],
+    ("t7_rw_canary", "agent-handlers", "edit"): [
+        ("read_file", {"path": "schema/constants.py"}),
+        ("read_file", {"path": "handlers/report.py"}),
+        ("write_file", {"path": "handlers/report.py", "content": (
+            "from schema.constants import STATUS_ACTIVE\n\n\n"
+            "def filter_active(records):\n"
+            '    return [r for r in records if r.get("status") == STATUS_ACTIVE]\n\n\n'
+            "def summarize_active(records):\n"
+            '    return {"active_count": len(filter_active(records))}\n'
+        )}),
+        ("done", {"summary": "handlers use live STATUS_ACTIVE"}),
+    ],
+    # t8 — opposite-order edits (file_lock stress)
+    ("t8_livelock", "agent-ab", "edit"): [
+        ("edit_file", {"path": "alpha.py",
+                       "old_string": 'GREETING = "hi"',
+                       "new_string": 'GREETING = "hello"'}),
+        ("edit_file", {"path": "beta.py",
+                       "old_string": 'FAREWELL = "bye"',
+                       "new_string": 'FAREWELL = "goodbye"'}),
+        ("done", {"summary": "alpha then beta"}),
+    ],
+    ("t8_livelock", "agent-ba", "edit"): [
+        ("edit_file", {"path": "beta.py",
+                       "old_string": "COUNT = 1",
+                       "new_string": "COUNT = 2"}),
+        ("edit_file", {"path": "alpha.py",
+                       "old_string": 'VERSION = "0.1"',
+                       "new_string": 'VERSION = "0.2"'}),
+        ("done", {"summary": "beta then alpha"}),
+    ],
+    # t9 — provably disjoint packages (any stall is overhead)
+    ("t9_overhead", "agent-a", "edit"): [
+        ("write_file", {"path": "mod_a/mathops.py",
+                        "content": "def double(x):\n    return 2 * x\n"}),
+        ("write_file", {"path": "mod_a/textops.py",
+                        "content": 'def greet(name):\n    return f"hello {name}"\n'}),
+        ("done", {"summary": "mod_a features"}),
+    ],
+    ("t9_overhead", "agent-b", "edit"): [
+        ("write_file", {"path": "mod_b/mathops.py",
+                        "content": "def square(x):\n    return x * x\n"}),
+        ("write_file", {"path": "mod_b/textops.py",
+                        "content": 'def shout(name):\n    return f"{name}!".upper()\n'}),
+        ("done", {"summary": "mod_b features"}),
+    ],
 }
 
 

@@ -1,4 +1,4 @@
-"""Visible tests: the pre-existing behavior both features must preserve."""
+"""Visible tests: pre-existing behavior both features must preserve."""
 from cache import Cache
 
 

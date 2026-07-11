@@ -32,16 +32,16 @@ class NotifyStrategy(Strategy):
         self._mailboxes: dict[str, list[str]] = defaultdict(list)
 
     async def _coordinate_read(self, agent_id: str, relpath: str) -> str | None:
-        if not self.ws.exists(relpath):
+        if not self.ws.exists(relpath, agent_id=agent_id):
             return None
-        content = self.ws.read_file(relpath)
+        content = self.ws.read_file(relpath, agent_id=agent_id)
         for sym in file_symbols(content):
             self._read_sets[agent_id].add((relpath, sym))
         return content
 
     async def _coordinate_write(self, agent_id: str, relpath: str,
                                 mutation: Mutation) -> WriteOutcome:
-        outcome = await self._apply_to_current(relpath, mutation)
+        outcome = await self._apply_to_current(relpath, mutation, agent_id=agent_id)
         if not outcome.ok:
             return outcome
         for reader, reads in self._read_sets.items():

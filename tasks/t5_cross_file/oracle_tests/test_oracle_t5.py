@@ -1,6 +1,7 @@
-"""Hidden oracle: new interface landed AND the service is built on it."""
+"""Hidden oracle."""
 import pytest
 
+import db
 import models
 import services
 
@@ -8,6 +9,8 @@ import services
 def test_interface_changed():
     assert hasattr(models, "create_user"), "create_user missing"
     assert not hasattr(models, "make_user"), "old make_user must be removed"
+    assert hasattr(models.user, "create_user")
+    assert not hasattr(models.user, "make_user")
 
 
 def test_create_user_validates_email():
@@ -18,14 +21,14 @@ def test_create_user_validates_email():
 
 
 def test_register_uses_current_factory():
-    services._USERS.clear()
+    db.clear()
     user = services.register("bob", "bob@example.com")
     assert user["email"] == "bob@example.com"
     assert user["active"] is True
 
 
 def test_active_users():
-    services._USERS.clear()
+    db.clear()
     a = services.register("a", "a@x.com")
     b = services.register("b", "b@x.com")
     b["active"] = False
@@ -33,6 +36,6 @@ def test_active_users():
 
 
 def test_register_rejects_bad_email_via_factory():
-    services._USERS.clear()
+    db.clear()
     with pytest.raises(ValueError):
         services.register("evil", "no-at-sign")

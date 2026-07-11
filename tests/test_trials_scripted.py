@@ -109,3 +109,32 @@ async def test_metrics_row_shape(tmp_path):
     assert m["total_tokens"] > 0
     assert m["read_set_visibility"] == 1.0
     assert m["reads_observed"] >= 2
+
+
+# ---------------------------------------------------------------- t9 overhead (disjoint)
+
+async def test_t9_naive_correct_no_stalls(tmp_path):
+    result, log = await run_scripted("t9_overhead", "naive", "edit", tmp_path)
+    assert result.correct
+    metrics = trial_metrics(log)
+    assert metrics["stall_events"] == 0
+
+
+async def test_t9_file_lock_fp_stalls_are_overhead(tmp_path):
+    result, log = await run_scripted("t9_overhead", "file_lock", "edit", tmp_path)
+    assert result.correct
+    metrics = trial_metrics(log)
+    # disjoint packages — any stall is false-positive overhead
+    assert metrics["fp_stall_events"] == metrics["stall_events"]
+
+
+# ---------------------------------------------------------------- t7 / t8 scripted
+
+async def test_t7_composing_edits_correct(tmp_path):
+    result, _ = await run_scripted("t7_rw_canary", "naive", "edit", tmp_path)
+    assert result.correct
+
+
+async def test_t8_composing_edits_correct_under_naive(tmp_path):
+    result, _ = await run_scripted("t8_livelock", "naive", "edit", tmp_path)
+    assert result.correct

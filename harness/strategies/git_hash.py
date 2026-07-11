@@ -1,18 +1,4 @@
-"""MegaAgent-style git-hash optimistic concurrency.
-
-On read, the strategy snapshots the content the agent saw (equivalent to
-recording the commit hash: it pins the read version). On write, under a global
-mutex (as in MegaAgent), the agent's intended content is computed against its
-READ snapshot and three-way merged with whatever is currently on disk:
-
-    base   = content at the agent's last read
-    ours   = current disk content (other agents' landed writes)
-    theirs = agent's intended new content
-
-A clean merge lands and is committed; a conflicting merge is refused and the
-agent is told to re-read and integrate — the optimistic-concurrency retry cost
-this benchmark measures.
-"""
+"""MegaAgent-style git-hash optimistic concurrency (within an agent's tree)."""
 from __future__ import annotations
 
 import subprocess
@@ -20,10 +6,10 @@ import tempfile
 from pathlib import Path
 
 from harness.strategies.base import Mutation, Strategy, WriteOutcome, register
+from harness.symbols import changed_symbols
 
 
 def three_way_merge(base: str, ours: str, theirs: str) -> tuple[bool, str]:
-    """git merge-file; returns (clean, merged_content)."""
     with tempfile.TemporaryDirectory() as td:
         paths = {}
         for name, content in (("base", base), ("ours", ours), ("theirs", theirs)):
@@ -45,20 +31,20 @@ class GitHashStrategy(Strategy):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # (agent, path) -> content snapshot at last read
         self._read_base: dict[tuple[str, str], str] = {}
 
     async def _coordinate_read(self, agent_id: str, relpath: str) -> str | None:
-        if not self.ws.exists(relpath):
+        if not self.ws.exists(relpath, agent_id=agent_id):
             return None
-        content = self.ws.read_file(relpath)
+        content = self.ws.read_file(relpath, agent_id=agent_id)
         self._read_base[(agent_id, relpath)] = content
         return content
 
     async def _coordinate_write(self, agent_id: str, relpath: str,
                                 mutation: Mutation) -> WriteOutcome:
-        async with self._apply_lock:  # MegaAgent's global mutex over git ops
-            current = self.ws.read_file(relpath) if self.ws.exists(relpath) else None
+        async with self._apply_lock:
+            current = (self.ws.read_file(relpath, agent_id=agent_id)
+                       if self.ws.exists(relpath, agent_id=agent_id) else None)
             base = self._read_base.get((agent_id, relpath))
 
             if mutation.kind == "replace":
@@ -73,17 +59,17 @@ class GitHashStrategy(Strategy):
             else:
                 theirs = mutation.content
 
-            # new file, or agent never read it and file absent: plain write
             if current is None:
-                self.ws.write_file(relpath, theirs)
-                head = self.ws.commit_all(f"{agent_id} writes {relpath}")
+                self.ws.write_file(relpath, theirs, agent_id=agent_id)
+                head = self.ws.commit_all(f"{agent_id} writes {relpath}",
+                                          agent_id=agent_id)
                 self._read_base[(agent_id, relpath)] = theirs
                 return WriteOutcome(status="applied", changed=set(), message=head[:12])
 
             effective_base = base if base is not None else current
 
             if effective_base == current:
-                merged, clean = theirs, True  # no concurrent change since read
+                merged, clean = theirs, True
             else:
                 clean, merged = three_way_merge(effective_base, current, theirs)
 
@@ -101,10 +87,10 @@ class GitHashStrategy(Strategy):
             if effective_base != current:
                 self.log.log("coord", strategy=self.name, action="auto_merge",
                              agent=agent_id, path=relpath)
-            self.ws.write_file(relpath, merged)
-            head = self.ws.commit_all(f"{agent_id} writes {relpath}")
+            self.ws.write_file(relpath, merged, agent_id=agent_id)
+            head = self.ws.commit_all(f"{agent_id} writes {relpath}",
+                                      agent_id=agent_id)
             self._read_base[(agent_id, relpath)] = merged
-            from harness.symbols import changed_symbols
             status = "merged" if effective_base != current else "applied"
             return WriteOutcome(status=status, message=head[:12],
                                 changed=changed_symbols(current, merged))

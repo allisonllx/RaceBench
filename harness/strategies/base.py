@@ -111,10 +111,12 @@ class Strategy(ABC):
 
     # ---- shared helper ----------------------------------------------------
 
-    async def _apply_to_current(self, relpath: str, mutation: Mutation) -> WriteOutcome:
+    async def _apply_to_current(self, relpath: str, mutation: Mutation,
+                                agent_id: str | None = None) -> WriteOutcome:
         """Apply a mutation against current disk content (atomic, uncoordinated)."""
         async with self._apply_lock:
-            base = self.ws.read_file(relpath) if self.ws.exists(relpath) else None
+            base = (self.ws.read_file(relpath, agent_id=agent_id)
+                    if self.ws.exists(relpath, agent_id=agent_id) else None)
             new = mutation.apply(base)
             if new is None:
                 return WriteOutcome(
@@ -122,7 +124,7 @@ class Strategy(ABC):
                     message="old_string not found in current file content "
                             "(the file may have changed since you read it — re-read it)",
                 )
-            self.ws.write_file(relpath, new)
+            self.ws.write_file(relpath, new, agent_id=agent_id)
             return WriteOutcome(status="applied",
                                 changed=changed_symbols(base or "", new))
 

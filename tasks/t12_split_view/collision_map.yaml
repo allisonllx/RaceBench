@@ -1,0 +1,8 @@
+failure_mode: split_view_divergence
+collision_points:
+  - file: lib/api.py
+    symbols: [Greeter]
+    agents: [agent-core, agent-ext]
+expected_anomaly: >
+  Worktree isolation hides concurrent edits until end merge. Naive merge may
+  conflict or drop one method; oracle requires both greet and farewell.

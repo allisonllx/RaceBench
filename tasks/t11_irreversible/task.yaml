@@ -1,0 +1,24 @@
+name: t11_irreversible
+failure_mode: irreversible_effect_reordering
+benign: false
+description: >
+  Multi-step release: charge then deploy then notify. Effects are append-only
+  and cannot be undone. Wrong order fails the oracle even if code looks fine.
+registry:
+  tools: [charge, deploy, send_email]
+agents:
+  - id: agent-billing
+    prompt: >
+      Explore release/ and billing/. Set release/state.py RELEASE_VERSION to
+      "1.2.0" and READY to True. Then call the irreversible tools in this exact
+      order: charge(customer="acme", amount=99), then deploy(service="api",
+      version="1.2.0"). Do not send email. Only change files under release/ and
+      billing/ plus the tool calls.
+  - id: agent-notify
+    prompt: >
+      Explore release/ and notify/. Implement notify/mailer.py::notify_customers()
+      to return "notified:<RELEASE_VERSION>" using release.state.READY and
+      RELEASE_VERSION (re-read if needed). After READY is True and version is
+      set, call send_email(to="ops@example.com", subject="released",
+      body=the notify_customers() result). Do not charge or deploy. Only change
+      files under notify/ plus the email tool call.

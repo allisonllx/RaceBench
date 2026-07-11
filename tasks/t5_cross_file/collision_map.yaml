@@ -1,17 +1,14 @@
 failure_mode: cross_file_dependency
 collision_points:
-  - file: models.py
+  - file: models/user.py
     symbol: make_user -> create_user
     agents: [agent-models]
     kind: interface_change
-  - file: services.py
+  - file: services/registration.py
     symbol: register
     agents: [agent-services]
     kind: stale_premise_consumer
 expected_anomaly: >
-  No same-file write ever happens, so naive, file_lock, git_hash, and
-  ast_scope all report zero conflicts — while agent-services may ship code
-  calling a function that no longer exists. The failure is only visible to a
-  mechanism that tracks cross-file read dependencies (none of the four under
-  test). Recovery depends on the agent re-running tests after the interface
-  change lands.
+  No same-file write ever happens. Services may ship a call to make_user after
+  models removed it. Multi-package layout increases the chance of a stale read
+  of models/__init__.py.

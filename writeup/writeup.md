@@ -43,25 +43,28 @@ art — Grit, Phantom, Weave, and arXiv:2603.24284 all do structural conflict
 detection — but none has been measured against alternatives on fixed tasks;
 that neutral measurement is our contribution, not the mechanism.
 
-Six tasks, one per failure mode from the taxonomy in arXiv:2606.17182 and
-CoAgent: stale-read/lost-update, **benign overlap** (disjoint functions, same
-file — correct behavior is zero coordination), write-write clobber, a 4-agent
-causal cascade, a cross-file interface change (invisible to all four
-file-scoped strategies — by design, to measure the visibility gap), and a
-CooperBench-style two-feature task. Each ships a collision map, a hidden
-pytest oracle, and a reference solution proving the oracle satisfiable.
+Twelve tasks cover the taxonomy from arXiv:2606.17182 / CoAgent plus three
+harness-extension modes. Core modes: stale-read/lost-update, **benign
+overlap** (disjoint functions, same file — correct behavior is zero
+coordination), write-write clobber, 4-agent causal cascade, cross-file
+interface change (invisible to file-scoped strategies), CooperBench-style
+feature pair, antidependency/rw-canary, lock livelock stress, and
+overhead-masks-benefit (disjoint packages). Extension modes: phantom-tool
+registry drift, irreversible effect reordering, and split-view worktree
+divergence. Each ships a collision map, hidden pytest oracle, and reference
+solution. The paid real-model grid has not been re-run on the expanded suite
+yet — offline scripted tests + reference oracles only for this expansion.
 
 **Ruled out and why:** a full CRDT substrate (Yjs infrastructure exceeds the
 window; CodeCRDT's own results are confounded by 82–189% code-volume
-inflation); CoAgent's full MTPO (its mechanical undo/reorder requires a
-registry of saga-invertible tools); 8+ agents (cost). CooperBench
-(arXiv:2601.13295) already covers the
+inflation); CoAgent's full MTPO (saga inverses beyond our effect loggers);
+8+ agents (cost). CooperBench (arXiv:2601.13295) already covers the
 *communication* axis with 652 tasks; we hold communication at zero and vary
 the *mechanism* — complementary, not competing.
 
 ## 3. Evidence
 
-Mechanics are pinned by 40 automated tests plus deterministic scripted-agent
+Mechanics are pinned by 72 automated tests plus deterministic scripted-agent
 trials (no API needed, committed under `results/smoke-*`):
 
 - naive + stale whole-file writes silently loses one agent's feature
@@ -91,7 +94,13 @@ capped; every trial runs in a throwaway git workspace.
 
 ## 5. Honesty & Trajectory
 
-Known limits: (1) six purpose-built tasks are a probe suite that isolates
+**Taxonomy coverage (11 modes → tasks):** stale read → t1; benign overlap →
+t2; write-write → t3; cascade → t4; cross-file → t5; feature pair → t6;
+antidependency → t7; livelock → t8; overhead confound → t9; phantom tool →
+t10; irreversible effects → t11; split-view → t12. Grid numbers above still
+reflect the pre-expansion six-task run until the paid grid is re-executed.
+
+Known limits: (1) twelve purpose-built tasks are a probe suite that isolates
 failure modes, not a general benchmark — external validity is bounded and we
 say so. (2) Strategies are our minimal reimplementations; results
 characterize the *mechanism class*, not the cited systems. (3) Symbol
@@ -100,11 +109,13 @@ over-serializes within classes — visible in t6 and reported, not hidden.
 (4) Scripted-agent results validate mechanics only; all headline claims come
 from real-model trials with the event logs committed. (5) The solo-calibration
 ceiling means results say little about tasks models can't do alone.
+(6) Split-view merge is sequential git merge (force-integrate on conflict);
+we do not claim a production CRDT/OT integrator.
 
-Next: port 2–3 real CooperBench tasks for external validity; a second model
-family to test mechanism × model interaction; cascade tasks at 8 agents; a
-cross-file dependency graph (Phantom-style) so t4/t5's visibility gap gets a
-mechanism that can actually see it.
+Next: re-run the paid grid on t1–t12; port 2–3 real CooperBench tasks for
+external validity; a second model family; cascade at 8 agents; deepen
+`ast_scope` with a cross-file dep graph so t4/t5's visibility gap gets a
+mechanism that can see it.
 
 ---
 

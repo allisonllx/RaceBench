@@ -9,7 +9,7 @@ from pathlib import Path
 
 from harness.agent import Agent
 from harness.events import EventLogger
-from harness.models import ModelClient
+from harness.registry import ToolRegistry
 from harness.strategies import get_strategy
 from harness.task import Task
 from harness.workspace import Workspace
@@ -21,7 +21,7 @@ class TrialConfig:
     n_agents: int
     rep: int = 0
     model_name: str = "scripted"
-    max_turns: int = 20
+    max_turns: int = 40
     lock_timeout_s: float = 30.0
     trial_timeout_s: float = 900.0
     workdir: Path = Path(".trial_workspaces")
@@ -45,24 +45,32 @@ class TrialResult:
 
 async def run_trial(task: Task, cfg: TrialConfig,
                     model_factory, log_path: Path) -> TrialResult:
-    """model_factory(agent_spec) -> ModelClient, so scripted mode can hand each
-    agent its own script and API mode can share one client config."""
     logger = EventLogger(log_path)
     ws_dir = Path(cfg.workdir) / f"{task.name}-{cfg.trial_id}"
-    ws = Workspace.create(task.repo, ws_dir)
     agents_specs = task.agent_subset(cfg.n_agents)
+    agent_ids = [a.id for a in agents_specs]
+
+    ws = Workspace.create(
+        task.repo, ws_dir,
+        isolation=task.isolation,
+        agent_ids=agent_ids,
+    )
 
     logger.log("trial_start", task=task.name, failure_mode=task.failure_mode,
                benign=task.benign, strategy=cfg.strategy, n_agents=cfg.n_agents,
-               rep=cfg.rep, model=cfg.model_name,
-               agent_ids=[a.id for a in agents_specs])
+               rep=cfg.rep, model=cfg.model_name, isolation=task.isolation,
+               agent_ids=agent_ids)
 
     strategy = get_strategy(cfg.strategy)(
-        ws, logger, [a.id for a in agents_specs], lock_timeout_s=cfg.lock_timeout_s)
+        ws, logger, agent_ids, lock_timeout_s=cfg.lock_timeout_s)
+
+    registry = None
+    if task.registry:
+        registry = ToolRegistry(ws, logger, task.registry)
 
     agents = [
         Agent(spec.id, spec.prompt, model_factory(spec), strategy, ws, logger,
-              max_turns=cfg.max_turns)
+              max_turns=cfg.max_turns, registry=registry)
         for spec in agents_specs
     ]
 
@@ -77,7 +85,11 @@ async def run_trial(task: Task, cfg: TrialConfig,
         results = []
     wall = time.monotonic() - t0
 
-    # evaluate against the hidden oracle
+    if task.isolation == "worktree":
+        merge = ws.merge_agent_trees()
+        logger.log("worktree_merge", ok=merge.ok, conflicts=merge.conflicts,
+                   message=merge.message)
+
     oracle_dst = ws.root / "oracle_tests"
     if oracle_dst.exists():
         shutil.rmtree(oracle_dst)
