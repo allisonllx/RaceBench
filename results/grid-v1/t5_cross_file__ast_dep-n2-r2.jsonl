@@ -1,0 +1,65 @@
+{"ts": 0.2533, "event": "trial_start", "task": "t5_cross_file", "failure_mode": "cross_file_dependency", "benign": false, "strategy": "ast_dep", "n_agents": 2, "rep": 2, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-models", "agent-services"]}
+{"ts": 1.4845, "event": "llm_usage", "agent": "agent-models", "turn": 1, "prompt_tokens": 656, "completion_tokens": 19}
+{"ts": 1.4847, "event": "tool_call", "agent": "agent-models", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 1.8878, "event": "llm_usage", "agent": "agent-services", "turn": 1, "prompt_tokens": 639, "completion_tokens": 19}
+{"ts": 1.8882, "event": "tool_call", "agent": "agent-services", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.5068, "event": "llm_usage", "agent": "agent-models", "turn": 2, "prompt_tokens": 732, "completion_tokens": 19}
+{"ts": 2.5068, "event": "tool_call", "agent": "agent-models", "turn": 2, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 2.5108, "event": "read", "agent": "agent-models", "path": "models/user.py", "found": true, "size": 127}
+{"ts": 2.8905, "event": "llm_usage", "agent": "agent-services", "turn": 2, "prompt_tokens": 715, "completion_tokens": 20}
+{"ts": 2.8907, "event": "tool_call", "agent": "agent-services", "turn": 2, "tool": "read_file", "args": {"path": "services/registration.py"}}
+{"ts": 2.8916, "event": "read", "agent": "agent-services", "path": "services/registration.py", "found": true, "size": 248}
+{"ts": 3.7063, "event": "llm_usage", "agent": "agent-models", "turn": 3, "prompt_tokens": 792, "completion_tokens": 21}
+{"ts": 3.7065, "event": "tool_call", "agent": "agent-models", "turn": 3, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 3.7075, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": true, "size": 118}
+{"ts": 4.2452, "event": "llm_usage", "agent": "agent-services", "turn": 3, "prompt_tokens": 799, "completion_tokens": 20}
+{"ts": 4.2455, "event": "tool_call", "agent": "agent-services", "turn": 3, "tool": "read_file", "args": {"path": "services/queries.py"}}
+{"ts": 4.2477, "event": "read", "agent": "agent-services", "path": "services/queries.py", "found": true, "size": 190}
+{"ts": 4.6227, "event": "llm_usage", "agent": "agent-models", "turn": 4, "prompt_tokens": 851, "completion_tokens": 20}
+{"ts": 4.6228, "event": "tool_call", "agent": "agent-models", "turn": 4, "tool": "read_file", "args": {"path": "models/validators.py"}}
+{"ts": 4.6236, "event": "read", "agent": "agent-models", "path": "models/validators.py", "found": true, "size": 127}
+{"ts": 5.277, "event": "llm_usage", "agent": "agent-services", "turn": 4, "prompt_tokens": 870, "completion_tokens": 21}
+{"ts": 5.2772, "event": "tool_call", "agent": "agent-services", "turn": 4, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 5.3343, "event": "read", "agent": "agent-services", "path": "models/__init__.py", "found": true, "size": 118}
+{"ts": 6.4532, "event": "llm_usage", "agent": "agent-services", "turn": 5, "prompt_tokens": 929, "completion_tokens": 19}
+{"ts": 6.4534, "event": "tool_call", "agent": "agent-services", "turn": 5, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 6.4545, "event": "read", "agent": "agent-services", "path": "models/user.py", "found": true, "size": 127}
+{"ts": 7.4128, "event": "llm_usage", "agent": "agent-services", "turn": 6, "prompt_tokens": 989, "completion_tokens": 21}
+{"ts": 7.4129, "event": "tool_call", "agent": "agent-services", "turn": 6, "tool": "read_file", "args": {"path": "db/__init__.py"}}
+{"ts": 7.4135, "event": "read", "agent": "agent-services", "path": "db/__init__.py", "found": true, "size": 118}
+{"ts": 8.4791, "event": "llm_usage", "agent": "agent-models", "turn": 5, "prompt_tokens": 912, "completion_tokens": 290}
+{"ts": 8.4792, "event": "tool_call", "agent": "agent-models", "turn": 5, "tool": "edit_file", "args": {"path": "models/user.py", "old_string": "\"\"\"User factory functions.\"\"\"\n\n\ndef make_user(name):\n    \"\"\"Create a user record.\"\"\"\n    return {\"name\": name, \"active\": True}\n", "new_string": "\"\"\"User factory functions.\"\"\"\n\nfrom models.validators import looks_like_email\n\n\ndef create_user(name, email):\n    \"\"\"Create a user record with validated email.\"\"\"\n    if not looks_like_email(email):\n "}}
+{"ts": 8.4803, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-models", "reader": "agent-services", "path": "models/user.py", "symbols": ["models/user.py:<module>", "models/user.py:make_user"]}
+{"ts": 8.488, "event": "write", "agent": "agent-models", "path": "models/user.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["<module>", "create_user", "make_user"], "message": ""}
+{"ts": 8.4885, "event": "llm_usage", "agent": "agent-services", "turn": 7, "prompt_tokens": 1052, "completion_tokens": 19}
+{"ts": 8.4885, "event": "tool_call", "agent": "agent-services", "turn": 7, "tool": "read_file", "args": {"path": "db/store.py"}}
+{"ts": 8.4889, "event": "read", "agent": "agent-services", "path": "db/store.py", "found": true, "size": 183}
+{"ts": 9.6423, "event": "llm_usage", "agent": "agent-services", "turn": 8, "prompt_tokens": 1128, "completion_tokens": 22}
+{"ts": 9.6424, "event": "tool_call", "agent": "agent-services", "turn": 8, "tool": "read_file", "args": {"path": "tests/test_services_smoke.py"}}
+{"ts": 9.6432, "event": "read", "agent": "agent-services", "path": "tests/test_services_smoke.py", "found": true, "size": 474}
+{"ts": 10.1797, "event": "llm_usage", "agent": "agent-models", "turn": 6, "prompt_tokens": 1084, "completion_tokens": 101}
+{"ts": 10.1798, "event": "tool_call", "agent": "agent-models", "turn": 6, "tool": "edit_file", "args": {"path": "models/__init__.py", "old_string": "\"\"\"Models package — re-exports the public user factory.\"\"\"\nfrom models.user import make_user\n\n__all__ = [\"make_user\"]\n", "new_string": "\"\"\"Models package — re-exports the public user factory.\"\"\"\nfrom models.user import create_user\n\n__all__ = [\"create_user\"]\n"}}
+{"ts": 10.1805, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-models", "reader": "agent-services", "path": "models/__init__.py", "symbols": ["models/__init__.py:<module>"]}
+{"ts": 10.185, "event": "write", "agent": "agent-models", "path": "models/__init__.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 11.4397, "event": "llm_usage", "agent": "agent-models", "turn": 7, "prompt_tokens": 1201, "completion_tokens": 23}
+{"ts": 11.4398, "event": "tool_call", "agent": "agent-models", "turn": 7, "tool": "grep", "args": {"pattern": "make_user", "glob": "**/*"}}
+{"ts": 11.4437, "event": "search", "agent": "agent-models", "kind": "grep", "pattern": "make_user", "n": 0}
+{"ts": 12.2996, "event": "llm_usage", "agent": "agent-services", "turn": 9, "prompt_tokens": 1272, "completion_tokens": 155}
+{"ts": 12.2996, "event": "tool_call", "agent": "agent-services", "turn": 9, "tool": "read_file", "args": {"path": "services/__init__.py"}}
+{"ts": 12.3001, "event": "read", "agent": "agent-services", "path": "services/__init__.py", "found": true, "size": 312}
+{"ts": 12.708, "event": "llm_usage", "agent": "agent-models", "turn": 8, "prompt_tokens": 1237, "completion_tokens": 13}
+{"ts": 12.7082, "event": "tool_call", "agent": "agent-models", "turn": 8, "tool": "run_tests", "args": {}}
+{"ts": 12.9823, "event": "run_tests", "agent": "agent-models", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 14.4502, "event": "llm_usage", "agent": "agent-models", "turn": 9, "prompt_tokens": 1280, "completion_tokens": 35}
+{"ts": 14.4503, "event": "tool_call", "agent": "agent-models", "turn": 9, "tool": "done", "args": {"summary": "Replaced make_user with create_user that validates email and updated package exports; removed old make_user."}}
+{"ts": 14.4503, "event": "agent_done_coord", "agent": "agent-models"}
+{"ts": 14.4503, "event": "agent_done", "agent": "agent-models", "status": "done", "turns": 9, "prompt_tokens": 8745, "completion_tokens": 541}
+{"ts": 21.3994, "event": "llm_usage", "agent": "agent-services", "turn": 10, "prompt_tokens": 1374, "completion_tokens": 713}
+{"ts": 21.3996, "event": "tool_call", "agent": "agent-services", "turn": 10, "tool": "edit_file", "args": {"path": "services/registration.py", "old_string": "def register(name, email):\n    \"\"\"Create a user via the user-factory function models provides, append it\n    to the store, and return it.\"\"\"\n    raise NotImplementedError\n", "new_string": "def register(name, email):\n    \"\"\"Create a user via the user-factory function models provides, append it\n    to the store, and return it.\"\"\"\n    # Create the user record using the models package facto"}}
+{"ts": 21.4058, "event": "write", "agent": "agent-services", "path": "services/registration.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["register"], "message": ""}
+{"ts": 23.4202, "event": "llm_usage", "agent": "agent-services", "turn": 11, "prompt_tokens": 1585, "completion_tokens": 108}
+{"ts": 23.4203, "event": "tool_call", "agent": "agent-services", "turn": 11, "tool": "edit_file", "args": {"path": "services/queries.py", "old_string": "def active_users():\n    \"\"\"Return the list of stored users whose \"active\" value is True.\"\"\"\n    raise NotImplementedError\n", "new_string": "def active_users():\n    \"\"\"Return the list of stored users whose \"active\" value is True.\"\"\"\n    return [u for u in all_users() if u.get(\"active\") is True]\n"}}
+{"ts": 23.4253, "event": "write", "agent": "agent-services", "path": "services/queries.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["active_users"], "message": ""}
+{"ts": 24.5223, "event": "llm_usage", "agent": "agent-services", "turn": 12, "prompt_tokens": 1709, "completion_tokens": 13}
+{"ts": 24.5223, "event": "tool_call", "agent": "agent-services", "turn": 12, "tool": "run_tests", "args": {}}
+{"ts": 24.8138, "event": "run_tests", "agent": "agent-services", "passed": 1, "failed": 1, "errored": 0}

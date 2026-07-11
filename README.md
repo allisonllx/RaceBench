@@ -36,6 +36,17 @@ original authors' systems.
 6. `notify` — CoAgent-lite advisory notifications: writes land immediately; agents whose
    read set intersects a landed write get a notice injected into context and self-judge.
 
+### Adding your strategy
+
+The benchmark is built to compare **your** coordination mechanism on the same
+tasks and metrics. Implement two methods (`_coordinate_read`, `_coordinate_write`),
+register with `@register`, import the module in `harness/strategies/__init__.py`,
+and add the name to `strategies:` in a runner config. Offline smoke test with
+`runner/config.smoke.yaml` (scripted agents, no API key).
+
+Full checklist, template, event-schema notes, and testing patterns:
+[`docs/adding-a-strategy.md`](docs/adding-a-strategy.md).
+
 Ruled out for the hackathon window (with reasons, see `writeup/`): full CRDT substrate,
 CoAgent's full MTPO with serialization pre-order and saga inverses, 8+ agent scale;
 lock-on-write-only `file_lock` and `git_hash`+worktree hybrids (redundant with
@@ -93,6 +104,8 @@ python -m runner.run_grid --config runner/config.smoke.yaml
 # real grid (needs OPENAI_API_KEY in .env or your shell)
 # echo 'OPENAI_API_KEY=sk-...' > .env
 python -m runner.run_grid --config runner/config.example.yaml
+# optional: override concurrent trials (config default: parallel: 4)
+# python -m runner.run_grid --config runner/config.example.yaml --parallel 8
 
 # report + plots from event logs
 python -m analysis.make_report results/<run_id>
@@ -105,6 +118,7 @@ harness/     agent loop, coordination layer, strategies/, event log
 tasks/       one dir per task: task.yaml, repo/, oracle_tests/, collision_map.yaml
 runner/      grid configs, orchestrator, cost guardrails
 analysis/    metrics computation, plots, report notebook
+docs/        contributor guides (e.g. adding-a-strategy.md)
 results/     committed JSONL event logs (the reproducibility artifact)
 writeup/     five-pillar write-up + demo video script
 ```

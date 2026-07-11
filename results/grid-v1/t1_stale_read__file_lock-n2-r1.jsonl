@@ -1,0 +1,38 @@
+{"ts": 0.1736, "event": "trial_start", "task": "t1_stale_read", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "file_lock", "n_agents": 2, "rep": 1, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 1.7268, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 641, "completion_tokens": 30}
+{"ts": 1.7269, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "grep", "args": {"pattern": "DEFAULTS", "glob": "**/*.py"}}
+{"ts": 1.7293, "event": "search", "agent": "agent-retries", "kind": "grep", "pattern": "DEFAULTS", "n": 7}
+{"ts": 1.7323, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 639, "completion_tokens": 30}
+{"ts": 1.7323, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "grep", "args": {"pattern": "DEFAULTS", "glob": "**/*.py"}}
+{"ts": 1.7338, "event": "search", "agent": "agent-timeout", "kind": "grep", "pattern": "DEFAULTS", "n": 7}
+{"ts": 2.7079, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 780, "completion_tokens": 18}
+{"ts": 2.708, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 2.7083, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 842}
+{"ts": 2.8609, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 782, "completion_tokens": 18}
+{"ts": 2.861, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 2.8611, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-retries", "path": "config.py", "holder": "agent-timeout"}
+{"ts": 11.54, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 1002, "completion_tokens": 753}
+{"ts": 11.5403, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "edit_file", "args": {"path": "config.py", "old_string": "\"\"\"Application configuration with validated defaults.\"\"\"\n\nDEFAULTS = {\n    \"host\": \"localhost\",\n    \"port\": 8080,\n}\n\n\ndef get_config(overrides=None):\n    \"\"\"Return the effective config: DEFAULTS updat", "new_string": "\"\"\"Application configuration with validated defaults.\"\"\"\n\nDEFAULTS = {\n    \"host\": \"localhost\",\n    \"port\": 8080,\n    \"timeout\": 30.0,\n}\n\n\ndef get_config(overrides=None):\n    \"\"\"Return the effective c"}}
+{"ts": 11.5456, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 13.6308, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 1573, "completion_tokens": 20}
+{"ts": 13.6311, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "read_file", "args": {"path": "tests/test_config.py"}}
+{"ts": 13.632, "event": "read", "agent": "agent-timeout", "path": "tests/test_config.py", "found": true, "size": 458}
+{"ts": 14.7714, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 1716, "completion_tokens": 13}
+{"ts": 14.7716, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 15.1194, "event": "run_tests", "agent": "agent-timeout", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 16.4848, "event": "llm_usage", "agent": "agent-timeout", "turn": 6, "prompt_tokens": 1755, "completion_tokens": 32}
+{"ts": 16.4849, "event": "tool_call", "agent": "agent-timeout", "turn": 6, "tool": "done", "args": {"summary": "Added 'timeout' default to DEFAULTS and validation to ensure positive numeric timeout values."}}
+{"ts": 16.485, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 16.485, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 6, "prompt_tokens": 7465, "completion_tokens": 866}
+{"ts": 16.4855, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 1014}
+{"ts": 28.1965, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 1050, "completion_tokens": 854}
+{"ts": 28.1967, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "edit_file", "args": {"path": "config.py", "old_string": "\"\"\"Application configuration with validated defaults.\"\"\"\n\nDEFAULTS = {\n    \"host\": \"localhost\",\n    \"port\": 8080,\n    \"timeout\": 30.0,\n}\n\n\ndef get_config(overrides=None):\n    \"\"\"Return the effective c", "new_string": "\"\"\"Application configuration with validated defaults.\"\"\"\n\nDEFAULTS = {\n    \"host\": \"localhost\",\n    \"port\": 8080,\n    \"timeout\": 30.0,\n    \"retries\": 3,\n}\n\n\ndef get_config(overrides=None):\n    \"\"\"Retu"}}
+{"ts": 28.1999, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 29.4763, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 1722, "completion_tokens": 13}
+{"ts": 29.4764, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 29.8164, "event": "run_tests", "agent": "agent-retries", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 31.3832, "event": "llm_usage", "agent": "agent-retries", "turn": 5, "prompt_tokens": 1761, "completion_tokens": 38}
+{"ts": 31.3833, "event": "tool_call", "agent": "agent-retries", "turn": 5, "tool": "done", "args": {"summary": "Added 'retries' default to DEFAULTS and validation ensuring non-negative int; all tests pass (4 passed)."}}
+{"ts": 31.3834, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 31.3834, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 5, "prompt_tokens": 5956, "completion_tokens": 953}
+{"ts": 31.6657, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 31.17, "prompt_tokens": 13421, "completion_tokens": 1819, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

@@ -1,0 +1,219 @@
+{"ts": 0.3128, "event": "trial_start", "task": "t5_cross_file", "failure_mode": "cross_file_dependency", "benign": false, "strategy": "file_lock", "n_agents": 2, "rep": 4, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-models", "agent-services"]}
+{"ts": 1.9436, "event": "llm_usage", "agent": "agent-services", "turn": 1, "prompt_tokens": 639, "completion_tokens": 19}
+{"ts": 1.9436, "event": "tool_call", "agent": "agent-services", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.4766, "event": "llm_usage", "agent": "agent-models", "turn": 1, "prompt_tokens": 656, "completion_tokens": 83}
+{"ts": 2.4767, "event": "tool_call", "agent": "agent-models", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.9322, "event": "llm_usage", "agent": "agent-services", "turn": 2, "prompt_tokens": 715, "completion_tokens": 20}
+{"ts": 2.9325, "event": "tool_call", "agent": "agent-services", "turn": 2, "tool": "read_file", "args": {"path": "services/registration.py"}}
+{"ts": 2.9333, "event": "read", "agent": "agent-services", "path": "services/registration.py", "found": true, "size": 248}
+{"ts": 3.8413, "event": "llm_usage", "agent": "agent-models", "turn": 2, "prompt_tokens": 732, "completion_tokens": 19}
+{"ts": 3.8414, "event": "tool_call", "agent": "agent-models", "turn": 2, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 3.8417, "event": "read", "agent": "agent-models", "path": "models/user.py", "found": true, "size": 127}
+{"ts": 3.886, "event": "llm_usage", "agent": "agent-services", "turn": 3, "prompt_tokens": 799, "completion_tokens": 20}
+{"ts": 3.8861, "event": "tool_call", "agent": "agent-services", "turn": 3, "tool": "read_file", "args": {"path": "services/queries.py"}}
+{"ts": 3.8863, "event": "read", "agent": "agent-services", "path": "services/queries.py", "found": true, "size": 190}
+{"ts": 4.9258, "event": "llm_usage", "agent": "agent-services", "turn": 4, "prompt_tokens": 870, "completion_tokens": 21}
+{"ts": 4.9259, "event": "tool_call", "agent": "agent-services", "turn": 4, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 4.9263, "event": "read", "agent": "agent-services", "path": "models/__init__.py", "found": true, "size": 118}
+{"ts": 4.9328, "event": "llm_usage", "agent": "agent-models", "turn": 3, "prompt_tokens": 792, "completion_tokens": 21}
+{"ts": 4.9328, "event": "tool_call", "agent": "agent-models", "turn": 3, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 4.9329, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 6.1139, "event": "llm_usage", "agent": "agent-services", "turn": 5, "prompt_tokens": 929, "completion_tokens": 19}
+{"ts": 6.114, "event": "tool_call", "agent": "agent-services", "turn": 5, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 6.1141, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-services", "path": "models/user.py", "holder": "agent-models"}
+{"ts": 34.9337, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.001}
+{"ts": 34.9339, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 36.0864, "event": "llm_usage", "agent": "agent-models", "turn": 4, "prompt_tokens": 839, "completion_tokens": 20}
+{"ts": 36.0866, "event": "tool_call", "agent": "agent-models", "turn": 4, "tool": "read_file", "args": {"path": "models/validators.py"}}
+{"ts": 36.0887, "event": "read", "agent": "agent-models", "path": "models/validators.py", "found": true, "size": 127}
+{"ts": 36.1152, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-services", "path": "models/user.py", "waited_s": 30.001}
+{"ts": 36.1152, "event": "read", "agent": "agent-services", "path": "models/user.py", "found": false, "size": 0}
+{"ts": 37.4148, "event": "llm_usage", "agent": "agent-services", "turn": 6, "prompt_tokens": 972, "completion_tokens": 13}
+{"ts": 37.4149, "event": "tool_call", "agent": "agent-services", "turn": 6, "tool": "list_files", "args": {}}
+{"ts": 38.4124, "event": "llm_usage", "agent": "agent-models", "turn": 5, "prompt_tokens": 900, "completion_tokens": 91}
+{"ts": 38.4125, "event": "tool_call", "agent": "agent-models", "turn": 5, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 38.4127, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 39.0132, "event": "llm_usage", "agent": "agent-services", "turn": 7, "prompt_tokens": 1048, "completion_tokens": 19}
+{"ts": 39.0133, "event": "tool_call", "agent": "agent-services", "turn": 7, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 39.0135, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-services", "path": "models/user.py", "holder": "agent-models"}
+{"ts": 68.4139, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.001}
+{"ts": 68.414, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 69.0148, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-services", "path": "models/user.py", "waited_s": 30.001}
+{"ts": 69.015, "event": "read", "agent": "agent-services", "path": "models/user.py", "found": false, "size": 0}
+{"ts": 70.3773, "event": "llm_usage", "agent": "agent-models", "turn": 6, "prompt_tokens": 947, "completion_tokens": 30}
+{"ts": 70.3774, "event": "tool_call", "agent": "agent-models", "turn": 6, "tool": "grep", "args": {"pattern": "make_user", "glob": "**/*.py"}}
+{"ts": 70.3843, "event": "search", "agent": "agent-models", "kind": "grep", "pattern": "make_user", "n": 3}
+{"ts": 70.4641, "event": "llm_usage", "agent": "agent-services", "turn": 8, "prompt_tokens": 1091, "completion_tokens": 25}
+{"ts": 70.4642, "event": "tool_call", "agent": "agent-services", "turn": 8, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 70.4642, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-services", "path": "models/user.py", "holder": "agent-models"}
+{"ts": 71.9232, "event": "llm_usage", "agent": "agent-models", "turn": 7, "prompt_tokens": 1022, "completion_tokens": 21}
+{"ts": 71.9233, "event": "tool_call", "agent": "agent-models", "turn": 7, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 71.9235, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 100.4653, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-services", "path": "models/user.py", "waited_s": 30.001}
+{"ts": 100.4654, "event": "read", "agent": "agent-services", "path": "models/user.py", "found": false, "size": 0}
+{"ts": 103.4871, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 31.564}
+{"ts": 103.4872, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 103.4917, "event": "llm_usage", "agent": "agent-services", "turn": 9, "prompt_tokens": 1134, "completion_tokens": 20}
+{"ts": 103.4918, "event": "tool_call", "agent": "agent-services", "turn": 9, "tool": "read_file", "args": {"path": "models/validators.py"}}
+{"ts": 103.492, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-services", "path": "models/validators.py", "holder": "agent-models"}
+{"ts": 105.1169, "event": "llm_usage", "agent": "agent-models", "turn": 8, "prompt_tokens": 1069, "completion_tokens": 27}
+{"ts": 105.1183, "event": "tool_call", "agent": "agent-models", "turn": 8, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 105.1255, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 133.4976, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-services", "path": "models/validators.py", "waited_s": 30.005}
+{"ts": 133.4982, "event": "read", "agent": "agent-services", "path": "models/validators.py", "found": false, "size": 0}
+{"ts": 135.1222, "event": "llm_usage", "agent": "agent-services", "turn": 10, "prompt_tokens": 1179, "completion_tokens": 21}
+{"ts": 135.1223, "event": "tool_call", "agent": "agent-services", "turn": 10, "tool": "read_file", "args": {"path": "db/__init__.py"}}
+{"ts": 135.1236, "event": "read", "agent": "agent-services", "path": "db/__init__.py", "found": true, "size": 118}
+{"ts": 135.1278, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.002}
+{"ts": 135.1278, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 136.4502, "event": "llm_usage", "agent": "agent-services", "turn": 11, "prompt_tokens": 1242, "completion_tokens": 19}
+{"ts": 136.4502, "event": "tool_call", "agent": "agent-services", "turn": 11, "tool": "read_file", "args": {"path": "db/store.py"}}
+{"ts": 136.4507, "event": "read", "agent": "agent-services", "path": "db/store.py", "found": true, "size": 183}
+{"ts": 136.9216, "event": "llm_usage", "agent": "agent-models", "turn": 9, "prompt_tokens": 1116, "completion_tokens": 19}
+{"ts": 136.9217, "event": "tool_call", "agent": "agent-models", "turn": 9, "tool": "list_files", "args": {}}
+{"ts": 137.6155, "event": "llm_usage", "agent": "agent-services", "turn": 12, "prompt_tokens": 1318, "completion_tokens": 22}
+{"ts": 137.6156, "event": "tool_call", "agent": "agent-services", "turn": 12, "tool": "read_file", "args": {"path": "tests/test_services_smoke.py"}}
+{"ts": 137.6161, "event": "read", "agent": "agent-services", "path": "tests/test_services_smoke.py", "found": true, "size": 474}
+{"ts": 139.1297, "event": "llm_usage", "agent": "agent-models", "turn": 10, "prompt_tokens": 1192, "completion_tokens": 91}
+{"ts": 139.1298, "event": "tool_call", "agent": "agent-models", "turn": 10, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 139.13, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 139.9567, "event": "llm_usage", "agent": "agent-services", "turn": 13, "prompt_tokens": 1462, "completion_tokens": 91}
+{"ts": 139.9568, "event": "tool_call", "agent": "agent-services", "turn": 13, "tool": "read_file", "args": {"path": "services/__init__.py"}}
+{"ts": 139.9576, "event": "read", "agent": "agent-services", "path": "services/__init__.py", "found": true, "size": 312}
+{"ts": 142.3769, "event": "llm_usage", "agent": "agent-services", "turn": 14, "prompt_tokens": 1564, "completion_tokens": 89}
+{"ts": 142.3771, "event": "tool_call", "agent": "agent-services", "turn": 14, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 142.3774, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-services", "path": "models/user.py", "holder": "agent-models"}
+{"ts": 169.921, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.791}
+{"ts": 169.921, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 172.268, "event": "llm_usage", "agent": "agent-models", "turn": 11, "prompt_tokens": 1239, "completion_tokens": 91}
+{"ts": 172.2682, "event": "tool_call", "agent": "agent-models", "turn": 11, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 172.2685, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 172.3786, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-services", "path": "models/user.py", "waited_s": 30.001}
+{"ts": 172.3787, "event": "read", "agent": "agent-services", "path": "models/user.py", "found": false, "size": 0}
+{"ts": 174.4068, "event": "llm_usage", "agent": "agent-services", "turn": 15, "prompt_tokens": 1607, "completion_tokens": 31}
+{"ts": 174.4069, "event": "tool_call", "agent": "agent-services", "turn": 15, "tool": "grep", "args": {"pattern": "def make_user", "glob": "**/*.py"}}
+{"ts": 174.4134, "event": "search", "agent": "agent-services", "kind": "grep", "pattern": "def make_user", "n": 1}
+{"ts": 202.2699, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.001}
+{"ts": 202.2701, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 204.1805, "event": "llm_usage", "agent": "agent-models", "turn": 12, "prompt_tokens": 1286, "completion_tokens": 90}
+{"ts": 204.1806, "event": "tool_call", "agent": "agent-models", "turn": 12, "tool": "read_file", "args": {"path": "services/registration.py"}}
+{"ts": 204.1809, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "services/registration.py", "holder": "agent-services"}
+{"ts": 234.1822, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "services/registration.py", "waited_s": 30.001}
+{"ts": 234.1826, "event": "read", "agent": "agent-models", "path": "services/registration.py", "found": false, "size": 0}
+{"ts": 235.758, "event": "llm_usage", "agent": "agent-models", "turn": 13, "prompt_tokens": 1331, "completion_tokens": 13}
+{"ts": 235.7583, "event": "tool_call", "agent": "agent-models", "turn": 13, "tool": "list_files", "args": {}}
+{"ts": 238.5251, "event": "llm_usage", "agent": "agent-models", "turn": 14, "prompt_tokens": 1407, "completion_tokens": 27}
+{"ts": 238.5255, "event": "tool_call", "agent": "agent-models", "turn": 14, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 238.5262, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 268.5275, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.001}
+{"ts": 268.5276, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 270.9264, "event": "llm_usage", "agent": "agent-models", "turn": 15, "prompt_tokens": 1454, "completion_tokens": 154}
+{"ts": 270.9264, "event": "tool_call", "agent": "agent-models", "turn": 15, "tool": "read_file", "args": {"path": "services/registration.py"}}
+{"ts": 270.9265, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "services/registration.py", "holder": "agent-services"}
+{"ts": 300.9279, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "services/registration.py", "waited_s": 30.001}
+{"ts": 300.9282, "event": "read", "agent": "agent-models", "path": "services/registration.py", "found": false, "size": 0}
+{"ts": 302.3347, "event": "llm_usage", "agent": "agent-models", "turn": 16, "prompt_tokens": 1499, "completion_tokens": 27}
+{"ts": 302.3348, "event": "tool_call", "agent": "agent-models", "turn": 16, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 302.3349, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 332.3361, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.001}
+{"ts": 332.3363, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 334.1328, "event": "llm_usage", "agent": "agent-models", "turn": 17, "prompt_tokens": 1546, "completion_tokens": 91}
+{"ts": 334.133, "event": "tool_call", "agent": "agent-models", "turn": 17, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 334.1333, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 364.1348, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.001}
+{"ts": 364.135, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 366.3621, "event": "llm_usage", "agent": "agent-models", "turn": 18, "prompt_tokens": 1593, "completion_tokens": 91}
+{"ts": 366.3622, "event": "tool_call", "agent": "agent-models", "turn": 18, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 366.3623, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 396.3639, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.001}
+{"ts": 396.3642, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 399.4227, "event": "llm_usage", "agent": "agent-models", "turn": 19, "prompt_tokens": 1640, "completion_tokens": 283}
+{"ts": 399.4229, "event": "tool_call", "agent": "agent-models", "turn": 19, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 399.4233, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 429.4248, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.002}
+{"ts": 429.425, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 431.732, "event": "llm_usage", "agent": "agent-models", "turn": 20, "prompt_tokens": 1687, "completion_tokens": 90}
+{"ts": 431.732, "event": "tool_call", "agent": "agent-models", "turn": 20, "tool": "read_file", "args": {"path": "services/registration.py"}}
+{"ts": 431.7321, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "services/registration.py", "holder": "agent-services"}
+{"ts": 461.7334, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "services/registration.py", "waited_s": 30.001}
+{"ts": 461.7335, "event": "read", "agent": "agent-models", "path": "services/registration.py", "found": false, "size": 0}
+{"ts": 464.7383, "event": "llm_usage", "agent": "agent-models", "turn": 21, "prompt_tokens": 1732, "completion_tokens": 156}
+{"ts": 464.7401, "event": "tool_call", "agent": "agent-models", "turn": 21, "tool": "read_file", "args": {"path": "tests/test_services_smoke.py"}}
+{"ts": 464.7405, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "tests/test_services_smoke.py", "holder": "agent-services"}
+{"ts": 494.7424, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "tests/test_services_smoke.py", "waited_s": 30.002}
+{"ts": 494.7431, "event": "read", "agent": "agent-models", "path": "tests/test_services_smoke.py", "found": false, "size": 0}
+{"ts": 498.5634, "event": "llm_usage", "agent": "agent-models", "turn": 22, "prompt_tokens": 1781, "completion_tokens": 347}
+{"ts": 498.5638, "event": "tool_call", "agent": "agent-models", "turn": 22, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 498.5669, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 528.5683, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.001}
+{"ts": 528.5685, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 530.6571, "event": "llm_usage", "agent": "agent-models", "turn": 23, "prompt_tokens": 1828, "completion_tokens": 91}
+{"ts": 530.6572, "event": "tool_call", "agent": "agent-models", "turn": 23, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 530.6574, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 560.6595, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.002}
+{"ts": 560.6598, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 562.4311, "event": "llm_usage", "agent": "agent-models", "turn": 24, "prompt_tokens": 1875, "completion_tokens": 27}
+{"ts": 562.4311, "event": "tool_call", "agent": "agent-models", "turn": 24, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 562.4312, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 592.434, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.003}
+{"ts": 592.4342, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 595.7726, "event": "llm_usage", "agent": "agent-models", "turn": 25, "prompt_tokens": 1922, "completion_tokens": 219}
+{"ts": 595.7727, "event": "tool_call", "agent": "agent-models", "turn": 25, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 595.7731, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 625.7751, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.002}
+{"ts": 625.7753, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 627.8311, "event": "llm_usage", "agent": "agent-models", "turn": 26, "prompt_tokens": 1969, "completion_tokens": 90}
+{"ts": 627.8314, "event": "tool_call", "agent": "agent-models", "turn": 26, "tool": "read_file", "args": {"path": "services/queries.py"}}
+{"ts": 627.832, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "services/queries.py", "holder": "agent-services"}
+{"ts": 657.8335, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "services/queries.py", "waited_s": 30.001}
+{"ts": 657.8338, "event": "read", "agent": "agent-models", "path": "services/queries.py", "found": false, "size": 0}
+{"ts": 659.8335, "event": "llm_usage", "agent": "agent-models", "turn": 27, "prompt_tokens": 2014, "completion_tokens": 27}
+{"ts": 659.8336, "event": "tool_call", "agent": "agent-models", "turn": 27, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 659.8338, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 689.8353, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.001}
+{"ts": 689.8354, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 691.7994, "event": "llm_usage", "agent": "agent-models", "turn": 28, "prompt_tokens": 2061, "completion_tokens": 27}
+{"ts": 691.7996, "event": "tool_call", "agent": "agent-models", "turn": 28, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 691.8, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 721.8019, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.002}
+{"ts": 721.8021, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 724.2797, "event": "llm_usage", "agent": "agent-models", "turn": 29, "prompt_tokens": 2108, "completion_tokens": 155}
+{"ts": 724.2798, "event": "tool_call", "agent": "agent-models", "turn": 29, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 724.28, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-models", "path": "models/__init__.py", "holder": "agent-services"}
+{"ts": 754.2854, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-models", "path": "models/__init__.py", "waited_s": 30.005}
+{"ts": 754.2856, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": false, "size": 0}
+{"ts": 785.1347, "event": "llm_usage", "agent": "agent-services", "turn": 16, "prompt_tokens": 1652, "completion_tokens": 19}
+{"ts": 785.135, "event": "tool_call", "agent": "agent-services", "turn": 16, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 785.1659, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-services", "path": "models/user.py", "holder": "agent-models"}
+{"ts": 815.165, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-services", "path": "models/user.py", "waited_s": 30.004}
+{"ts": 815.1655, "event": "read", "agent": "agent-services", "path": "models/user.py", "found": false, "size": 0}
+{"ts": 816.4546, "event": "llm_usage", "agent": "agent-services", "turn": 17, "prompt_tokens": 1695, "completion_tokens": 13}
+{"ts": 816.4548, "event": "tool_call", "agent": "agent-services", "turn": 17, "tool": "list_files", "args": {}}
+{"ts": 818.1784, "event": "llm_usage", "agent": "agent-services", "turn": 18, "prompt_tokens": 1771, "completion_tokens": 19}
+{"ts": 818.1785, "event": "tool_call", "agent": "agent-services", "turn": 18, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 818.1787, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-services", "path": "models/user.py", "holder": "agent-models"}
+{"ts": 848.1806, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-services", "path": "models/user.py", "waited_s": 30.002}
+{"ts": 848.1809, "event": "read", "agent": "agent-services", "path": "models/user.py", "found": false, "size": 0}
+{"ts": 850.3105, "event": "llm_usage", "agent": "agent-services", "turn": 19, "prompt_tokens": 1814, "completion_tokens": 26}
+{"ts": 850.3107, "event": "tool_call", "agent": "agent-services", "turn": 19, "tool": "read_file", "args": {"path": "models/validators.py"}}
+{"ts": 850.311, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-services", "path": "models/validators.py", "holder": "agent-models"}
+{"ts": 880.3119, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-services", "path": "models/validators.py", "waited_s": 30.001}
+{"ts": 880.3136, "event": "read", "agent": "agent-services", "path": "models/validators.py", "found": false, "size": 0}
+{"ts": 885.5455, "event": "llm_usage", "agent": "agent-services", "turn": 20, "prompt_tokens": 1859, "completion_tokens": 222}
+{"ts": 885.5456, "event": "tool_call", "agent": "agent-services", "turn": 20, "tool": "grep", "args": {"pattern": ".*", "glob": "models/user.py"}}
+{"ts": 885.55, "event": "search", "agent": "agent-services", "kind": "grep", "pattern": ".*", "n": 0}
+{"ts": 889.2826, "event": "llm_usage", "agent": "agent-services", "turn": 21, "prompt_tokens": 1896, "completion_tokens": 285}
+{"ts": 889.2828, "event": "tool_call", "agent": "agent-services", "turn": 21, "tool": "grep", "args": {"pattern": "active", "glob": "**/*.py"}}
+{"ts": 889.2901, "event": "search", "agent": "agent-services", "kind": "grep", "pattern": "active", "n": 6}
+{"ts": 890.4423, "event": "llm_usage", "agent": "agent-services", "turn": 22, "prompt_tokens": 2036, "completion_tokens": 28}
+{"ts": 890.4425, "event": "tool_call", "agent": "agent-services", "turn": 22, "tool": "grep", "args": {"pattern": "return {\"name\": name", "glob": "**/*.py"}}
+{"ts": 890.4463, "event": "search", "agent": "agent-services", "kind": "grep", "pattern": "return {\"name\": name", "n": 1}
+{"ts": 893.2128, "event": "llm_usage", "agent": "agent-services", "turn": 23, "prompt_tokens": 2092, "completion_tokens": 19}
+{"ts": 893.213, "event": "tool_call", "agent": "agent-services", "turn": 23, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 893.2131, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-services", "path": "models/user.py", "holder": "agent-models"}
+{"ts": 900.3613, "event": "agent_done_coord", "agent": "agent-services"}
+{"ts": 900.3615, "event": "agent_done", "agent": "agent-services", "status": "max_turns", "turns": 23, "prompt_tokens": 31384, "completion_tokens": 1080}
+{"ts": 900.3694, "event": "agent_done_coord", "agent": "agent-models"}
+{"ts": 900.3695, "event": "agent_done", "agent": "agent-models", "status": "max_turns", "turns": 30, "prompt_tokens": 41237, "completion_tokens": 2518}
+{"ts": 900.3697, "event": "trial_timeout"}
+{"ts": 900.6843, "event": "trial_end", "correct": false, "oracle_passed": 0, "oracle_total": 5, "wall_clock_s": 900.01, "prompt_tokens": 0, "completion_tokens": 0, "agent_statuses": {}, "oracle_output": "FFFFF                                                                    [100%]\n=================================== FAILURES ===================================\nE   AssertionError: create_user missing\n    assert False\n     +  where False = hasattr(models, 'create_user')\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t5_cross_file-file_lock-n2-r4/oracle_tests/test_oracle_t5.py:10: AssertionError: create_user missing\nE   AttributeError: module 'models' has no attribute 'create_user'\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t5_cross_file-file_lock-n2-r4/oracle_tests/test_oracle_t5.py:18: AttributeError: module 'models' has no attribute 'create_user'\nE   NotImplementedError\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t5_cross_file-file_lock-n2-r4/services/registration.py:9: NotImplementedError\nE   NotImplementedError\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t5_cross_file-file_lock-n2-r4/services/registration.py:9: NotImplementedError\nE   NotImplementedError\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t5_cross_file-file_lock-n2-r4/services/registration.py:9: NotImplementedError\n=========================== short test summary info ============================\nFAILED oracle_tests/test_oracle_t5.py::test_interface_changed - AssertionErro...\nFAILED oracle_tests/test_oracle_t5.py::test_create_user_validates_email - Att...\nFAILED oracle_tests/test_oracle_t5.py::test_register_uses_current_factory - N...\nFAILED oracle_tests/test_oracle_t5.py::test_active_users - NotImplementedError\nFAILED oracle_tests/test_oracle_t5.py::test_register_rejects_bad_email_via_factory\n5 failed in 0.02s\n"}
