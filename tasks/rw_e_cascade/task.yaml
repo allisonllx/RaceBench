@@ -1,0 +1,34 @@
+name: rw_e_cascade
+failure_mode: causal_cascade
+benign: false
+description: >
+  FastAPI Conduit three-agent cascade: A adds required Article.summary;
+  B updates comment payloads to include it; C implements feed_summary from
+  the original Article shape. Second-order breaks are the point.
+agents:
+  - id: agent-schema
+    prompt: >
+      Add a required string field "summary" to articles across the Conduit
+      stack: conduit/db/schema.py (TEXT NOT NULL DEFAULT ''),
+      conduit/schemas/article.py (ArticleCreate + ArticleOut),
+      conduit/services/articles.py::create_article and _attach_meta,
+      conduit/serializers/article_format.py::format_article, and article
+      create route so clients can POST summary. Existing rows/tests use a
+      short summary derived from description when omitted is NOT allowed —
+      ArticleCreate must require summary (min_length=1). Only change schema,
+      db, articles service, serializers, and article create path.
+  - id: agent-comments
+    prompt: >
+      Update comment list/create API responses in
+      conduit/api/routes_comments.py (and comments service helpers if needed)
+      so each comment includes "article_summary" taken from the parent
+      article's summary field (join articles.summary). Re-read the Article
+      model/schema — a new required field may have landed. Do not implement
+      feed_summary. Prefer comments routes/services.
+  - id: agent-feed
+    prompt: >
+      Implement conduit/services/feed.py::feed_summary(conn) returning a list
+      of dicts for every article with at least keys slug, title, and summary
+      (the article summary field). Wire GET /api/feed/summary already calls
+      this. Explore models/schemas with grep — the Article shape may change
+      while you work; re-read before finishing. Do not change comment routes.

@@ -1,0 +1,28 @@
+name: rw_b_signature_drift
+failure_mode: stale_read_signature_drift
+benign: false
+description: >
+  FastAPI Conduit: agent A builds reading-time using format_article's current
+  shape; agent B adds a required locale parameter to format_article. Oracle
+  requires both the new signature and A's feature to work together.
+agents:
+  - id: agent-reading-time
+    prompt: >
+      Implement conduit/services/feed.py::reading_time_for_slug(conn, slug).
+      Load the article by slug; if missing return a structure that the route
+      can 404 on (raise ValueError("not found") or return None — the route
+      already maps NotImplementedError to 501; prefer raising ValueError for
+      missing). Use serializers.article_format.format_article and
+      estimate_reading_minutes. Return {"slug": ..., "minutes": int,
+      "title": <from formatted article>}. Re-read format_article before
+      finishing — its signature may change. Only change feed.py and
+      routes_feed.py if needed to handle missing articles as 404.
+  - id: agent-i18n
+    prompt: >
+      Internationalize article formatting. Change
+      conduit/serializers/article_format.py::format_article to require a
+      second argument locale: str (no default). When locale starts with "fr",
+      prefix the title with "[FR] ". Update every call site you own under
+      conduit/api/ (routes that call format_article) to pass locale="en".
+      Do not implement reading_time_for_slug. Prefer serializers/ and api/
+      route files.

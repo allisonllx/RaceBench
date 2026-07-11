@@ -1,0 +1,14 @@
+failure_mode: benign_overlap_false_positive
+benign: true
+critical_paths:
+  - conduit/api/routes_articles.py
+  - conduit/services/favorites.py
+  - conduit/serializers/article_format.py
+collision_points:
+  - file: conduit/api/routes_articles.py
+    symbols: [unfavorite_article, list_articles]
+    agents: [agent-favorite, agent-listfix]
+    kind: disjoint_same_file
+expected_anomaly: >
+  Same file, disjoint top-level handlers. file_lock stalls; ast_scope/ast_dep
+  should not. Any stall is a false positive.

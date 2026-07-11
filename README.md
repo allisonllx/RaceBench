@@ -43,10 +43,9 @@ lock-on-write-only `file_lock` and `git_hash`+worktree hybrids (redundant with
 
 ## Tasks
 
-Twelve purpose-built mini-repos in `tasks/`, covering the concurrency-anomaly
-taxonomy plus harness-extension modes (phantom tools, irreversible effects,
-split-view worktrees). Each has a collision map, hidden pytest oracle, and
-reference solution:
+Twelve purpose-built mini-repos in `tasks/` (probe suite) plus a **FastAPI
+Conduit external-validity track** (`rw_*`). Each has a collision map, hidden
+pytest oracle, and reference solution.
 
 | Task | Failure mode | Agents | Notes |
 |---|---|---|---|
@@ -62,6 +61,14 @@ reference solution:
 | `t10_phantom_tool` | tool-registry drift | 2 | needs `list_tools` |
 | `t11_irreversible` | external-effect reordering | 2 | `.effects.jsonl` order |
 | `t12_split_view` | worktree divergence | 2 | `isolation: worktree` |
+| `rw_c_benign_overlap` | benign same-file on Conduit | 2 | FastAPI+SQLite+Pydantic |
+| `rw_b_signature_drift` | stale-read / signature drift | 2 | Conduit `format_article` |
+| `rw_e_cascade` | 3-agent causal cascade | 3 | Conduit Article.summary |
+
+The Conduit base lives in `tasks/_conduit_base/` (shared source). Host deps
+include `fastapi`, `httpx`, and `pydantic` — reinstall with
+`pip install -e ".[dev]"` after pull. Oracles use FastAPI `TestClient` (no
+live server / Newman / Postgres).
 
 ## Tools
 

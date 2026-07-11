@@ -22,11 +22,21 @@ from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
+import yaml
 
 from harness.events import read_events
+from harness.task import TASKS_DIR
 
 STALL_ACTIONS = {"blocked", "lock_timeout", "merge_conflict"}
 REFUSED_WRITE_STATUSES = {"edit_failed", "conflict", "lock_timeout"}
+
+
+def _critical_paths(task_name: str) -> list[str]:
+    path = TASKS_DIR / task_name / "collision_map.yaml"
+    if not path.is_file():
+        return []
+    spec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return list(spec.get("critical_paths") or [])
 
 
 def trial_metrics(log_path: Path) -> dict | None:
@@ -51,6 +61,7 @@ def trial_metrics(log_path: Path) -> dict | None:
     stalls: list[dict] = []
     notifications: list[dict] = []
     reads = 0
+    read_paths: set[str] = set()
     stall_wait_s = 0.0
 
     for e in events:
@@ -58,6 +69,8 @@ def trial_metrics(log_path: Path) -> dict | None:
             current_turn[e["agent"]] = e["turn"]
         elif e["event"] == "read":
             reads += 1
+            if e.get("path"):
+                read_paths.add(e["path"])
         elif e["event"] == "write":
             agent = e["agent"]
             if e["status"] in REFUSED_WRITE_STATUSES:
@@ -93,6 +106,12 @@ def trial_metrics(log_path: Path) -> dict | None:
             fp_stalls += 1
 
     statuses = end.get("agent_statuses", {}) or {}
+    critical = _critical_paths(start["task"])
+    if critical:
+        hit = sum(1 for p in critical if p in read_paths)
+        critical_frac = hit / len(critical)
+    else:
+        critical_frac = None
     return {
         "task": start["task"],
         "failure_mode": start.get("failure_mode", ""),
@@ -116,6 +135,7 @@ def trial_metrics(log_path: Path) -> dict | None:
         "stall_wait_s": round(stall_wait_s, 3),
         "reads_observed": reads,
         "read_set_visibility": 1.0,
+        "critical_paths_read_fraction": critical_frac,
         "agents_done": sum(1 for v in statuses.values() if v == "done"),
         "agents_errored": sum(1 for v in statuses.values() if v == "error"),
     }

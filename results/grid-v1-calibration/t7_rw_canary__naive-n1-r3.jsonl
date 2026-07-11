@@ -1,0 +1,36 @@
+{"ts": 0.1765, "event": "trial_start", "task": "t7_rw_canary", "failure_mode": "antidependency_silent_invalidation", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 3, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["solo"]}
+{"ts": 2.015, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 711, "completion_tokens": 29}
+{"ts": 2.0152, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "grep", "args": {"pattern": "STATUS_ACTIVE", "glob": "**/*"}}
+{"ts": 2.0235, "event": "search", "agent": "solo", "kind": "grep", "pattern": "STATUS_ACTIVE", "n": 6}
+{"ts": 3.3182, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 842, "completion_tokens": 19}
+{"ts": 3.319, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "read_file", "args": {"path": "schema/constants.py"}}
+{"ts": 3.3204, "event": "read", "agent": "solo", "path": "schema/constants.py", "found": true, "size": 86}
+{"ts": 4.5772, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 890, "completion_tokens": 21}
+{"ts": 4.5779, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "read_file", "args": {"path": "schema/__init__.py"}}
+{"ts": 4.5793, "event": "read", "agent": "solo", "path": "schema/__init__.py", "found": true, "size": 108}
+{"ts": 6.033, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 946, "completion_tokens": 21}
+{"ts": 6.0331, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "read_file", "args": {"path": "exporters/status_export.py"}}
+{"ts": 6.0334, "event": "read", "agent": "solo", "path": "exporters/status_export.py", "found": true, "size": 192}
+{"ts": 7.3269, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 1011, "completion_tokens": 19}
+{"ts": 7.327, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "read_file", "args": {"path": "handlers/report.py"}}
+{"ts": 7.3273, "event": "read", "agent": "solo", "path": "handlers/report.py", "found": true, "size": 363}
+{"ts": 17.5084, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 1115, "completion_tokens": 917}
+{"ts": 17.5086, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "edit_file", "args": {"path": "schema/constants.py", "old_string": "\"\"\"Public status constants.\"\"\"\n\nSTATUS_ACTIVE = \"active\"\nSTATUS_INACTIVE = \"inactive\"\n", "new_string": "\"\"\"Public status constants.\"\"\"\n\nSTATUS_ACTIVE = \"enabled\"\nSTATUS_INACTIVE = \"inactive\"\n"}}
+{"ts": 17.5107, "event": "write", "agent": "solo", "path": "schema/constants.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 19.8112, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 1210, "completion_tokens": 85}
+{"ts": 19.8115, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "edit_file", "args": {"path": "schema/__init__.py", "old_string": "from schema.constants import STATUS_ACTIVE, STATUS_INACTIVE\n\n__all__ = [\"STATUS_ACTIVE\", \"STATUS_INACTIVE\"]\n", "new_string": "from schema.constants import STATUS_ACTIVE, STATUS_INACTIVE\n\n__all__ = [\"STATUS_ACTIVE\", \"STATUS_INACTIVE\"]\n"}}
+{"ts": 19.8147, "event": "write", "agent": "solo", "path": "schema/__init__.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": [], "message": ""}
+{"ts": 25.4533, "event": "llm_usage", "agent": "solo", "turn": 8, "prompt_tokens": 1311, "completion_tokens": 466}
+{"ts": 25.4543, "event": "tool_call", "agent": "solo", "turn": 8, "tool": "edit_file", "args": {"path": "handlers/report.py", "old_string": "\"\"\"Report handlers — stubs.\"\"\"\n\n\ndef filter_active(records):\n    \"\"\"Return records whose status equals schema.constants.STATUS_ACTIVE\n    (the live constant value, not a hard-coded string).\"\"\"\n    rai", "new_string": "\"\"\"Report handlers — stubs.\"\"\"\n\nfrom schema.constants import STATUS_ACTIVE\n\n\ndef filter_active(records):\n    \"\"\"Return records whose status equals schema.constants.STATUS_ACTIVE\n    (the live constant"}}
+{"ts": 25.4568, "event": "write", "agent": "solo", "path": "handlers/report.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "filter_active", "summarize_active"], "message": ""}
+{"ts": 26.6009, "event": "llm_usage", "agent": "solo", "turn": 9, "prompt_tokens": 1595, "completion_tokens": 21}
+{"ts": 26.601, "event": "tool_call", "agent": "solo", "turn": 9, "tool": "read_file", "args": {"path": "exporters/status_export.py"}}
+{"ts": 26.602, "event": "read", "agent": "solo", "path": "exporters/status_export.py", "found": true, "size": 192}
+{"ts": 27.7644, "event": "llm_usage", "agent": "solo", "turn": 10, "prompt_tokens": 1660, "completion_tokens": 13}
+{"ts": 27.7645, "event": "tool_call", "agent": "solo", "turn": 10, "tool": "run_tests", "args": {}}
+{"ts": 28.3338, "event": "run_tests", "agent": "solo", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 29.9153, "event": "llm_usage", "agent": "solo", "turn": 11, "prompt_tokens": 1699, "completion_tokens": 66}
+{"ts": 29.9154, "event": "tool_call", "agent": "solo", "turn": 11, "tool": "done", "args": {"summary": "Renamed STATUS_ACTIVE to \"enabled\" in schema/constants.py and updated handlers/report.py to use the new constant and implement filter_active and summarize_active; ensured schema/__init__.py and export"}}
+{"ts": 29.9154, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 29.9154, "event": "agent_done", "agent": "solo", "status": "done", "turns": 11, "prompt_tokens": 12990, "completion_tokens": 1677}
+{"ts": 30.176, "event": "trial_end", "correct": true, "oracle_passed": 4, "oracle_total": 4, "wall_clock_s": 29.72, "prompt_tokens": 12990, "completion_tokens": 1677, "agent_statuses": {"solo": "done"}, "oracle_output": "....                                                                     [100%]\n4 passed in 0.01s\n"}

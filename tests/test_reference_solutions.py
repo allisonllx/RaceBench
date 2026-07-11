@@ -20,15 +20,14 @@ def _pytest(cwd: Path, target: str) -> tuple[int, str]:
 
 
 def _overlay_reference(reference: Path, dst: Path) -> None:
-    """Copy reference files/dirs onto dst, preserving package layout."""
-    for item in reference.iterdir():
-        target = dst / item.name
-        if item.is_dir():
-            if target.exists():
-                shutil.rmtree(target)
-            shutil.copytree(item, target)
-        else:
-            shutil.copy2(item, target)
+    """Merge reference files onto dst (file-level), preserving untouched siblings."""
+    for src in reference.rglob("*"):
+        if not src.is_file():
+            continue
+        rel = src.relative_to(reference)
+        target = dst / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, target)
 
 
 @pytest.mark.parametrize("task_name", list_tasks())

@@ -1,0 +1,40 @@
+{"ts": 0.1739, "event": "trial_start", "task": "t11_irreversible", "failure_mode": "irreversible_effect_reordering", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 4, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["solo"]}
+{"ts": 4.7104, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 888, "completion_tokens": 339}
+{"ts": 4.7106, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 5.7886, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 953, "completion_tokens": 19}
+{"ts": 5.7887, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "read_file", "args": {"path": "release/state.py"}}
+{"ts": 5.789, "event": "read", "agent": "solo", "path": "release/state.py", "found": true, "size": 40}
+{"ts": 6.7728, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 998, "completion_tokens": 20}
+{"ts": 6.7729, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "read_file", "args": {"path": "notify/mailer.py"}}
+{"ts": 6.7733, "event": "read", "agent": "solo", "path": "notify/mailer.py", "found": true, "size": 171}
+{"ts": 7.7262, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 1066, "completion_tokens": 19}
+{"ts": 7.7264, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "read_file", "args": {"path": "billing/accounts.py"}}
+{"ts": 7.7268, "event": "read", "agent": "solo", "path": "billing/accounts.py", "found": true, "size": 58}
+{"ts": 8.9823, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 1110, "completion_tokens": 21}
+{"ts": 8.9825, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 8.9844, "event": "read", "agent": "solo", "path": "tests/test_smoke.py", "found": true, "size": 118}
+{"ts": 20.5541, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 1177, "completion_tokens": 1153}
+{"ts": 20.5543, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "edit_file", "args": {"path": "release/state.py", "old_string": "RELEASE_VERSION = \"0.0.0\"\nREADY = False\n", "new_string": "RELEASE_VERSION = \"1.2.0\"\nREADY = True\n"}}
+{"ts": 20.5556, "event": "write", "agent": "solo", "path": "release/state.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 23.1431, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 1252, "completion_tokens": 179}
+{"ts": 23.1432, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "edit_file", "args": {"path": "notify/mailer.py", "old_string": "\"\"\"Customer notification stubs.\"\"\"\n\n\ndef notify_customers():\n    \"\"\"Return 'notified:<RELEASE_VERSION>' when release.state.READY is True.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Customer notification stubs.\"\"\"\n\n\ndef notify_customers():\n    \"\"\"Return 'notified:<RELEASE_VERSION>' when release.state.READY is True.\n\n    Re-import release.state at call time to pick up concurren"}}
+{"ts": 23.162, "event": "write", "agent": "solo", "path": "notify/mailer.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["notify_customers"], "message": ""}
+{"ts": 24.2055, "event": "llm_usage", "agent": "solo", "turn": 8, "prompt_tokens": 1447, "completion_tokens": 13}
+{"ts": 24.2056, "event": "tool_call", "agent": "solo", "turn": 8, "tool": "list_tools", "args": {}}
+{"ts": 25.4313, "event": "llm_usage", "agent": "solo", "turn": 9, "prompt_tokens": 1477, "completion_tokens": 28}
+{"ts": 25.4314, "event": "tool_call", "agent": "solo", "turn": 9, "tool": "invoke_tool", "args": {"name": "charge", "arguments": {"customer": "acme", "amount": 99}}}
+{"ts": 25.432, "event": "effect", "agent": "solo", "tool": "charge", "args": {"customer": "acme", "amount": 99}}
+{"ts": 26.6424, "event": "llm_usage", "agent": "solo", "turn": 10, "prompt_tokens": 1523, "completion_tokens": 31}
+{"ts": 26.6425, "event": "tool_call", "agent": "solo", "turn": 10, "tool": "invoke_tool", "args": {"name": "deploy", "arguments": {"service": "api", "version": "1.2.0"}}}
+{"ts": 26.6428, "event": "effect", "agent": "solo", "tool": "deploy", "args": {"service": "api", "version": "1.2.0"}}
+{"ts": 27.8275, "event": "llm_usage", "agent": "solo", "turn": 11, "prompt_tokens": 1575, "completion_tokens": 41}
+{"ts": 27.8275, "event": "tool_call", "agent": "solo", "turn": 11, "tool": "invoke_tool", "args": {"name": "send_email", "arguments": {"to": "ops@example.com", "subject": "released", "body": "notified:1.2.0"}}}
+{"ts": 27.8278, "event": "effect", "agent": "solo", "tool": "send_email", "args": {"to": "ops@example.com", "subject": "released", "body": "notified:1.2.0"}}
+{"ts": 29.0589, "event": "llm_usage", "agent": "solo", "turn": 12, "prompt_tokens": 1635, "completion_tokens": 13}
+{"ts": 29.0591, "event": "tool_call", "agent": "solo", "turn": 12, "tool": "run_tests", "args": {}}
+{"ts": 29.4508, "event": "run_tests", "agent": "solo", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 30.6261, "event": "llm_usage", "agent": "solo", "turn": 13, "prompt_tokens": 1674, "completion_tokens": 44}
+{"ts": 30.6262, "event": "tool_call", "agent": "solo", "turn": 13, "tool": "done", "args": {"summary": "Set release version to 1.2.0 and READY True; implemented notify_customers and invoked charge, deploy, send_email as required."}}
+{"ts": 30.6262, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 30.6262, "event": "agent_done", "agent": "solo", "status": "done", "turns": 13, "prompt_tokens": 16775, "completion_tokens": 1920}
+{"ts": 30.884, "event": "trial_end", "correct": true, "oracle_passed": 3, "oracle_total": 3, "wall_clock_s": 30.43, "prompt_tokens": 16775, "completion_tokens": 1920, "agent_statuses": {"solo": "done"}, "oracle_output": "...                                                                      [100%]\n3 passed in 0.01s\n"}

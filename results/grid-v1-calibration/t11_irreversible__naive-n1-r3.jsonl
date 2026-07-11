@@ -1,0 +1,47 @@
+{"ts": 0.2427, "event": "trial_start", "task": "t11_irreversible", "failure_mode": "irreversible_effect_reordering", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 3, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["solo"]}
+{"ts": 2.8922, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 888, "completion_tokens": 147}
+{"ts": 2.8925, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 3.9176, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 953, "completion_tokens": 19}
+{"ts": 3.9178, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "read_file", "args": {"path": "release/state.py"}}
+{"ts": 3.9184, "event": "read", "agent": "solo", "path": "release/state.py", "found": true, "size": 40}
+{"ts": 4.9119, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 998, "completion_tokens": 19}
+{"ts": 4.9121, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "read_file", "args": {"path": "billing/accounts.py"}}
+{"ts": 4.9127, "event": "read", "agent": "solo", "path": "billing/accounts.py", "found": true, "size": 58}
+{"ts": 5.8781, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 1042, "completion_tokens": 20}
+{"ts": 5.8782, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "read_file", "args": {"path": "notify/mailer.py"}}
+{"ts": 5.8784, "event": "read", "agent": "solo", "path": "notify/mailer.py", "found": true, "size": 171}
+{"ts": 7.2047, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 1110, "completion_tokens": 21}
+{"ts": 7.2048, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 7.2049, "event": "read", "agent": "solo", "path": "tests/test_smoke.py", "found": true, "size": 118}
+{"ts": 9.3082, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 1177, "completion_tokens": 90}
+{"ts": 9.3083, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "read_file", "args": {"path": "conftest.py"}}
+{"ts": 9.3086, "event": "read", "agent": "solo", "path": "conftest.py", "found": true, "size": 92}
+{"ts": 22.8637, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 1231, "completion_tokens": 1089}
+{"ts": 22.8638, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "edit_file", "args": {"path": "release/state.py", "old_string": "RELEASE_VERSION = \"0.0.0\"\nREADY = False\n", "new_string": "RELEASE_VERSION = \"1.2.0\"\nREADY = True\n"}}
+{"ts": 22.8659, "event": "write", "agent": "solo", "path": "release/state.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 28.5967, "event": "llm_usage", "agent": "solo", "turn": 8, "prompt_tokens": 1306, "completion_tokens": 476}
+{"ts": 28.5968, "event": "tool_call", "agent": "solo", "turn": 8, "tool": "charge", "args": {"customer": "acme", "amount": 99}}
+{"ts": 28.5973, "event": "effect", "agent": "solo", "tool": "charge", "args": {"customer": "acme", "amount": 99}}
+{"ts": 29.6822, "event": "llm_usage", "agent": "solo", "turn": 9, "prompt_tokens": 1345, "completion_tokens": 24}
+{"ts": 29.6823, "event": "tool_call", "agent": "solo", "turn": 9, "tool": "deploy", "args": {"service": "api", "version": "1.2.0"}}
+{"ts": 29.6826, "event": "effect", "agent": "solo", "tool": "deploy", "args": {"service": "api", "version": "1.2.0"}}
+{"ts": 31.018, "event": "llm_usage", "agent": "solo", "turn": 10, "prompt_tokens": 1389, "completion_tokens": 20}
+{"ts": 31.0181, "event": "tool_call", "agent": "solo", "turn": 10, "tool": "read_file", "args": {"path": "notify/mailer.py"}}
+{"ts": 31.0192, "event": "read", "agent": "solo", "path": "notify/mailer.py", "found": true, "size": 171}
+{"ts": 34.0394, "event": "llm_usage", "agent": "solo", "turn": 11, "prompt_tokens": 1457, "completion_tokens": 208}
+{"ts": 34.0395, "event": "tool_call", "agent": "solo", "turn": 11, "tool": "edit_file", "args": {"path": "notify/mailer.py", "old_string": "\"\"\"Customer notification stubs.\"\"\"\n\n\ndef notify_customers():\n    \"\"\"Return 'notified:<RELEASE_VERSION>' when release.state.READY is True.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Customer notification stubs.\"\"\"\n\n\ndef notify_customers():\n    \"\"\"Return 'notified:<RELEASE_VERSION>' when release.state.READY is True.\"\"\"\n    import importlib\n\n    # Re-import release.state to ensu"}}
+{"ts": 34.0405, "event": "write", "agent": "solo", "path": "notify/mailer.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["notify_customers"], "message": ""}
+{"ts": 35.2213, "event": "llm_usage", "agent": "solo", "turn": 12, "prompt_tokens": 1681, "completion_tokens": 20}
+{"ts": 35.2214, "event": "tool_call", "agent": "solo", "turn": 12, "tool": "read_file", "args": {"path": "notify/mailer.py"}}
+{"ts": 35.2217, "event": "read", "agent": "solo", "path": "notify/mailer.py", "found": true, "size": 472}
+{"ts": 36.7905, "event": "llm_usage", "agent": "solo", "turn": 13, "prompt_tokens": 1817, "completion_tokens": 34}
+{"ts": 36.7906, "event": "tool_call", "agent": "solo", "turn": 13, "tool": "send_email", "args": {"to": "ops@example.com", "subject": "released", "body": "notified:1.2.0"}}
+{"ts": 36.7917, "event": "effect", "agent": "solo", "tool": "send_email", "args": {"to": "ops@example.com", "subject": "released", "body": "notified:1.2.0"}}
+{"ts": 37.9356, "event": "llm_usage", "agent": "solo", "turn": 14, "prompt_tokens": 1870, "completion_tokens": 13}
+{"ts": 37.9358, "event": "tool_call", "agent": "solo", "turn": 14, "tool": "run_tests", "args": {}}
+{"ts": 38.3022, "event": "run_tests", "agent": "solo", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 40.6439, "event": "llm_usage", "agent": "solo", "turn": 15, "prompt_tokens": 1909, "completion_tokens": 70}
+{"ts": 40.6441, "event": "tool_call", "agent": "solo", "turn": 15, "tool": "done", "args": {"summary": "Set release/state.py RELEASE_VERSION to 1.2.0 and READY True; implemented notify_customers to return notified:<RELEASE_VERSION>; charged acme, deployed api@1.2.0, and sent email to ops@example.com wit"}}
+{"ts": 40.6443, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 40.6443, "event": "agent_done", "agent": "solo", "status": "done", "turns": 15, "prompt_tokens": 20173, "completion_tokens": 2270}
+{"ts": 40.8991, "event": "trial_end", "correct": true, "oracle_passed": 3, "oracle_total": 3, "wall_clock_s": 40.38, "prompt_tokens": 20173, "completion_tokens": 2270, "agent_statuses": {"solo": "done"}, "oracle_output": "...                                                                      [100%]\n3 passed in 0.01s\n"}

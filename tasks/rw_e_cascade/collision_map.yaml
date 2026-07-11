@@ -1,0 +1,24 @@
+failure_mode: causal_cascade
+critical_paths:
+  - conduit/db/schema.py
+  - conduit/schemas/article.py
+  - conduit/serializers/article_format.py
+  - conduit/services/articles.py
+  - conduit/services/comments.py
+  - conduit/api/routes_comments.py
+  - conduit/services/feed.py
+collision_points:
+  - file: conduit/schemas/article.py
+    symbol: ArticleCreate
+    agents: [agent-schema]
+    kind: interface_change
+  - file: conduit/api/routes_comments.py
+    agents: [agent-comments]
+    kind: first_order_consumer
+  - file: conduit/services/feed.py
+    symbol: feed_summary
+    agents: [agent-feed]
+    kind: second_order_consumer
+expected_anomaly: >
+  Pairwise fixes (A→B) can still leave C's feed_summary missing summary,
+  failing the oracle. Cascade visibility is the measured gap.

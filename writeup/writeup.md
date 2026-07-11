@@ -102,12 +102,16 @@ capped; every trial runs in a throwaway git workspace.
 **Taxonomy coverage (11 modes → tasks):** stale read → t1; benign overlap →
 t2; write-write → t3; cascade → t4; cross-file → t5; feature pair → t6;
 antidependency → t7; livelock → t8; overhead confound → t9; phantom tool →
-t10; irreversible effects → t11; split-view → t12. Grid numbers above still
-reflect the pre-expansion six-task run until the paid grid is re-executed.
+t10; irreversible effects → t11; split-view → t12. **External-validity
+track:** FastAPI+SQLite+Pydantic Conduit app with `rw_c` (benign same-file),
+`rw_b` (signature drift), `rw_e` (3-agent cascade). Collision maps may list
+`critical_paths`; metrics report `critical_paths_read_fraction` from the
+event log (proxy for “what agents actually opened,” not HTTP sniffing).
 
 Known limits: (1) twelve purpose-built tasks are a probe suite that isolates
-failure modes, not a general benchmark — external validity is bounded and we
-say so. (2) Strategies are our minimal reimplementations; results
+failure modes; the Conduit track is still a trimmed RealWorld-inspired app
+(TestClient oracles, not Newman/Postgres) — external validity is improved
+but not unlimited. (2) Strategies are our minimal reimplementations; results
 characterize the *mechanism class*, not the cited systems. (3) Symbol
 granularity is top-level only (a class is one symbol), so ast_scope /
 ast_dep over-serialize within classes — visible in t6 and reported, not
@@ -119,9 +123,8 @@ conflict); we do not claim a production CRDT/OT integrator. (7) `ast_dep`'s
 import resolver is best-effort (package re-exports + submodule scan); it is
 not a full type checker.
 
-Next: re-run the paid grid on t1–t12 including `ast_dep`; port 2–3 real
-CooperBench tasks for external validity; a second model family; cascade at
-8 agents.
+Next: re-run the paid grid on t1–t12 + `rw_*` including `ast_dep`; a second
+model family; cascade at 8 agents.
 ---
 
 *Appendix pointers (not counted): metric definitions in `analysis/metrics.py`

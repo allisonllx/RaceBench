@@ -1,0 +1,24 @@
+name: rw_c_benign_overlap
+failure_mode: benign_overlap_false_positive
+benign: true
+description: >
+  FastAPI Conduit: two agents edit disjoint handlers in the same
+  routes_articles.py file. Ground truth is no real conflict — any stall is a
+  false positive. Exercises AST-level coordination on a realistic multi-file app.
+agents:
+  - id: agent-favorite
+    prompt: >
+      In the Conduit FastAPI app, implement DELETE /api/articles/{slug}/favorite.
+      Update conduit/services/favorites.py::unfavorite_article to remove the
+      favorites row for (user_id, article_id) and return the updated article
+      (via get_article_by_slug), or None if missing. Wire
+      conduit/api/routes_articles.py::unfavorite_article to call it and return
+      {"article": format_article(...)} with 404 when missing. Do not change
+      list_articles. Prefer editing favorites.py and routes_articles.py only.
+  - id: agent-listfix
+    prompt: >
+      GET /api/articles currently returns slug-only stubs (seeded bug). Fix
+      conduit/api/routes_articles.py::list_articles so each item is
+      format_article(row) with full fields (title, body, tag_list, etc.).
+      Do not implement unfavorite. Prefer editing only the list_articles
+      handler in routes_articles.py.

@@ -1,0 +1,44 @@
+{"ts": 0.1689, "event": "trial_start", "task": "t9_overhead", "failure_mode": "overhead_masks_benefit", "benign": true, "strategy": "naive", "n_agents": 1, "rep": 4, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["solo"]}
+{"ts": 1.324, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 683, "completion_tokens": 19}
+{"ts": 1.3241, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.6704, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 755, "completion_tokens": 21}
+{"ts": 2.6705, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "read_file", "args": {"path": "mod_a/mathops.py"}}
+{"ts": 2.6707, "event": "read", "agent": "solo", "path": "mod_a/mathops.py", "found": true, "size": 45}
+{"ts": 4.5444, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 797, "completion_tokens": 21}
+{"ts": 4.5445, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "read_file", "args": {"path": "mod_a/textops.py"}}
+{"ts": 4.5448, "event": "read", "agent": "solo", "path": "mod_a/textops.py", "found": true, "size": 47}
+{"ts": 5.5893, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 839, "completion_tokens": 22}
+{"ts": 5.5894, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "read_file", "args": {"path": "mod_a/__init__.py"}}
+{"ts": 5.5896, "event": "read", "agent": "solo", "path": "mod_a/__init__.py", "found": true, "size": 96}
+{"ts": 6.5582, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 899, "completion_tokens": 21}
+{"ts": 6.5582, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "read_file", "args": {"path": "mod_b/mathops.py"}}
+{"ts": 6.5584, "event": "read", "agent": "solo", "path": "mod_b/mathops.py", "found": true, "size": 45}
+{"ts": 7.4394, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 941, "completion_tokens": 21}
+{"ts": 7.4396, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "read_file", "args": {"path": "mod_b/textops.py"}}
+{"ts": 7.4401, "event": "read", "agent": "solo", "path": "mod_b/textops.py", "found": true, "size": 47}
+{"ts": 8.5086, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 983, "completion_tokens": 22}
+{"ts": 8.509, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "read_file", "args": {"path": "mod_b/__init__.py"}}
+{"ts": 8.51, "event": "read", "agent": "solo", "path": "mod_b/__init__.py", "found": true, "size": 96}
+{"ts": 9.8698, "event": "llm_usage", "agent": "solo", "turn": 8, "prompt_tokens": 1043, "completion_tokens": 21}
+{"ts": 9.87, "event": "tool_call", "agent": "solo", "turn": 8, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 9.8705, "event": "read", "agent": "solo", "path": "tests/test_smoke.py", "found": true, "size": 82}
+{"ts": 12.2924, "event": "llm_usage", "agent": "solo", "turn": 9, "prompt_tokens": 1102, "completion_tokens": 124}
+{"ts": 12.2927, "event": "tool_call", "agent": "solo", "turn": 9, "tool": "edit_file", "args": {"path": "mod_a/mathops.py", "old_string": "def double(x):\n    raise NotImplementedError\n", "new_string": "def double(x):\n    return 2 * x\n"}}
+{"ts": 12.2951, "event": "write", "agent": "solo", "path": "mod_a/mathops.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["double"], "message": ""}
+{"ts": 13.8472, "event": "llm_usage", "agent": "solo", "turn": 10, "prompt_tokens": 1172, "completion_tokens": 57}
+{"ts": 13.8474, "event": "tool_call", "agent": "solo", "turn": 10, "tool": "edit_file", "args": {"path": "mod_a/textops.py", "old_string": "def greet(name):\n    raise NotImplementedError\n", "new_string": "def greet(name):\n    return f\"hello {name}\"\n"}}
+{"ts": 13.848, "event": "write", "agent": "solo", "path": "mod_a/textops.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["greet"], "message": ""}
+{"ts": 15.2736, "event": "llm_usage", "agent": "solo", "turn": 11, "prompt_tokens": 1245, "completion_tokens": 53}
+{"ts": 15.2737, "event": "tool_call", "agent": "solo", "turn": 11, "tool": "edit_file", "args": {"path": "mod_b/mathops.py", "old_string": "def square(x):\n    raise NotImplementedError\n", "new_string": "def square(x):\n    return x * x\n"}}
+{"ts": 15.2745, "event": "write", "agent": "solo", "path": "mod_b/mathops.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["square"], "message": ""}
+{"ts": 17.156, "event": "llm_usage", "agent": "solo", "turn": 12, "prompt_tokens": 1314, "completion_tokens": 59}
+{"ts": 17.1564, "event": "tool_call", "agent": "solo", "turn": 12, "tool": "edit_file", "args": {"path": "mod_b/textops.py", "old_string": "def shout(name):\n    raise NotImplementedError\n", "new_string": "def shout(name):\n    return f\"{name}!\".upper()\n"}}
+{"ts": 17.1576, "event": "write", "agent": "solo", "path": "mod_b/textops.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["shout"], "message": ""}
+{"ts": 18.4876, "event": "llm_usage", "agent": "solo", "turn": 13, "prompt_tokens": 1389, "completion_tokens": 13}
+{"ts": 18.4876, "event": "tool_call", "agent": "solo", "turn": 13, "tool": "run_tests", "args": {}}
+{"ts": 18.834, "event": "run_tests", "agent": "solo", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 20.524, "event": "llm_usage", "agent": "solo", "turn": 14, "prompt_tokens": 1428, "completion_tokens": 46}
+{"ts": 20.5241, "event": "tool_call", "agent": "solo", "turn": 14, "tool": "done", "args": {"summary": "Implemented mod_a.double, mod_a.greet, mod_b.square, mod_b.shout; left __init__ exports as-is. All tests passed."}}
+{"ts": 20.5241, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 20.5241, "event": "agent_done", "agent": "solo", "status": "done", "turns": 14, "prompt_tokens": 14590, "completion_tokens": 520}
+{"ts": 20.7916, "event": "trial_end", "correct": true, "oracle_passed": 2, "oracle_total": 2, "wall_clock_s": 20.33, "prompt_tokens": 14590, "completion_tokens": 520, "agent_statuses": {"solo": "done"}, "oracle_output": "..                                                                       [100%]\n2 passed in 0.01s\n"}

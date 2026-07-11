@@ -1,38 +1,98 @@
-{"ts": 0.2488, "event": "trial_start", "task": "t4_cascade", "failure_mode": "causal_cascade", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 3, "model": "gpt-5-mini", "agent_ids": ["solo"]}
-{"ts": 1.6481, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 614, "completion_tokens": 19}
-{"ts": 1.6483, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "list_files", "args": {}}
-{"ts": 2.6829, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 661, "completion_tokens": 19}
-{"ts": 2.683, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "read_file", "args": {"path": "datasource.py"}}
-{"ts": 2.6834, "event": "read", "agent": "solo", "path": "datasource.py", "found": true, "size": 386}
-{"ts": 3.8717, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 774, "completion_tokens": 18}
-{"ts": 3.8719, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "read_file", "args": {"path": "pipeline.py"}}
-{"ts": 3.8723, "event": "read", "agent": "solo", "path": "pipeline.py", "found": true, "size": 432}
-{"ts": 4.8375, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 901, "completion_tokens": 18}
-{"ts": 4.8376, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "read_file", "args": {"path": "report.py"}}
-{"ts": 4.8378, "event": "read", "agent": "solo", "path": "report.py", "found": true, "size": 415}
-{"ts": 5.994, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 1022, "completion_tokens": 18}
-{"ts": 5.9941, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "read_file", "args": {"path": "cli.py"}}
-{"ts": 5.9944, "event": "read", "agent": "solo", "path": "cli.py", "found": true, "size": 175}
-{"ts": 6.9741, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 1088, "completion_tokens": 21}
-{"ts": 6.9742, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "read_file", "args": {"path": "tests/test_pipeline_chain.py"}}
-{"ts": 6.9744, "event": "read", "agent": "solo", "path": "tests/test_pipeline_chain.py", "found": true, "size": 658}
-{"ts": 14.7035, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 1285, "completion_tokens": 723}
-{"ts": 14.7036, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "edit_file", "args": {"path": "datasource.py", "old_string": "\"\"\"Record parsing for the reporting pipeline.\"\"\"\n\n\ndef parse_records(text):\n    \"\"\"Parse 'name,value' lines into a list of (name, float_value) tuples.\"\"\"\n    records = []\n    for line in text.splitlin", "new_string": "\"\"\"Record parsing for the reporting pipeline.\"\"\"\n\n\ndef parse_dataset(text):\n    \"\"\"Parse 'name,value' lines into a list of (name, float_value) tuples.\n\n    Skip blank lines and lines starting with '#'"}}
-{"ts": 14.7062, "event": "write", "agent": "solo", "path": "datasource.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["parse_dataset", "parse_records"], "message": ""}
-{"ts": 20.6927, "event": "llm_usage", "agent": "solo", "turn": 8, "prompt_tokens": 1570, "completion_tokens": 545}
-{"ts": 20.693, "event": "tool_call", "agent": "solo", "turn": 8, "tool": "edit_file", "args": {"path": "pipeline.py", "old_string": "\"\"\"Aggregation over parsed records.\"\"\"\nimport datasource\n\n\ndef summarize(records):\n    \"\"\"Return {\"count\": n, \"total\": sum_of_values, \"mean\": total / count}.\n    mean is 0.0 when records is empty (cou", "new_string": "\"\"\"Aggregation over parsed records.\"\"\"\nimport datasource\n\n\ndef summarize(records):\n    \"\"\"Return {\"count\": n, \"total\": sum_of_values, \"mean\": total / count}.\n    mean is 0.0 when records is empty (cou"}}
-{"ts": 20.6958, "event": "write", "agent": "solo", "path": "pipeline.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["summarize", "summarize_text"], "message": ""}
-{"ts": 24.32, "event": "llm_usage", "agent": "solo", "turn": 9, "prompt_tokens": 1933, "completion_tokens": 298}
-{"ts": 24.3201, "event": "tool_call", "agent": "solo", "turn": 9, "tool": "edit_file", "args": {"path": "report.py", "old_string": "\"\"\"Human-readable report formatting.\"\"\"\nimport pipeline\n\n\ndef format_report(summary):\n    \"\"\"Return the string 'count=<count> total=<total:.1f> mean=<mean:.2f>'\n    for a summary dict as produced by p", "new_string": "\"\"\"Human-readable report formatting.\"\"\"\nimport pipeline\n\n\ndef format_report(summary):\n    \"\"\"Return the string 'count=<count> total=<total:.1f> mean=<mean:.2f>'\n    for a summary dict as produced by p"}}
-{"ts": 24.3227, "event": "write", "agent": "solo", "path": "report.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["format_report", "report_from_text"], "message": ""}
-{"ts": 26.4779, "event": "llm_usage", "agent": "solo", "turn": 10, "prompt_tokens": 2247, "completion_tokens": 136}
-{"ts": 26.4781, "event": "tool_call", "agent": "solo", "turn": 10, "tool": "edit_file", "args": {"path": "cli.py", "old_string": "\"\"\"Command-line entry point.\"\"\"\nimport report\n\n\ndef build_report(text):\n    \"\"\"Return report.report_from_text(text) prefixed with 'REPORT: '.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Command-line entry point.\"\"\"\nimport report\n\n\ndef build_report(text):\n    \"\"\"Return report.report_from_text(text) prefixed with 'REPORT: '.\"\"\"\n    return \"REPORT: \" + report.report_from_text(text)\n"}}
-{"ts": 26.4806, "event": "write", "agent": "solo", "path": "cli.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["build_report"], "message": ""}
-{"ts": 27.7083, "event": "llm_usage", "agent": "solo", "turn": 11, "prompt_tokens": 2399, "completion_tokens": 13}
-{"ts": 27.7085, "event": "tool_call", "agent": "solo", "turn": 11, "tool": "run_tests", "args": {}}
-{"ts": 28.0512, "event": "run_tests", "agent": "solo", "passed": 2, "failed": 0, "errored": 0}
-{"ts": 29.5565, "event": "llm_usage", "agent": "solo", "turn": 12, "prompt_tokens": 2438, "completion_tokens": 56}
-{"ts": 29.5566, "event": "tool_call", "agent": "solo", "turn": 12, "tool": "done", "args": {"summary": "Renamed parse_records to parse_dataset and made it skip blank/comment lines; implemented pipeline.summarize and summarize_text, report.format_report and report_from_text, and cli.build_report; all tes"}}
-{"ts": 29.5567, "event": "agent_done_coord", "agent": "solo"}
-{"ts": 29.5567, "event": "agent_done", "agent": "solo", "status": "done", "turns": 12, "prompt_tokens": 16932, "completion_tokens": 1884}
-{"ts": 29.8759, "event": "trial_end", "correct": true, "oracle_passed": 7, "oracle_total": 7, "wall_clock_s": 29.28, "prompt_tokens": 16932, "completion_tokens": 1884, "agent_statuses": {"solo": "done"}, "oracle_output": ".......                                                                  [100%]\n7 passed in 0.02s\n"}
+{"ts": 0.2061, "event": "trial_start", "task": "t4_cascade", "failure_mode": "causal_cascade", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 3, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["solo"]}
+{"ts": 1.5883, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 813, "completion_tokens": 19}
+{"ts": 1.5886, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.5845, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 916, "completion_tokens": 20}
+{"ts": 2.5847, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "read_file", "args": {"path": "datasource/parser.py"}}
+{"ts": 2.5854, "event": "read", "agent": "solo", "path": "datasource/parser.py", "found": true, "size": 420}
+{"ts": 3.5657, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 1037, "completion_tokens": 21}
+{"ts": 3.5658, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "read_file", "args": {"path": "datasource/filters.py"}}
+{"ts": 3.5662, "event": "read", "agent": "solo", "path": "datasource/filters.py", "found": true, "size": 197}
+{"ts": 4.5506, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 1113, "completion_tokens": 22}
+{"ts": 4.5509, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "read_file", "args": {"path": "datasource/__init__.py"}}
+{"ts": 4.5514, "event": "read", "agent": "solo", "path": "datasource/__init__.py", "found": true, "size": 134}
+{"ts": 5.6921, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 1173, "completion_tokens": 20}
+{"ts": 5.6922, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "read_file", "args": {"path": "pipeline/aggregate.py"}}
+{"ts": 5.6925, "event": "read", "agent": "solo", "path": "pipeline/aggregate.py", "found": true, "size": 233}
+{"ts": 6.6693, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 1266, "completion_tokens": 19}
+{"ts": 6.6695, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "read_file", "args": {"path": "pipeline/text.py"}}
+{"ts": 6.6699, "event": "read", "agent": "solo", "path": "pipeline/text.py", "found": true, "size": 277}
+{"ts": 7.6751, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 1346, "completion_tokens": 21}
+{"ts": 7.6752, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "read_file", "args": {"path": "pipeline/__init__.py"}}
+{"ts": 7.6758, "event": "read", "agent": "solo", "path": "pipeline/__init__.py", "found": true, "size": 178}
+{"ts": 8.6773, "event": "llm_usage", "agent": "solo", "turn": 8, "prompt_tokens": 1416, "completion_tokens": 20}
+{"ts": 8.6775, "event": "tool_call", "agent": "solo", "turn": 8, "tool": "read_file", "args": {"path": "report/format.py"}}
+{"ts": 8.6781, "event": "read", "agent": "solo", "path": "report/format.py", "found": true, "size": 236}
+{"ts": 9.8041, "event": "llm_usage", "agent": "solo", "turn": 9, "prompt_tokens": 1502, "completion_tokens": 20}
+{"ts": 9.8042, "event": "tool_call", "agent": "solo", "turn": 9, "tool": "read_file", "args": {"path": "report/from_text.py"}}
+{"ts": 9.8045, "event": "read", "agent": "solo", "path": "report/from_text.py", "found": true, "size": 273}
+{"ts": 10.8002, "event": "llm_usage", "agent": "solo", "turn": 10, "prompt_tokens": 1589, "completion_tokens": 21}
+{"ts": 10.8004, "event": "tool_call", "agent": "solo", "turn": 10, "tool": "read_file", "args": {"path": "report/__init__.py"}}
+{"ts": 10.8009, "event": "read", "agent": "solo", "path": "report/__init__.py", "found": true, "size": 185}
+{"ts": 11.8558, "event": "llm_usage", "agent": "solo", "turn": 11, "prompt_tokens": 1660, "completion_tokens": 19}
+{"ts": 11.8559, "event": "tool_call", "agent": "solo", "turn": 11, "tool": "read_file", "args": {"path": "cli/main.py"}}
+{"ts": 11.8569, "event": "read", "agent": "solo", "path": "cli/main.py", "found": true, "size": 175}
+{"ts": 12.8448, "event": "llm_usage", "agent": "solo", "turn": 12, "prompt_tokens": 1727, "completion_tokens": 19}
+{"ts": 12.8448, "event": "tool_call", "agent": "solo", "turn": 12, "tool": "read_file", "args": {"path": "shared/types.py"}}
+{"ts": 12.8453, "event": "read", "agent": "solo", "path": "shared/types.py", "found": true, "size": 132}
+{"ts": 14.0514, "event": "llm_usage", "agent": "solo", "turn": 13, "prompt_tokens": 1787, "completion_tokens": 21}
+{"ts": 14.0514, "event": "tool_call", "agent": "solo", "turn": 13, "tool": "read_file", "args": {"path": "tests/test_pipeline_chain.py"}}
+{"ts": 14.0518, "event": "read", "agent": "solo", "path": "tests/test_pipeline_chain.py", "found": true, "size": 503}
+{"ts": 16.7745, "event": "llm_usage", "agent": "solo", "turn": 14, "prompt_tokens": 1950, "completion_tokens": 157}
+{"ts": 16.7747, "event": "tool_call", "agent": "solo", "turn": 14, "tool": "grep", "args": {"pattern": "parse_records", "glob": "**/*"}}
+{"ts": 16.7902, "event": "search", "agent": "solo", "kind": "grep", "pattern": "parse_records", "n": 3}
+{"ts": 37.634, "event": "llm_usage", "agent": "solo", "turn": 15, "prompt_tokens": 2027, "completion_tokens": 1953}
+{"ts": 37.6341, "event": "tool_call", "agent": "solo", "turn": 15, "tool": "edit_file", "args": {"path": "datasource/parser.py", "old_string": "\"\"\"Record parsing for the reporting pipeline.\"\"\"\nfrom datasource.filters import is_skippable\n\n\ndef parse_records(text):\n    \"\"\"Parse 'name,value' lines into a list of (name, float_value) tuples.\"\"\"\n  ", "new_string": "\"\"\"Record parsing for the reporting pipeline.\"\"\"\nfrom datasource.filters import is_skippable\n\n\ndef parse_dataset(text):\n    \"\"\"Parse 'name,value' lines into a list of (name, float_value) tuples.\n    S"}}
+{"ts": 37.6361, "event": "write", "agent": "solo", "path": "datasource/parser.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["parse_dataset", "parse_records"], "message": ""}
+{"ts": 39.5425, "event": "llm_usage", "agent": "solo", "turn": 16, "prompt_tokens": 2326, "completion_tokens": 102}
+{"ts": 39.5429, "event": "tool_call", "agent": "solo", "turn": 16, "tool": "edit_file", "args": {"path": "datasource/__init__.py", "old_string": "\"\"\"Datasource package — re-exports the public parser API.\"\"\"\nfrom datasource.parser import parse_records\n\n__all__ = [\"parse_records\"]\n", "new_string": "\"\"\"Datasource package — re-exports the public parser API.\"\"\"\nfrom datasource.parser import parse_dataset\n\n__all__ = [\"parse_dataset\"]\n"}}
+{"ts": 39.5494, "event": "write", "agent": "solo", "path": "datasource/__init__.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 40.775, "event": "llm_usage", "agent": "solo", "turn": 17, "prompt_tokens": 2444, "completion_tokens": 19}
+{"ts": 40.7751, "event": "tool_call", "agent": "solo", "turn": 17, "tool": "read_file", "args": {"path": "pipeline/text.py"}}
+{"ts": 40.7756, "event": "read", "agent": "solo", "path": "pipeline/text.py", "found": true, "size": 277}
+{"ts": 42.3798, "event": "llm_usage", "agent": "solo", "turn": 18, "prompt_tokens": 2524, "completion_tokens": 20}
+{"ts": 42.3799, "event": "tool_call", "agent": "solo", "turn": 18, "tool": "read_file", "args": {"path": "pipeline/aggregate.py"}}
+{"ts": 42.3806, "event": "read", "agent": "solo", "path": "pipeline/aggregate.py", "found": true, "size": 233}
+{"ts": 43.5944, "event": "llm_usage", "agent": "solo", "turn": 19, "prompt_tokens": 2617, "completion_tokens": 21}
+{"ts": 43.5945, "event": "tool_call", "agent": "solo", "turn": 19, "tool": "read_file", "args": {"path": "pipeline/__init__.py"}}
+{"ts": 43.5949, "event": "read", "agent": "solo", "path": "pipeline/__init__.py", "found": true, "size": 178}
+{"ts": 44.8533, "event": "llm_usage", "agent": "solo", "turn": 20, "prompt_tokens": 2687, "completion_tokens": 20}
+{"ts": 44.8535, "event": "tool_call", "agent": "solo", "turn": 20, "tool": "read_file", "args": {"path": "report/format.py"}}
+{"ts": 44.8551, "event": "read", "agent": "solo", "path": "report/format.py", "found": true, "size": 236}
+{"ts": 46.0254, "event": "llm_usage", "agent": "solo", "turn": 21, "prompt_tokens": 2773, "completion_tokens": 20}
+{"ts": 46.0255, "event": "tool_call", "agent": "solo", "turn": 21, "tool": "read_file", "args": {"path": "report/from_text.py"}}
+{"ts": 46.0283, "event": "read", "agent": "solo", "path": "report/from_text.py", "found": true, "size": 273}
+{"ts": 47.2362, "event": "llm_usage", "agent": "solo", "turn": 22, "prompt_tokens": 2860, "completion_tokens": 19}
+{"ts": 47.2363, "event": "tool_call", "agent": "solo", "turn": 22, "tool": "read_file", "args": {"path": "cli/main.py"}}
+{"ts": 47.2369, "event": "read", "agent": "solo", "path": "cli/main.py", "found": true, "size": 175}
+{"ts": 48.4322, "event": "llm_usage", "agent": "solo", "turn": 23, "prompt_tokens": 2927, "completion_tokens": 21}
+{"ts": 48.4325, "event": "tool_call", "agent": "solo", "turn": 23, "tool": "read_file", "args": {"path": "report/__init__.py"}}
+{"ts": 48.434, "event": "read", "agent": "solo", "path": "report/__init__.py", "found": true, "size": 185}
+{"ts": 51.9959, "event": "llm_usage", "agent": "solo", "turn": 24, "prompt_tokens": 2998, "completion_tokens": 233}
+{"ts": 51.996, "event": "tool_call", "agent": "solo", "turn": 24, "tool": "edit_file", "args": {"path": "pipeline/aggregate.py", "old_string": "\"\"\"Aggregation over parsed records.\"\"\"\n\n\ndef summarize(records):\n    \"\"\"Return {\"count\": n, \"total\": sum_of_values, \"mean\": total / count}.\n    mean is 0.0 when records is empty (count 0, total 0.0).\"", "new_string": "\"\"\"Aggregation over parsed records.\"\"\"\n\n\ndef summarize(records):\n    \"\"\"Return {\"count\": n, \"total\": sum_of_values, \"mean\": total / count}.\n    mean is 0.0 when records is empty (count 0, total 0.0).\""}}
+{"ts": 51.9971, "event": "write", "agent": "solo", "path": "pipeline/aggregate.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["summarize"], "message": ""}
+{"ts": 54.8947, "event": "llm_usage", "agent": "solo", "turn": 25, "prompt_tokens": 3247, "completion_tokens": 175}
+{"ts": 54.8949, "event": "tool_call", "agent": "solo", "turn": 25, "tool": "edit_file", "args": {"path": "pipeline/text.py", "old_string": "\"\"\"Text-to-summary entry points.\"\"\"\nimport datasource\n\nfrom pipeline.aggregate import summarize\n\n\ndef summarize_text(text):\n    \"\"\"Parse raw text using the record-parsing function datasource provides,", "new_string": "\"\"\"Text-to-summary entry points.\"\"\"\nimport datasource\n\nfrom pipeline.aggregate import summarize\n\n\ndef summarize_text(text):\n    \"\"\"Parse raw text using the record-parsing function datasource provides,"}}
+{"ts": 54.8973, "event": "write", "agent": "solo", "path": "pipeline/text.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["summarize_text"], "message": ""}
+{"ts": 58.0422, "event": "llm_usage", "agent": "solo", "turn": 26, "prompt_tokens": 3438, "completion_tokens": 194}
+{"ts": 58.0424, "event": "tool_call", "agent": "solo", "turn": 26, "tool": "edit_file", "args": {"path": "report/format.py", "old_string": "\"\"\"Human-readable report formatting.\"\"\"\n\n\ndef format_report(summary):\n    \"\"\"Return the string 'count=<count> total=<total:.1f> mean=<mean:.2f>'\n    for a summary dict as produced by pipeline.summariz", "new_string": "\"\"\"Human-readable report formatting.\"\"\"\n\n\ndef format_report(summary):\n    \"\"\"Return the string 'count=<count> total=<total:.1f> mean=<mean:.2f>'\n    for a summary dict as produced by pipeline.summariz"}}
+{"ts": 58.0437, "event": "write", "agent": "solo", "path": "report/format.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["format_report"], "message": ""}
+{"ts": 60.8679, "event": "llm_usage", "agent": "solo", "turn": 27, "prompt_tokens": 3648, "completion_tokens": 182}
+{"ts": 60.8681, "event": "tool_call", "agent": "solo", "turn": 27, "tool": "edit_file", "args": {"path": "report/from_text.py", "old_string": "\"\"\"Build a report from raw text via the pipeline.\"\"\"\nimport pipeline\n\nfrom report.format import format_report\n\n\ndef report_from_text(text):\n    \"\"\"Summarize raw text via pipeline.summarize_text and fo", "new_string": "\"\"\"Build a report from raw text via the pipeline.\"\"\"\nimport pipeline\n\nfrom report.format import format_report\n\n\ndef report_from_text(text):\n    \"\"\"Summarize raw text via pipeline.summarize_text and fo"}}
+{"ts": 60.8703, "event": "write", "agent": "solo", "path": "report/from_text.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["report_from_text"], "message": ""}
+{"ts": 63.1669, "event": "llm_usage", "agent": "solo", "turn": 28, "prompt_tokens": 3846, "completion_tokens": 137}
+{"ts": 63.167, "event": "tool_call", "agent": "solo", "turn": 28, "tool": "edit_file", "args": {"path": "cli/main.py", "old_string": "\"\"\"Command-line entry point.\"\"\"\nimport report\n\n\ndef build_report(text):\n    \"\"\"Return report.report_from_text(text) prefixed with 'REPORT: '.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Command-line entry point.\"\"\"\nimport report\n\n\ndef build_report(text):\n    \"\"\"Return report.report_from_text(text) prefixed with 'REPORT: '.\"\"\"\n    return \"REPORT: \" + report.report_from_text(text)\n"}}
+{"ts": 63.1687, "event": "write", "agent": "solo", "path": "cli/main.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["build_report"], "message": ""}
+{"ts": 64.3905, "event": "llm_usage", "agent": "solo", "turn": 29, "prompt_tokens": 3999, "completion_tokens": 23}
+{"ts": 64.3909, "event": "tool_call", "agent": "solo", "turn": 29, "tool": "grep", "args": {"pattern": "parse_dataset", "glob": "**/*"}}
+{"ts": 64.4334, "event": "search", "agent": "solo", "kind": "grep", "pattern": "parse_dataset", "n": 5}
+{"ts": 65.5309, "event": "llm_usage", "agent": "solo", "turn": 30, "prompt_tokens": 4103, "completion_tokens": 23}
+{"ts": 65.5311, "event": "tool_call", "agent": "solo", "turn": 30, "tool": "grep", "args": {"pattern": "parse_records", "glob": "**/*"}}
+{"ts": 65.5368, "event": "search", "agent": "solo", "kind": "grep", "pattern": "parse_records", "n": 0}
+{"ts": 66.6738, "event": "llm_usage", "agent": "solo", "turn": 31, "prompt_tokens": 4139, "completion_tokens": 13}
+{"ts": 66.674, "event": "tool_call", "agent": "solo", "turn": 31, "tool": "run_tests", "args": {}}
+{"ts": 67.033, "event": "run_tests", "agent": "solo", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 68.8071, "event": "llm_usage", "agent": "solo", "turn": 32, "prompt_tokens": 4178, "completion_tokens": 65}
+{"ts": 68.8072, "event": "tool_call", "agent": "solo", "turn": 32, "tool": "done", "args": {"summary": "Renamed datasource.parse_records to parse_dataset and added skipping of blank/comment lines; implemented pipeline.summarize and pipeline.summarize_text; implemented report.format.format_report and rep"}}
+{"ts": 68.8072, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 68.8073, "event": "agent_done", "agent": "solo", "status": "done", "turns": 32, "prompt_tokens": 76076, "completion_tokens": 3659}
+{"ts": 69.0626, "event": "trial_end", "correct": true, "oracle_passed": 7, "oracle_total": 7, "wall_clock_s": 68.58, "prompt_tokens": 76076, "completion_tokens": 3659, "agent_statuses": {"solo": "done"}, "oracle_output": ".......                                                                  [100%]\n7 passed in 0.02s\n"}

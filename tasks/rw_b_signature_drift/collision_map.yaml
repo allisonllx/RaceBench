@@ -1,0 +1,18 @@
+failure_mode: stale_read_signature_drift
+critical_paths:
+  - conduit/serializers/article_format.py
+  - conduit/services/feed.py
+  - conduit/api/routes_articles.py
+  - conduit/api/routes_feed.py
+collision_points:
+  - file: conduit/serializers/article_format.py
+    symbol: format_article
+    agents: [agent-i18n]
+    kind: signature_change
+  - file: conduit/services/feed.py
+    symbol: reading_time_for_slug
+    agents: [agent-reading-time]
+    kind: stale_premise_consumer
+expected_anomaly: >
+  If reading-time was written against the old one-arg format_article, the
+  final tree TypeErrors or 500s once locale is required.

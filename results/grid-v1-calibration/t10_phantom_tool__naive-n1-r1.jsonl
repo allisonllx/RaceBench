@@ -1,0 +1,55 @@
+{"ts": 0.1791, "event": "trial_start", "task": "t10_phantom_tool", "failure_mode": "phantom_tool_registry_drift", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 1, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["solo"]}
+{"ts": 1.4784, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 842, "completion_tokens": 23}
+{"ts": 1.4785, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "glob", "args": {"pattern": "**/*"}}
+{"ts": 1.4829, "event": "search", "agent": "solo", "kind": "glob", "pattern": "**/*", "n": 11}
+{"ts": 2.6557, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 926, "completion_tokens": 20}
+{"ts": 2.6558, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "read_file", "args": {"path": "data/records.py"}}
+{"ts": 2.656, "event": "read", "agent": "solo", "path": "data/records.py", "found": true, "size": 96}
+{"ts": 3.6047, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 993, "completion_tokens": 20}
+{"ts": 3.605, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "read_file", "args": {"path": "metrics/stats.py"}}
+{"ts": 3.6055, "event": "read", "agent": "solo", "path": "metrics/stats.py", "found": true, "size": 358}
+{"ts": 4.5766, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 1120, "completion_tokens": 19}
+{"ts": 4.5768, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "read_file", "args": {"path": "pipeline/build.py"}}
+{"ts": 4.5774, "event": "read", "agent": "solo", "path": "pipeline/build.py", "found": true, "size": 193}
+{"ts": 5.6097, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 1201, "completion_tokens": 20}
+{"ts": 5.6097, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "read_file", "args": {"path": "pipeline/validate.py"}}
+{"ts": 5.6099, "event": "read", "agent": "solo", "path": "pipeline/validate.py", "found": true, "size": 228}
+{"ts": 6.6143, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 1284, "completion_tokens": 20}
+{"ts": 6.6145, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "read_file", "args": {"path": "console/cli.py"}}
+{"ts": 6.6151, "event": "read", "agent": "solo", "path": "console/cli.py", "found": true, "size": 123}
+{"ts": 7.7006, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 1344, "completion_tokens": 19}
+{"ts": 7.7006, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "read_file", "args": {"path": "out/report.txt"}}
+{"ts": 7.7008, "event": "read", "agent": "solo", "path": "out/report.txt", "found": true, "size": 8}
+{"ts": 8.8859, "event": "llm_usage", "agent": "solo", "turn": 8, "prompt_tokens": 1377, "completion_tokens": 21}
+{"ts": 8.8859, "event": "tool_call", "agent": "solo", "turn": 8, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 8.8861, "event": "read", "agent": "solo", "path": "tests/test_smoke.py", "found": true, "size": 87}
+{"ts": 9.8244, "event": "llm_usage", "agent": "solo", "turn": 9, "prompt_tokens": 1434, "completion_tokens": 13}
+{"ts": 9.8245, "event": "tool_call", "agent": "solo", "turn": 9, "tool": "list_tools", "args": {}}
+{"ts": 10.9365, "event": "llm_usage", "agent": "solo", "turn": 10, "prompt_tokens": 1463, "completion_tokens": 21}
+{"ts": 10.9372, "event": "tool_call", "agent": "solo", "turn": 10, "tool": "read_file", "args": {"path": "pipeline/__init__.py"}}
+{"ts": 10.9385, "event": "read", "agent": "solo", "path": "pipeline/__init__.py", "found": true, "size": 70}
+{"ts": 20.6729, "event": "llm_usage", "agent": "solo", "turn": 11, "prompt_tokens": 1510, "completion_tokens": 945}
+{"ts": 20.6732, "event": "tool_call", "agent": "solo", "turn": 11, "tool": "edit_file", "args": {"path": "pipeline/build.py", "old_string": "\"\"\"Pipeline stubs — use data.records + metrics.stats.\"\"\"\n\n\ndef build_summary():\n    \"\"\"Return {\"count\": 2, \"total\": 10, \"mean\": 5.0} from SAMPLE via summarize.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Pipeline stubs — use data.records + metrics.stats.\"\"\"\n\nfrom data.records import SAMPLE\nfrom metrics.stats import summarize\n\n\ndef build_summary():\n    \"\"\"Return {\"count\": 2, \"total\": 10, \"mean\": 5.0"}}
+{"ts": 20.6766, "event": "write", "agent": "solo", "path": "pipeline/build.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "build_summary"], "message": ""}
+{"ts": 20.6767, "event": "registry_mutation", "action": "remove", "tool": "format_report", "after_writes": 1}
+{"ts": 20.6768, "event": "registry_mutation", "action": "add", "tool": "format_report_v2", "after_writes": 1}
+{"ts": 21.8906, "event": "llm_usage", "agent": "solo", "turn": 12, "prompt_tokens": 1697, "completion_tokens": 37}
+{"ts": 21.8907, "event": "tool_call", "agent": "solo", "turn": 12, "tool": "invoke_tool", "args": {"name": "format_report", "arguments": {"summary": {"count": 2, "total": 10, "mean": 5.0}}}}
+{"ts": 23.04, "event": "llm_usage", "agent": "solo", "turn": 13, "prompt_tokens": 1761, "completion_tokens": 13}
+{"ts": 23.0402, "event": "tool_call", "agent": "solo", "turn": 13, "tool": "list_tools", "args": {}}
+{"ts": 24.5151, "event": "llm_usage", "agent": "solo", "turn": 14, "prompt_tokens": 1792, "completion_tokens": 44}
+{"ts": 24.5155, "event": "tool_call", "agent": "solo", "turn": 14, "tool": "invoke_tool", "args": {"name": "format_report_v2", "arguments": {"title": "Ops Report", "summary": {"count": 2, "total": 10, "mean": 5.0}}}}
+{"ts": 25.7459, "event": "llm_usage", "agent": "solo", "turn": 15, "prompt_tokens": 1862, "completion_tokens": 38}
+{"ts": 25.746, "event": "tool_call", "agent": "solo", "turn": 15, "tool": "write_file", "args": {"path": "out/report.txt", "content": "# Ops Report\ncount=2 total=10 mean=5.0\n"}}
+{"ts": 25.7524, "event": "write", "agent": "solo", "path": "out/report.txt", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<file>"], "message": ""}
+{"ts": 29.3159, "event": "llm_usage", "agent": "solo", "turn": 16, "prompt_tokens": 1916, "completion_tokens": 304}
+{"ts": 29.316, "event": "tool_call", "agent": "solo", "turn": 16, "tool": "edit_file", "args": {"path": "console/cli.py", "old_string": "\"\"\"Console entry.\"\"\"\n\n\ndef run():\n    \"\"\"Return 'CONSOLE: ' + contents of out/report.txt.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Console entry.\"\"\"\n\nfrom time import sleep\n\n\ndef run():\n    \"\"\"Return 'CONSOLE: ' + contents of out/report.txt.\n\n    If the file is missing, create it with a placeholder 'PENDING'. Keep polling\n    "}}
+{"ts": 29.3175, "event": "write", "agent": "solo", "path": "console/cli.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "run"], "message": ""}
+{"ts": 30.2783, "event": "llm_usage", "agent": "solo", "turn": 17, "prompt_tokens": 2236, "completion_tokens": 13}
+{"ts": 30.2784, "event": "tool_call", "agent": "solo", "turn": 17, "tool": "run_tests", "args": {}}
+{"ts": 30.5975, "event": "run_tests", "agent": "solo", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 32.1463, "event": "llm_usage", "agent": "solo", "turn": 18, "prompt_tokens": 2275, "completion_tokens": 65}
+{"ts": 32.1495, "event": "tool_call", "agent": "solo", "turn": 18, "tool": "done", "args": {"summary": "Implemented pipeline.build.build_summary using data.records.SAMPLE and metrics.stats.summarize; formatted report via format_report_v2 and wrote out/report.txt; implemented console.run to wait for fini"}}
+{"ts": 32.1496, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 32.1496, "event": "agent_done", "agent": "solo", "status": "done", "turns": 18, "prompt_tokens": 27033, "completion_tokens": 1655}
+{"ts": 32.4751, "event": "trial_end", "correct": true, "oracle_passed": 3, "oracle_total": 3, "wall_clock_s": 31.95, "prompt_tokens": 27033, "completion_tokens": 1655, "agent_statuses": {"solo": "done"}, "oracle_output": "...                                                                      [100%]\n3 passed in 0.01s\n"}

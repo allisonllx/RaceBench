@@ -254,6 +254,43 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         )}),
         ("done", {"summary": "services during models hold"}),
     ],
+    # rw_c — disjoint handlers in routes_articles.py
+    ("rw_c_benign_overlap", "agent-favorite", "edit"): [
+        ("read_file", {"path": "conduit/services/favorites.py"}),
+        ("read_file", {"path": "conduit/api/routes_articles.py"}),
+        ("write_file", {"path": "conduit/services/favorites.py",
+                        "content": (
+                            Path(__file__).resolve().parent.parent
+                            / "tasks/rw_c_benign_overlap/reference/conduit/services/favorites.py"
+                        ).read_text(encoding="utf-8")}),
+        ("edit_file", {"path": "conduit/api/routes_articles.py",
+                       "old_string": (
+                           '    """Remove favorite. Wired by agents in the benign-overlap task."""\n'
+                           '    raise HTTPException(status_code=501, detail="not implemented")'
+                       ),
+                       "new_string": (
+                           "    article = favorites_svc.unfavorite_article(conn, user[\"id\"], slug)\n"
+                           "    if article is None:\n"
+                           '        raise HTTPException(status_code=404, detail="not found")\n'
+                           '    return {"article": format_article(article)}'
+                       )}),
+        ("done", {"summary": "implemented unfavorite"}),
+    ],
+    ("rw_c_benign_overlap", "agent-listfix", "edit"): [
+        ("read_file", {"path": "conduit/api/routes_articles.py"}),
+        ("edit_file", {"path": "conduit/api/routes_articles.py",
+                       "old_string": (
+                           "    rows = articles_svc.list_articles(conn, tag)\n"
+                           "    # Seeded bug for rw_c (agent-listfix): returns slug-only stubs.\n"
+                           "    # Correct implementation returns format_article(r) for each row.\n"
+                           '    return {"articles": [{"slug": r["slug"]} for r in rows]}'
+                       ),
+                       "new_string": (
+                           "    rows = articles_svc.list_articles(conn, tag)\n"
+                           '    return {"articles": [format_article(r) for r in rows]}'
+                       )}),
+        ("done", {"summary": "fixed list_articles formatting"}),
+    ],
 }
 
 def get_script(task: str, agent_id: str, variant: str) -> list[tuple[str, dict]]:

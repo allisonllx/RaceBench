@@ -211,3 +211,17 @@ async def test_ast_dep_silent_on_benign_overlap(tmp_path):
     metrics = trial_metrics(log)
     assert metrics["stall_events"] == 0, \
         "ast_dep must not FP-stall on disjoint same-file symbols"
+
+
+async def test_rw_c_ast_scope_silent_file_lock_stalls(tmp_path):
+    result, log = await run_scripted(
+        "rw_c_benign_overlap", "ast_scope", "edit", tmp_path)
+    assert result.correct
+    assert trial_metrics(log)["stall_events"] == 0
+
+    result, log = await run_scripted(
+        "rw_c_benign_overlap", "file_lock", "edit", tmp_path)
+    assert result.correct
+    m = trial_metrics(log)
+    assert m["stall_events"] >= 1
+    assert m["fp_stall_events"] == m["stall_events"]
