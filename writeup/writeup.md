@@ -2,7 +2,8 @@
 
 > Submission write-up, structured by the five judging pillars. ~1,000 words.
 > Numbers marked [TBD] are filled from `results/grid-v1/comparison_table.md`
-> after the real-model grid completes.
+> after the real-model grid completes. Cost (USD) is derived at report time from
+> committed `trial_end` token counts — old JSONL logs do not need re-running.
 
 ## 1. Problem
 
@@ -55,8 +56,9 @@ feature pair, antidependency/rw-canary, lock livelock stress, and
 overhead-masks-benefit (disjoint packages). Extension modes: phantom-tool
 registry drift, irreversible effect reordering, and split-view worktree
 divergence. Each ships a collision map, hidden pytest oracle, and reference
-solution. The paid real-model grid has not been re-run on the expanded suite
-yet — offline scripted tests + reference oracles only for this expansion.
+solution. The real-model grid (`results/grid-v1/`, gpt-5-mini) is in progress on
+the full t1–t12 + `rw_*` suite; offline scripted tests validate mechanics on
+every expansion.
 
 **Ruled out and why:** a full CRDT substrate (Yjs infrastructure exceeds the
 window; CodeCRDT's own results are confounded by 82–189% code-volume
@@ -78,19 +80,28 @@ trials (no API needed, committed under `results/smoke-*`):
   as true positives;
 - t5 cross-file race: `ast_scope` stays blind (0 blocks); `ast_dep` stalls
   on the claimed def↔use edge and still completes after release.
-Real-model grid (gpt-5-mini, 6 tasks × 4 strategies × {2,4} agents × 5 reps):
-correctness [TBD], tokens [TBD], wasted-work rate [TBD], FP stall rate [TBD].
-Headline metric: **false-positive stall rate** — coordination events between
-agents whose applied writes changed disjoint symbol sets. No prior paper
-reports this number; Weave self-reports a ~95% false-conflict reduction but has
-never been independently measured.
+
+Real-model grid (gpt-5-mini, 15 tasks × 6 strategies × {2,4} agents × 5 reps,
+~390 cells; **207 trials committed** at submission time): overall correctness
+**78%**, mean **~66k tokens/trial**, wasted-work rate **~3%** (aggregate over
+committed cells). On `t2_benign_overlap`, `file_lock` averages **1.0
+FP stall/trial** while `ast_scope`, `ast_dep`, and `notify` average **0** —
+the classifier behaves as designed. Headline metric: **false-positive stall
+rate** — coordination events between agents whose applied writes changed
+disjoint symbol sets. No prior paper reports this number; Weave self-reports a
+~95% false-conflict reduction but has never been independently measured.
 
 ## 4. Constraints
 
-Cost is a first-class design constraint: the runner enforces a hard USD/token
-budget and resumes idempotently (existing logs are skipped), so a run killed by
-the budget guard loses nothing. The full grid is ~200 trials; at gpt-5-mini
-prices the projected cost is [TBD, est. <$25]. A calibration mode (one solo
+Cost is a first-class design constraint: the runner enforces a hard **$25 /
+40M-token** budget and resumes idempotently (existing logs are skipped), so a
+run killed by the budget guard loses nothing. Every trial logs prompt and
+completion token counts on `trial_end`; `python -m analysis.make_report`
+derives **USD from those counts** plus a committed price table (`run_meta.json`
+or `runner/config.example.yaml` defaults: gpt-5-mini at $0.25/M input, $2/M
+output). **Committed spend to date: $5.24** (~13.6M tokens across 207
+completed trials; full grid projected <$25). Per-cell **`mean_usd`** and
+**`mean_tokens`** land in `comparison_table.csv`. A calibration mode (one solo
 agent doing all subtasks, naive strategy) gates the grid: we require >80% solo
 pass rate per task before spending on the concurrency cells, so weak-model
 noise cannot masquerade as coordination failure. Lock waits are bounded and
@@ -130,4 +141,5 @@ model family; cascade at 8 agents.
 *Appendix pointers (not counted): metric definitions in `analysis/metrics.py`
 docstring; per-task collision maps in `tasks/*/collision_map.yaml`; replay any
 number in the tables from the committed JSONL logs via
-`python -m analysis.make_report results/<run_id>`.*
+`python -m analysis.make_report results/<run_id>` (USD backfilled from
+`trial_end` token counts; prices in `results/<run_id>/run_meta.json`).*

@@ -1,0 +1,132 @@
+{"ts": 0.2055, "event": "trial_start", "task": "t6_feature_pair", "failure_mode": "realistic_feature_pair", "benign": false, "strategy": "file_lock", "n_agents": 2, "rep": 2, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-ttl", "agent-evict"]}
+{"ts": 1.5907, "event": "llm_usage", "agent": "agent-ttl", "turn": 1, "prompt_tokens": 695, "completion_tokens": 19}
+{"ts": 1.5908, "event": "tool_call", "agent": "agent-ttl", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 1.7557, "event": "llm_usage", "agent": "agent-evict", "turn": 1, "prompt_tokens": 694, "completion_tokens": 19}
+{"ts": 1.7558, "event": "tool_call", "agent": "agent-evict", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.4906, "event": "llm_usage", "agent": "agent-ttl", "turn": 2, "prompt_tokens": 774, "completion_tokens": 19}
+{"ts": 2.4907, "event": "tool_call", "agent": "agent-ttl", "turn": 2, "tool": "read_file", "args": {"path": "cache/core.py"}}
+{"ts": 2.491, "event": "read", "agent": "agent-ttl", "path": "cache/core.py", "found": true, "size": 497}
+{"ts": 2.6125, "event": "llm_usage", "agent": "agent-evict", "turn": 2, "prompt_tokens": 773, "completion_tokens": 19}
+{"ts": 2.6126, "event": "tool_call", "agent": "agent-evict", "turn": 2, "tool": "read_file", "args": {"path": "cache/core.py"}}
+{"ts": 2.6127, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-evict", "path": "cache/core.py", "holder": "agent-ttl"}
+{"ts": 3.4378, "event": "llm_usage", "agent": "agent-ttl", "turn": 3, "prompt_tokens": 925, "completion_tokens": 20}
+{"ts": 3.4379, "event": "tool_call", "agent": "agent-ttl", "turn": 3, "tool": "read_file", "args": {"path": "cache/expiry.py"}}
+{"ts": 3.4381, "event": "read", "agent": "agent-ttl", "path": "cache/expiry.py", "found": true, "size": 198}
+{"ts": 4.4887, "event": "llm_usage", "agent": "agent-ttl", "turn": 4, "prompt_tokens": 1004, "completion_tokens": 21}
+{"ts": 4.4888, "event": "tool_call", "agent": "agent-ttl", "turn": 4, "tool": "read_file", "args": {"path": "cache/clock_adapter.py"}}
+{"ts": 4.4891, "event": "read", "agent": "agent-ttl", "path": "cache/clock_adapter.py", "found": true, "size": 178}
+{"ts": 5.582, "event": "llm_usage", "agent": "agent-ttl", "turn": 5, "prompt_tokens": 1075, "completion_tokens": 18}
+{"ts": 5.582, "event": "tool_call", "agent": "agent-ttl", "turn": 5, "tool": "read_file", "args": {"path": "clock.py"}}
+{"ts": 5.5823, "event": "read", "agent": "agent-ttl", "path": "clock.py", "found": true, "size": 113}
+{"ts": 6.7326, "event": "llm_usage", "agent": "agent-ttl", "turn": 6, "prompt_tokens": 1131, "completion_tokens": 21}
+{"ts": 6.7327, "event": "tool_call", "agent": "agent-ttl", "turn": 6, "tool": "read_file", "args": {"path": "tests/test_cache_basic.py"}}
+{"ts": 6.7329, "event": "read", "agent": "agent-ttl", "path": "tests/test_cache_basic.py", "found": true, "size": 375}
+{"ts": 9.4781, "event": "llm_usage", "agent": "agent-ttl", "turn": 7, "prompt_tokens": 1276, "completion_tokens": 21}
+{"ts": 9.4787, "event": "tool_call", "agent": "agent-ttl", "turn": 7, "tool": "read_file", "args": {"path": "cache/eviction.py"}}
+{"ts": 9.48, "event": "read", "agent": "agent-ttl", "path": "cache/eviction.py", "found": true, "size": 201}
+{"ts": 13.6075, "event": "llm_usage", "agent": "agent-ttl", "turn": 8, "prompt_tokens": 1353, "completion_tokens": 286}
+{"ts": 13.6076, "event": "tool_call", "agent": "agent-ttl", "turn": 8, "tool": "grep", "args": {"pattern": "_data", "glob": "**/*"}}
+{"ts": 13.6145, "event": "search", "agent": "agent-ttl", "kind": "grep", "pattern": "_data", "n": 4}
+{"ts": 17.1604, "event": "llm_usage", "agent": "agent-ttl", "turn": 9, "prompt_tokens": 1442, "completion_tokens": 219}
+{"ts": 17.1621, "event": "tool_call", "agent": "agent-ttl", "turn": 9, "tool": "read_file", "args": {"path": "cache/__init__.py"}}
+{"ts": 17.1675, "event": "read", "agent": "agent-ttl", "path": "cache/__init__.py", "found": true, "size": 150}
+{"ts": 27.8052, "event": "llm_usage", "agent": "agent-ttl", "turn": 10, "prompt_tokens": 1509, "completion_tokens": 894}
+{"ts": 27.8054, "event": "tool_call", "agent": "agent-ttl", "turn": 10, "tool": "edit_file", "args": {"path": "cache/expiry.py", "old_string": "\"\"\"TTL helpers — stubs for agents to wire into Cache if useful.\"\"\"\n\n\ndef expired(expiry_ts, now_fn):\n    \"\"\"Return True if expiry_ts is set and now_fn() is past it.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"TTL helpers — small utilities used by Cache.\n\nThe cache stores an expiry timestamp (or None). expired() centralizes the\ncomparison so tests can inject alternate clock implementations.\n\"\"\"\n\n\ndef exp"}}
+{"ts": 27.8075, "event": "write", "agent": "agent-ttl", "path": "cache/expiry.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "expired"], "message": ""}
+{"ts": 32.6138, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-evict", "path": "cache/core.py", "waited_s": 30.001}
+{"ts": 32.6143, "event": "read", "agent": "agent-evict", "path": "cache/core.py", "found": false, "size": 0}
+{"ts": 34.1769, "event": "llm_usage", "agent": "agent-evict", "turn": 3, "prompt_tokens": 816, "completion_tokens": 13}
+{"ts": 34.177, "event": "tool_call", "agent": "agent-evict", "turn": 3, "tool": "list_files", "args": {}}
+{"ts": 35.1575, "event": "llm_usage", "agent": "agent-evict", "turn": 4, "prompt_tokens": 895, "completion_tokens": 19}
+{"ts": 35.1576, "event": "tool_call", "agent": "agent-evict", "turn": 4, "tool": "read_file", "args": {"path": "cache/core.py"}}
+{"ts": 35.1577, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-evict", "path": "cache/core.py", "holder": "agent-ttl"}
+{"ts": 35.3338, "event": "llm_usage", "agent": "agent-ttl", "turn": 11, "prompt_tokens": 1773, "completion_tokens": 537}
+{"ts": 35.3339, "event": "tool_call", "agent": "agent-ttl", "turn": 11, "tool": "read_file", "args": {"path": "cache/core.py"}}
+{"ts": 35.3343, "event": "read", "agent": "agent-ttl", "path": "cache/core.py", "found": true, "size": 497}
+{"ts": 53.3162, "event": "llm_usage", "agent": "agent-ttl", "turn": 12, "prompt_tokens": 1924, "completion_tokens": 1534}
+{"ts": 53.3166, "event": "tool_call", "agent": "agent-ttl", "turn": 12, "tool": "edit_file", "args": {"path": "cache/core.py", "old_string": "\"\"\"Core Cache class. Agents must integrate TTL and eviction here.\"\"\"\nfrom cache import clock_adapter as clock\n\n\nclass Cache:\n    def __init__(self, max_size=128):\n        self.max_size = max_size\n    ", "new_string": "\"\"\"Core Cache class with optional TTL support.\n\nValues are stored along with an expiry timestamp (or None). When ttl is\nprovided to set(), the expiry timestamp is computed using cache.clock_adapter.no"}}
+{"ts": 53.3195, "event": "write", "agent": "agent-ttl", "path": "cache/core.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "Cache"], "message": ""}
+{"ts": 54.6632, "event": "llm_usage", "agent": "agent-ttl", "turn": 13, "prompt_tokens": 2636, "completion_tokens": 22}
+{"ts": 54.6633, "event": "tool_call", "agent": "agent-ttl", "turn": 13, "tool": "grep", "args": {"pattern": "Cache(", "glob": "**/*"}}
+{"ts": 54.669, "event": "search", "agent": "agent-ttl", "kind": "grep", "pattern": "Cache(", "n": 3}
+{"ts": 56.0286, "event": "llm_usage", "agent": "agent-ttl", "turn": 14, "prompt_tokens": 2717, "completion_tokens": 13}
+{"ts": 56.0287, "event": "tool_call", "agent": "agent-ttl", "turn": 14, "tool": "run_tests", "args": {}}
+{"ts": 56.3341, "event": "run_tests", "agent": "agent-ttl", "passed": 3, "failed": 0, "errored": 0}
+{"ts": 57.6015, "event": "llm_usage", "agent": "agent-ttl", "turn": 15, "prompt_tokens": 2756, "completion_tokens": 21}
+{"ts": 57.6016, "event": "tool_call", "agent": "agent-ttl", "turn": 15, "tool": "read_file", "args": {"path": "cache/__init__.py"}}
+{"ts": 57.6018, "event": "read", "agent": "agent-ttl", "path": "cache/__init__.py", "found": true, "size": 150}
+{"ts": 65.1592, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-evict", "path": "cache/core.py", "waited_s": 30.001}
+{"ts": 65.1595, "event": "read", "agent": "agent-evict", "path": "cache/core.py", "found": false, "size": 0}
+{"ts": 66.8674, "event": "llm_usage", "agent": "agent-evict", "turn": 5, "prompt_tokens": 938, "completion_tokens": 30}
+{"ts": 66.8675, "event": "tool_call", "agent": "agent-evict", "turn": 5, "tool": "grep", "args": {"pattern": "class Cache", "glob": "**/*.py"}}
+{"ts": 66.8732, "event": "search", "agent": "agent-evict", "kind": "grep", "pattern": "class Cache", "n": 1}
+{"ts": 67.5483, "event": "llm_usage", "agent": "agent-ttl", "turn": 16, "prompt_tokens": 2823, "completion_tokens": 729}
+{"ts": 67.5517, "event": "tool_call", "agent": "agent-ttl", "turn": 16, "tool": "read_file", "args": {"path": "cache/core.py"}}
+{"ts": 67.5543, "event": "read", "agent": "agent-ttl", "path": "cache/core.py", "found": true, "size": 2112}
+{"ts": 67.8669, "event": "llm_usage", "agent": "agent-evict", "turn": 6, "prompt_tokens": 981, "completion_tokens": 21}
+{"ts": 67.867, "event": "tool_call", "agent": "agent-evict", "turn": 6, "tool": "read_file", "args": {"path": "cache/eviction.py"}}
+{"ts": 67.8672, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-evict", "path": "cache/eviction.py", "holder": "agent-ttl"}
+{"ts": 73.7612, "event": "llm_usage", "agent": "agent-ttl", "turn": 17, "prompt_tokens": 3313, "completion_tokens": 506}
+{"ts": 73.7613, "event": "tool_call", "agent": "agent-ttl", "turn": 17, "tool": "done", "args": {"summary": "Added TTL support: Cache.set accepts ttl (seconds); entries store expiry timestamps; Cache.get treats expired entries as missing and deletes them; implemented expiry.expired helper; preserved backward"}}
+{"ts": 73.7614, "event": "agent_done_coord", "agent": "agent-ttl"}
+{"ts": 73.7614, "event": "agent_done", "agent": "agent-ttl", "status": "done", "turns": 17, "prompt_tokens": 29126, "completion_tokens": 4900}
+{"ts": 73.7643, "event": "read", "agent": "agent-evict", "path": "cache/eviction.py", "found": true, "size": 201}
+{"ts": 75.0231, "event": "llm_usage", "agent": "agent-evict", "turn": 7, "prompt_tokens": 1058, "completion_tokens": 21}
+{"ts": 75.0232, "event": "tool_call", "agent": "agent-evict", "turn": 7, "tool": "read_file", "args": {"path": "cache/__init__.py"}}
+{"ts": 75.0236, "event": "read", "agent": "agent-evict", "path": "cache/__init__.py", "found": true, "size": 150}
+{"ts": 76.2894, "event": "llm_usage", "agent": "agent-evict", "turn": 8, "prompt_tokens": 1125, "completion_tokens": 20}
+{"ts": 76.2898, "event": "tool_call", "agent": "agent-evict", "turn": 8, "tool": "read_file", "args": {"path": "cache/expiry.py"}}
+{"ts": 76.2933, "event": "read", "agent": "agent-evict", "path": "cache/expiry.py", "found": true, "size": 612}
+{"ts": 77.3904, "event": "llm_usage", "agent": "agent-evict", "turn": 9, "prompt_tokens": 1290, "completion_tokens": 21}
+{"ts": 77.3905, "event": "tool_call", "agent": "agent-evict", "turn": 9, "tool": "read_file", "args": {"path": "cache/clock_adapter.py"}}
+{"ts": 77.3914, "event": "read", "agent": "agent-evict", "path": "cache/clock_adapter.py", "found": true, "size": 178}
+{"ts": 78.5363, "event": "llm_usage", "agent": "agent-evict", "turn": 10, "prompt_tokens": 1361, "completion_tokens": 23}
+{"ts": 78.5364, "event": "tool_call", "agent": "agent-evict", "turn": 10, "tool": "read_file", "args": {"path": "policies/oldest_first.py"}}
+{"ts": 78.5371, "event": "read", "agent": "agent-evict", "path": "policies/oldest_first.py", "found": true, "size": 82}
+{"ts": 79.9031, "event": "llm_usage", "agent": "agent-evict", "turn": 11, "prompt_tokens": 1413, "completion_tokens": 21}
+{"ts": 79.9032, "event": "tool_call", "agent": "agent-evict", "turn": 11, "tool": "read_file", "args": {"path": "tests/test_cache_basic.py"}}
+{"ts": 79.9036, "event": "read", "agent": "agent-evict", "path": "tests/test_cache_basic.py", "found": true, "size": 375}
+{"ts": 81.1568, "event": "llm_usage", "agent": "agent-evict", "turn": 12, "prompt_tokens": 1558, "completion_tokens": 18}
+{"ts": 81.157, "event": "tool_call", "agent": "agent-evict", "turn": 12, "tool": "read_file", "args": {"path": "clock.py"}}
+{"ts": 81.1576, "event": "read", "agent": "agent-evict", "path": "clock.py", "found": true, "size": 113}
+{"ts": 82.2626, "event": "llm_usage", "agent": "agent-evict", "turn": 13, "prompt_tokens": 1614, "completion_tokens": 20}
+{"ts": 82.2628, "event": "tool_call", "agent": "agent-evict", "turn": 13, "tool": "read_file", "args": {"path": "conftest.py"}}
+{"ts": 82.2634, "event": "read", "agent": "agent-evict", "path": "conftest.py", "found": true, "size": 92}
+{"ts": 84.0177, "event": "llm_usage", "agent": "agent-evict", "turn": 14, "prompt_tokens": 1668, "completion_tokens": 25}
+{"ts": 84.0179, "event": "tool_call", "agent": "agent-evict", "turn": 14, "tool": "read_file", "args": {"path": "cache/core.py"}}
+{"ts": 84.0187, "event": "read", "agent": "agent-evict", "path": "cache/core.py", "found": true, "size": 2112}
+{"ts": 101.585, "event": "llm_usage", "agent": "agent-evict", "turn": 15, "prompt_tokens": 2158, "completion_tokens": 1817}
+{"ts": 101.5854, "event": "tool_call", "agent": "agent-evict", "turn": 15, "tool": "read_file", "args": {"path": "cache/core.py"}}
+{"ts": 101.5862, "event": "read", "agent": "agent-evict", "path": "cache/core.py", "found": true, "size": 2112}
+{"ts": 122.6257, "event": "llm_usage", "agent": "agent-evict", "turn": 16, "prompt_tokens": 2648, "completion_tokens": 1997}
+{"ts": 122.6259, "event": "tool_call", "agent": "agent-evict", "turn": 16, "tool": "edit_file", "args": {"path": "cache/eviction.py", "old_string": "\"\"\"Eviction helpers — stubs for agents to wire into Cache if useful.\"\"\"\n\n\ndef oldest_key(data: dict):\n    \"\"\"Return the first key in insertion order, or None if empty.\"\"\"\n    raise NotImplementedError", "new_string": "\"\"\"Eviction helpers — small utilities used by Cache.\n\nProvide helpers to inspect insertion order of a mapping. Dictionaries in\nPython 3.7+ preserve insertion order so the \"oldest\" key is the first one"}}
+{"ts": 122.6279, "event": "write", "agent": "agent-evict", "path": "cache/eviction.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "oldest_key"], "message": ""}
+{"ts": 130.2153, "event": "llm_usage", "agent": "agent-evict", "turn": 17, "prompt_tokens": 2863, "completion_tokens": 717}
+{"ts": 130.2157, "event": "tool_call", "agent": "agent-evict", "turn": 17, "tool": "edit_file", "args": {"path": "cache/core.py", "old_string": "class Cache:\n    def __init__(self, max_size=128):\n        self.max_size = max_size\n        # map key -> (value, expiry_ts_or_None)\n        self._data = {}\n\n    def set(self, key, value, ttl=None):\n  ", "new_string": "class Cache:\n    def __init__(self, max_size=128, on_evict=None):\n        self.max_size = max_size\n        # map key -> (value, expiry_ts_or_None)\n        self._data = {}\n        # optional callback c"}}
+{"ts": 130.2296, "event": "write", "agent": "agent-evict", "path": "cache/core.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["Cache"], "message": ""}
+{"ts": 131.6061, "event": "llm_usage", "agent": "agent-evict", "turn": 18, "prompt_tokens": 3596, "completion_tokens": 25}
+{"ts": 131.6062, "event": "tool_call", "agent": "agent-evict", "turn": 18, "tool": "grep", "args": {"pattern": "on_evict", "glob": "**/*.py"}}
+{"ts": 131.612, "event": "search", "agent": "agent-evict", "kind": "grep", "pattern": "on_evict", "n": 5}
+{"ts": 132.8573, "event": "llm_usage", "agent": "agent-evict", "turn": 19, "prompt_tokens": 3727, "completion_tokens": 13}
+{"ts": 132.8573, "event": "tool_call", "agent": "agent-evict", "turn": 19, "tool": "run_tests", "args": {}}
+{"ts": 133.1389, "event": "run_tests", "agent": "agent-evict", "passed": 3, "failed": 0, "errored": 0}
+{"ts": 134.7626, "event": "llm_usage", "agent": "agent-evict", "turn": 20, "prompt_tokens": 3766, "completion_tokens": 19}
+{"ts": 134.7627, "event": "tool_call", "agent": "agent-evict", "turn": 20, "tool": "read_file", "args": {"path": "cache/core.py"}}
+{"ts": 134.7629, "event": "read", "agent": "agent-evict", "path": "cache/core.py", "found": true, "size": 3935}
+{"ts": 135.8092, "event": "llm_usage", "agent": "agent-evict", "turn": 21, "prompt_tokens": 4622, "completion_tokens": 21}
+{"ts": 135.8093, "event": "tool_call", "agent": "agent-evict", "turn": 21, "tool": "read_file", "args": {"path": "cache/eviction.py"}}
+{"ts": 135.8095, "event": "read", "agent": "agent-evict", "path": "cache/eviction.py", "found": true, "size": 415}
+{"ts": 136.9377, "event": "llm_usage", "agent": "agent-evict", "turn": 22, "prompt_tokens": 4745, "completion_tokens": 13}
+{"ts": 136.9378, "event": "tool_call", "agent": "agent-evict", "turn": 22, "tool": "run_tests", "args": {}}
+{"ts": 137.1961, "event": "run_tests", "agent": "agent-evict", "passed": 3, "failed": 0, "errored": 0}
+{"ts": 138.7084, "event": "llm_usage", "agent": "agent-evict", "turn": 23, "prompt_tokens": 4784, "completion_tokens": 21}
+{"ts": 138.7086, "event": "tool_call", "agent": "agent-evict", "turn": 23, "tool": "read_file", "args": {"path": "cache/__init__.py"}}
+{"ts": 138.7092, "event": "read", "agent": "agent-evict", "path": "cache/__init__.py", "found": true, "size": 150}
+{"ts": 140.1828, "event": "llm_usage", "agent": "agent-evict", "turn": 24, "prompt_tokens": 4851, "completion_tokens": 24}
+{"ts": 140.1829, "event": "tool_call", "agent": "agent-evict", "turn": 24, "tool": "grep", "args": {"pattern": "evict", "glob": "**/*.py"}}
+{"ts": 140.1884, "event": "search", "agent": "agent-evict", "kind": "grep", "pattern": "evict", "n": 14}
+{"ts": 142.3745, "event": "llm_usage", "agent": "agent-evict", "turn": 25, "prompt_tokens": 5157, "completion_tokens": 67}
+{"ts": 142.3747, "event": "tool_call", "agent": "agent-evict", "turn": 25, "tool": "done", "args": {"summary": "Added bounded-size eviction to Cache: Cache.__init__ accepts on_evict callback; set() evicts oldest-inserted key on overflow and calls callback; implemented oldest_key helper in cache/eviction.py; tes"}}
+{"ts": 142.3748, "event": "agent_done_coord", "agent": "agent-evict"}
+{"ts": 142.3748, "event": "agent_done", "agent": "agent-evict", "status": "done", "turns": 25, "prompt_tokens": 59101, "completion_tokens": 5024}
+{"ts": 142.6856, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 142.13, "prompt_tokens": 88227, "completion_tokens": 9924, "agent_statuses": {"agent-ttl": "done", "agent-evict": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.02s\n"}

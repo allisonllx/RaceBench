@@ -25,6 +25,7 @@ import yaml
 
 from harness.env import ENV_FILE, load_env
 from harness.models import OpenAIModel, ScriptedModel
+from harness.pricing import DEFAULT_PRICES, estimate_usd, write_run_meta
 from harness.scripts import get_script
 from harness.task import TaskAgentSpec, load_task
 from harness.trial import TrialConfig, run_trial
@@ -45,15 +46,6 @@ def load_config(path: str) -> dict:
     cfg.setdefault("budget", {})
     cfg.setdefault("prices", {})
     return cfg
-
-
-def estimate_usd(prices: dict, model: str, prompt_tokens: int,
-                 completion_tokens: int) -> float:
-    p = prices.get(model)
-    if not p:
-        return 0.0
-    return (prompt_tokens * p.get("input", 0.0)
-            + completion_tokens * p.get("output", 0.0)) / 1e6
 
 
 def make_model_factory(cfg: dict, task_name: str):
@@ -151,6 +143,15 @@ async def main() -> int:
     run_id = cfg["run_id"] + ("-calibration" if args.calibrate else "")
     out_dir = RESULTS_DIR / run_id
     out_dir.mkdir(parents=True, exist_ok=True)
+    prices = {**DEFAULT_PRICES, **(cfg.get("prices") or {})}
+    write_run_meta(
+        out_dir,
+        run_id=run_id,
+        model=cfg.get("model", "scripted"),
+        mode=cfg["mode"],
+        prices=prices,
+        budget=cfg.get("budget"),
+    )
 
     budget = cfg["budget"]
     state = GridState()
@@ -212,7 +213,7 @@ async def main() -> int:
                 return
 
             cost = estimate_usd(
-                cfg["prices"], cfg.get("model", ""),
+                prices, cfg.get("model", ""),
                 result.prompt_tokens, result.completion_tokens)
             async with lock:
                 state.n_run += 1

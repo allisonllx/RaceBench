@@ -108,6 +108,8 @@ async def test_metrics_row_shape(tmp_path):
     assert m["task"] == "t1_stale_read"
     assert m["strategy"] == "naive"
     assert m["total_tokens"] > 0
+    assert m["prompt_tokens"] > 0
+    assert m["estimated_usd"] >= 0.0
     assert m["read_set_visibility"] == 1.0
     assert m["reads_observed"] >= 2
 

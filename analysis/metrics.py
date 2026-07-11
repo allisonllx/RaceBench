@@ -6,6 +6,8 @@ Definitions (also quoted in the write-up):
 - wasted_tokens: tokens of every agent turn whose tool results included a
   refused write (edit_failed / conflict / lock_timeout). Those turns produced
   work the coordination layer discarded.
+- estimated_usd: list-price USD from trial_end prompt/completion counts and
+  the price table (run_meta.json, --prices-config, or harness.pricing defaults).
 - stall_events: coordination events that delayed or refused an agent action
   (blocked, lock_timeout, merge_conflict).
 - false-positive stall: a stall between two agents whose applied writes to the
@@ -25,6 +27,7 @@ import pandas as pd
 import yaml
 
 from harness.events import read_events
+from harness.pricing import estimate_usd, load_prices
 from harness.task import TASKS_DIR
 
 STALL_ACTIONS = {"blocked", "lock_timeout", "merge_conflict"}
@@ -39,8 +42,11 @@ def _critical_paths(task_name: str) -> list[str]:
     return list(spec.get("critical_paths") or [])
 
 
-def trial_metrics(log_path: Path) -> dict | None:
-    events = read_events(Path(log_path))
+def trial_metrics(log_path: Path, prices: dict | None = None) -> dict | None:
+    log_path = Path(log_path)
+    if prices is None:
+        prices = load_prices(log_path.parent)
+    events = read_events(log_path)
     start = next((e for e in events if e["event"] == "trial_start"), None)
     end = next((e for e in events if e["event"] == "trial_end"), None)
     if start is None or end is None:
@@ -84,7 +90,7 @@ def trial_metrics(log_path: Path) -> dict | None:
         elif e["event"] == "coord" and e.get("action") == "notified":
             notifications.append(e)
 
-    total_tokens = sum(turn_tokens.values())
+    turn_total = sum(turn_tokens.values())
     wasted_tokens = sum(turn_tokens.get(key, 0) for key in refused_turns)
 
     # --- false-positive classification
@@ -112,6 +118,9 @@ def trial_metrics(log_path: Path) -> dict | None:
         critical_frac = hit / len(critical)
     else:
         critical_frac = None
+    prompt_tokens = int(end.get("prompt_tokens", 0))
+    completion_tokens = int(end.get("completion_tokens", 0))
+    model = start.get("model", "")
     return {
         "task": start["task"],
         "failure_mode": start.get("failure_mode", ""),
@@ -119,14 +128,18 @@ def trial_metrics(log_path: Path) -> dict | None:
         "strategy": start["strategy"],
         "n_agents": start["n_agents"],
         "rep": start.get("rep", 0),
-        "model": start.get("model", ""),
+        "model": model,
         "correct": bool(end.get("correct", False)),
         "oracle_passed": end.get("oracle_passed", 0),
         "oracle_total": end.get("oracle_total", 0),
         "wall_clock_s": float(end.get("wall_clock_s", 0.0)),
-        "total_tokens": total_tokens,
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "total_tokens": prompt_tokens + completion_tokens,
+        "estimated_usd": round(
+            estimate_usd(prices, model, prompt_tokens, completion_tokens), 6),
         "wasted_tokens": wasted_tokens,
-        "wasted_token_rate": (wasted_tokens / total_tokens) if total_tokens else 0.0,
+        "wasted_token_rate": (wasted_tokens / turn_total) if turn_total else 0.0,
         "stall_events": len(stalls),
         "fp_stall_events": fp_stalls,
         "notify_events": len(notifications),
@@ -141,10 +154,13 @@ def trial_metrics(log_path: Path) -> dict | None:
     }
 
 
-def run_dataframe(run_dir: Path) -> pd.DataFrame:
+def run_dataframe(run_dir: Path, prices: dict | None = None) -> pd.DataFrame:
+    run_dir = Path(run_dir)
+    if prices is None:
+        prices = load_prices(run_dir)
     rows = []
-    for log in sorted(Path(run_dir).glob("*.jsonl")):
-        row = trial_metrics(log)
+    for log in sorted(run_dir.glob("*.jsonl")):
+        row = trial_metrics(log, prices=prices)
         if row is not None:
             row["log"] = log.name
             rows.append(row)
@@ -162,6 +178,7 @@ def aggregate(df: pd.DataFrame) -> pd.DataFrame:
             correct_rate=("correct", "mean"),
             mean_wall_s=("wall_clock_s", "mean"),
             mean_tokens=("total_tokens", "mean"),
+            mean_usd=("estimated_usd", "mean"),
             wasted_rate=("wasted_token_rate", "mean"),
             stalls_per_trial=("stall_events", "mean"),
             fp_stalls_per_trial=("fp_stall_events", "mean"),
@@ -175,5 +192,6 @@ def aggregate(df: pd.DataFrame) -> pd.DataFrame:
         agg[col] = agg[col].round(3)
     agg["mean_wall_s"] = agg["mean_wall_s"].round(1)
     agg["mean_tokens"] = agg["mean_tokens"].round(0)
+    agg["mean_usd"] = agg["mean_usd"].round(4)
     agg["mean_stall_wait_s"] = agg["mean_stall_wait_s"].round(2)
     return agg

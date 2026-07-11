@@ -107,8 +107,10 @@ python -m runner.run_grid --config runner/config.example.yaml
 # optional: override concurrent trials (config default: parallel: 4)
 # python -m runner.run_grid --config runner/config.example.yaml --parallel 8
 
-# report + plots from event logs
+# report + plots from event logs (USD derived from token counts + price table)
 python -m analysis.make_report results/<run_id>
+# optional: pass the runner config that holds prices:
+# python -m analysis.make_report results/<run_id> --prices-config runner/config.example.yaml
 ```
 
 ## Repo layout
