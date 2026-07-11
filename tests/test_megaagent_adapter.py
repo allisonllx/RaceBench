@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from adapters.megaagent.deps import INSTALL_HINT, missing_megaagent_deps
 from adapters.megaagent.prompt import build_prompts, load_agent_briefs
 from adapters.megaagent.sync import collect_files, seed_files
 from harness.external import ExternalContext, ExternalOutcome, write_instruction_pack
@@ -130,3 +131,19 @@ async def test_megaagent_missing_root_message(tmp_path):
     assert "MEGAAGENT_ROOT" in outcome.message
     log.close()
     ws.cleanup()
+
+
+def test_missing_megaagent_deps_message_when_chromadb_absent(monkeypatch):
+    """Preflight should name chromadb/requests and the pip extra."""
+    import adapters.megaagent.deps as deps_mod
+
+    def fake_import(name: str):
+        if name in deps_mod.MEGAAGENT_PYTHON_DEPS:
+            raise ImportError(name)
+        return object()
+
+    monkeypatch.setattr(deps_mod.importlib, "import_module", fake_import)
+    missing = deps_mod.missing_megaagent_deps()
+    assert "chromadb" in missing
+    assert "requests" in missing
+    assert "megaagent" in INSTALL_HINT

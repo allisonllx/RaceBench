@@ -11,6 +11,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from adapters.megaagent.deps import INSTALL_HINT, missing_megaagent_deps
 from harness.external import ExternalContext, ExternalOutcome
 
 _BRIDGE = (
@@ -67,6 +68,18 @@ class MegaAgentRuntime:
                 ok=False,
                 agent_statuses={s.id: "error" for s in ctx.agent_specs},
                 message=f"bridge script missing: {_BRIDGE}",
+            )
+
+        deps_missing = missing_megaagent_deps()
+        if deps_missing:
+            return ExternalOutcome(
+                ok=False,
+                agent_statuses={s.id: "error" for s in ctx.agent_specs},
+                message=(
+                    "MegaAgent bridge missing Python packages: "
+                    + ", ".join(deps_missing)
+                    + f". Install with: {INSTALL_HINT}"
+                ),
             )
 
         env = os.environ.copy()

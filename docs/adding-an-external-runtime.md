@@ -110,13 +110,20 @@ reimplementation. Put your API key in the MegaAgent checkout’s `config.py`
 (upstream expectation).
 
 ```bash
-git clone https://github.com/Xtra-Computing/MegaAgent.git
-export MEGAAGENT_ROOT=$PWD/MegaAgent
-# edit $MEGAAGENT_ROOT/config.py api_key
+# 1. MegaAgent checkout (ignored under vendor/ if cloned in-repo)
+git clone https://github.com/Xtra-Computing/MegaAgent.git vendor/MegaAgent
+export MEGAAGENT_ROOT=$PWD/vendor/MegaAgent
+# edit $MEGAAGENT_ROOT/config.py — set api_key and model
+
+# 2. Bridge imports MegaAgent in the RaceBench venv — install its deps once:
+pip install -e '.[megaagent]'
 
 python -m runner.run_external --task t02_benign_overlap --adapter megaagent \
   --megaagent-root "$MEGAAGENT_ROOT" --out results/ext-megaagent
 ```
+
+If the bridge exits immediately with `ModuleNotFoundError: chromadb`, you skipped
+step 2. The harness now fails fast with the same install hint before spawning.
 
 Level A `git_hash` remains the apples-to-apples **mechanism-class** column.
 

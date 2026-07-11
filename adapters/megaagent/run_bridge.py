@@ -20,6 +20,7 @@ _RACEBENCH_REPO = Path(__file__).resolve().parents[2]
 if str(_RACEBENCH_REPO) not in sys.path:
     sys.path.insert(0, str(_RACEBENCH_REPO))
 
+from adapters.megaagent.deps import require_megaagent_deps  # noqa: E402
 from adapters.megaagent.prompt import build_prompts  # noqa: E402
 from adapters.megaagent.sync import collect_files, seed_files  # noqa: E402
 
@@ -63,6 +64,7 @@ def main() -> int:
             "(missing main.py)"
         )
 
+    require_megaagent_deps()
     initial_prompt, additional_prompt = build_prompts(instruction_dir)
 
     # Run entirely from the MegaAgent checkout so their relative paths work.
