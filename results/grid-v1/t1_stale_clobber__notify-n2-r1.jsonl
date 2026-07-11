@@ -1,0 +1,34 @@
+{"ts": 0.0763, "event": "trial_start", "task": "t1_stale_clobber", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "notify", "n_agents": 2, "rep": 1, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 1.3725, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 693, "completion_tokens": 24}
+{"ts": 1.3727, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 1.3737, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 1056}
+{"ts": 1.3801, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 691, "completion_tokens": 24}
+{"ts": 1.3802, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 1.3811, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 1056}
+{"ts": 10.1244, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 964, "completion_tokens": 626}
+{"ts": 10.1247, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 10.1272, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-retries", "reader": "agent-timeout", "path": "config.py", "symbols": ["<module>", "validate"]}
+{"ts": 10.1273, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 13.0284, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 1344, "completion_tokens": 13}
+{"ts": 13.0286, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "run_tests", "args": {}}
+{"ts": 13.1872, "event": "run_tests", "agent": "agent-retries", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 13.2052, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 962, "completion_tokens": 909}
+{"ts": 13.2052, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 13.2059, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-timeout", "reader": "agent-retries", "path": "config.py", "symbols": ["<module>", "validate"]}
+{"ts": 13.2059, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 13.206, "event": "notification_delivered", "agent": "agent-timeout", "turn": 3, "note": "[coordination notice] Another agent just modified config.py (changed: <module>, validate). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 14.3569, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 1416, "completion_tokens": 24}
+{"ts": 14.357, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 14.3575, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 1353}
+{"ts": 14.7351, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 1383, "completion_tokens": 41}
+{"ts": 14.7352, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "done", "args": {"summary": "Added 'retries' default to DEFAULTS and extended validate() to enforce non-negative int; rewrote config.py as required."}}
+{"ts": 14.7352, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 14.7353, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 4, "prompt_tokens": 4384, "completion_tokens": 704}
+{"ts": 18.9391, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 1756, "completion_tokens": 147}
+{"ts": 18.9392, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 19.1128, "event": "run_tests", "agent": "agent-timeout", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 20.3969, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 1795, "completion_tokens": 37}
+{"ts": 20.3972, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "done", "args": {"summary": "Add timeout default (30.0) and validation enforcing positive numeric value; rewrote config.py as requested."}}
+{"ts": 20.3973, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 20.3973, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 5, "prompt_tokens": 6620, "completion_tokens": 1141}
+{"ts": 20.5719, "event": "trial_end", "correct": false, "oracle_passed": 3, "oracle_total": 6, "wall_clock_s": 20.3, "prompt_tokens": 11004, "completion_tokens": 1845, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": ".F.F.F                                                                   [100%]\n=================================== FAILURES ===================================\nE   AssertionError: assert None == 3\n     +  where None = <built-in method get of dict object at 0x107131180>('retries')\n     +    where <built-in method get of dict object at 0x107131180> = {'host': 'localhost', 'port': 8080, 'timeout': 30.0}.get\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t1_stale_clobber-notify-n2-r1/oracle_tests/test_oracle_t1.py:13: AssertionError: assert None == 3\nE   KeyError: 'unknown config key: retries'\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t1_stale_clobber-notify-n2-r1/config.py:28: KeyError: 'unknown config key: retries'\nE   KeyError: 'unknown config key: retries'\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t1_stale_clobber-notify-n2-r1/config.py:28: KeyError: 'unknown config key: retries'\n=========================== short test summary info ============================\nFAILED oracle_tests/test_oracle_t1.py::test_retries_key_added - AssertionErro...\nFAILED oracle_tests/test_oracle_t1.py::test_retries_validation - KeyError: 'u...\nFAILED oracle_tests/test_oracle_t1.py::test_both_overrides_together - KeyErro...\n3 failed, 3 passed in 0.01s\n"}

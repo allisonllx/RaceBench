@@ -1,0 +1,39 @@
+{"ts": 0.0856, "event": "trial_start", "task": "t1_stale_clobber", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "git_hash", "n_agents": 2, "rep": 1, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 1.5194, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 693, "completion_tokens": 24}
+{"ts": 1.5196, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 1.52, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 1056}
+{"ts": 1.9572, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 691, "completion_tokens": 24}
+{"ts": 1.9572, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 1.9574, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 1056}
+{"ts": 8.0769, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 964, "completion_tokens": 626}
+{"ts": 8.077, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 8.1226, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": "a96f32428bb5"}
+{"ts": 9.1292, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 1344, "completion_tokens": 13}
+{"ts": 9.1293, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "run_tests", "args": {}}
+{"ts": 9.3793, "event": "run_tests", "agent": "agent-retries", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 10.1699, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 962, "completion_tokens": 635}
+{"ts": 10.17, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 10.1875, "event": "coord", "strategy": "git_hash", "action": "merge_conflict", "agent": "agent-timeout", "path": "config.py"}
+{"ts": 10.1876, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "overwrite", "status": "conflict", "waited_s": 0.0, "changed_symbols": [], "message": "your change conflicts with a concurrent edit to config.py; the file has changed since you read it. Re-read it and reapply your change on top.\nCurrent content:\n\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite this whole module; keep host/port behavior) ===\nDEFAULTS = {\n    \"host\": \"localhost\",\n    \"port\": 8080,\n    \"retries\": 3,\n}\n\n\ndef get_config(ove"}
+{"ts": 10.7388, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 1383, "completion_tokens": 31}
+{"ts": 10.7388, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "done", "args": {"summary": "Added 'retries' default and validation; rewrote config.py as required."}}
+{"ts": 10.7388, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 10.7388, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 4, "prompt_tokens": 4384, "completion_tokens": 694}
+{"ts": 18.4708, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 1673, "completion_tokens": 685}
+{"ts": 18.4709, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 18.4928, "event": "coord", "strategy": "git_hash", "action": "merge_conflict", "agent": "agent-timeout", "path": "config.py"}
+{"ts": 18.4929, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "overwrite", "status": "conflict", "waited_s": 0.0, "changed_symbols": [], "message": "your change conflicts with a concurrent edit to config.py; the file has changed since you read it. Re-read it and reapply your change on top.\nCurrent content:\n\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite this whole module; keep host/port behavior) ===\nDEFAULTS = {\n    \"host\": \"localhost\",\n    \"port\": 8080,\n    \"retries\": 3,\n}\n\n\ndef get_config(ove"}
+{"ts": 21.9259, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 2434, "completion_tokens": 216}
+{"ts": 21.926, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 21.9261, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 1218}
+{"ts": 29.0752, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 2750, "completion_tokens": 557}
+{"ts": 29.0752, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 29.1173, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": "18ee6c1c1bc0"}
+{"ts": 30.3722, "event": "llm_usage", "agent": "agent-timeout", "turn": 6, "prompt_tokens": 3189, "completion_tokens": 13}
+{"ts": 30.3725, "event": "tool_call", "agent": "agent-timeout", "turn": 6, "tool": "run_tests", "args": {}}
+{"ts": 30.5408, "event": "run_tests", "agent": "agent-timeout", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 32.1844, "event": "llm_usage", "agent": "agent-timeout", "turn": 7, "prompt_tokens": 3228, "completion_tokens": 41}
+{"ts": 32.1844, "event": "tool_call", "agent": "agent-timeout", "turn": 7, "tool": "done", "args": {"summary": "Added 'timeout' default to DEFAULTS and extended validate() to require timeout be a positive number; rewrote config.py accordingly."}}
+{"ts": 32.1845, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 32.1845, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 7, "prompt_tokens": 14927, "completion_tokens": 2171}
+{"ts": 32.3614, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 32.08, "prompt_tokens": 19311, "completion_tokens": 2865, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

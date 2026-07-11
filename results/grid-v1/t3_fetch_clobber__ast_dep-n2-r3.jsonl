@@ -1,0 +1,35 @@
+{"ts": 0.0797, "event": "trial_start", "task": "t3_fetch_clobber", "failure_mode": "write_write_clobber", "benign": false, "strategy": "ast_dep", "n_agents": 2, "rep": 3, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 1.6498, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 670, "completion_tokens": 19}
+{"ts": 1.6498, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 1.651, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 697, "completion_tokens": 24}
+{"ts": 1.651, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 1.6519, "event": "read", "agent": "agent-retries", "path": "api.py", "found": true, "size": 551}
+{"ts": 2.6664, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 709, "completion_tokens": 18}
+{"ts": 2.6665, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 2.6675, "event": "read", "agent": "agent-timeout", "path": "api.py", "found": true, "size": 551}
+{"ts": 5.6958, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 854, "completion_tokens": 154}
+{"ts": 5.6959, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "read_file", "args": {"path": "tests/test_api.py"}}
+{"ts": 5.6964, "event": "read", "agent": "agent-timeout", "path": "tests/test_api.py", "found": true, "size": 146}
+{"ts": 11.3252, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 842, "completion_tokens": 715}
+{"ts": 11.3254, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "write_file", "args": {"path": "api.py", "content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents "}}
+{"ts": 11.3275, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-retries", "reader": "agent-timeout", "path": "api.py", "symbols": ["api.py:fetch", "tests/test_api.py:test_fetch_returns_transport_result"]}
+{"ts": 11.3319, "event": "write", "agent": "agent-retries", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.003, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 12.6997, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 1183, "completion_tokens": 13}
+{"ts": 12.6997, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "run_tests", "args": {}}
+{"ts": 12.8569, "event": "run_tests", "agent": "agent-retries", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 12.9297, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 925, "completion_tokens": 529}
+{"ts": 12.9298, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "write_file", "args": {"path": "api.py", "content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents "}}
+{"ts": 12.9303, "event": "coord", "strategy": "ast_dep", "action": "blocked", "agent": "agent-timeout", "path": "api.py", "symbols": ["api.py:fetch"], "holders": ["agent-retries"]}
+{"ts": 14.228, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 1222, "completion_tokens": 45}
+{"ts": 14.2281, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "done", "args": {"summary": "Implement fetch with retries keyword, calling transport and retrying on TransportError up to retries additional times; re-raise last error if all attempts fail."}}
+{"ts": 14.2281, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 14.2281, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 4, "prompt_tokens": 3944, "completion_tokens": 797}
+{"ts": 14.2309, "event": "write", "agent": "agent-timeout", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 1.3, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 15.2525, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 1144, "completion_tokens": 13}
+{"ts": 15.2525, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 15.4028, "event": "run_tests", "agent": "agent-timeout", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 18.0606, "event": "llm_usage", "agent": "agent-timeout", "turn": 6, "prompt_tokens": 1183, "completion_tokens": 36}
+{"ts": 18.0607, "event": "tool_call", "agent": "agent-timeout", "turn": 6, "tool": "done", "args": {"summary": "Replace fetch to accept timeout=10 keyword and call transport(url, timeout=timeout) via full-file write"}}
+{"ts": 18.0607, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 18.0607, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 6, "prompt_tokens": 5485, "completion_tokens": 769}
+{"ts": 18.2225, "event": "trial_end", "correct": false, "oracle_passed": 2, "oracle_total": 5, "wall_clock_s": 17.96, "prompt_tokens": 9429, "completion_tokens": 1566, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "F.FF.                                                                    [100%]\n=================================== FAILURES ===================================\nE   AssertionError: retries parameter missing\n    assert 'retries' in mappingproxy(OrderedDict({'url': <Parameter \"url\">, 'transport': <Parameter \"transport\">, 'timeout': <Parameter \"timeout=10\">}))\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t3_fetch_clobber-ast_dep-n2-r3/oracle_tests/test_oracle_t3.py:12: AssertionError: retries parameter missing\nE   TypeError: fetch() got an unexpected keyword argument 'retries'\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t3_fetch_clobber-ast_dep-n2-r3/oracle_tests/test_oracle_t3.py:37: TypeError: fetch() got an unexpected keyword argument 'retries'\nE   TypeError: fetch() got an unexpected keyword argument 'retries'\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t3_fetch_clobber-ast_dep-n2-r3/oracle_tests/test_oracle_t3.py:46: TypeError: fetch() got an unexpected keyword argument 'retries'\n=========================== short test summary info ============================\nFAILED oracle_tests/test_oracle_t3.py::test_signature_has_both_params - Asser...\nFAILED oracle_tests/test_oracle_t3.py::test_retries_on_transport_error - Type...\nFAILED oracle_tests/test_oracle_t3.py::test_raises_after_retries_exhausted - ...\n3 failed, 2 passed in 0.01s\n"}

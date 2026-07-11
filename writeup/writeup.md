@@ -144,11 +144,23 @@ whole-file lost updates, and after hardening, live gpt-5-mini also fails
 `t1_stale_clobber` / `t3_fetch_clobber` under naive (0/5) while file_lock
 recovers (5/5); `rw_d_tag_antidependency` shows naive 1/5 vs notify 5/5. The
 archived v1 `t1`/`t3` probes under-triggered because models preferred anchored
-`edit_file` against *current* disk. Fair claim: coordination value is
-**selective** — visible on hardened WW / antidependency cells and as
-stall / wall-clock cost when mechanisms over-fire — not a suite-wide naive
-cliff. Unfair claim: the tasks are ill-designed because naive works on the
-benign half.
+`edit_file` against *current* disk — disjoint anchors compose under naive
+without anyone “seeing” the peer, and a failed anchor triggers re-read/retry.
+
+**Why whole-file / same-region races are in scope.** Parallel coding agents do
+not continuously track peer edits in real time: they snapshot, plan, then
+write. Between read and write the file can change — the classical stale-read /
+lost-update. Fine-grained `edit_file` only saves you when anchors land in
+*different* regions; real work often hits the same function, config block, or
+“rewrite this module cleanly,” where a second agent overwrites from an older
+snapshot. We do **not** claim production agents always rewrite whole files —
+they often patch — which is why the benign/disjoint half stays in the suite.
+The hardened cells exist so the comparison table also measures the mode where
+anchors collide or agents emit a full-file write from a stale read, not only
+the lucky compose path. Fair claim: coordination value is **selective** —
+visible on hardened WW / antidependency cells and as stall / wall-clock cost
+when mechanisms over-fire — not a suite-wide naive cliff. Unfair claim: the
+tasks are ill-designed because naive works on the benign half.
 
 ## 4. Constraints
 
@@ -304,10 +316,10 @@ is 1.0 only for `read_file`. (11) High pooled `naive` correctness on early grid 
 suite failed to seed races — see §3 “Reading a strong `naive` column”. We
 archived compose-friendly v1 `t1`/`t3` and shipped hardened whole-file
 siblings plus `rw_d` after an adversarial gate smoke
-(`results/adversarial-gate/`). (12) Cascade tasks require the full agent chain
-(`min_agents`; e.g. `rw_e_cascade` at n=3). Truncating to n=2 drops later
-consumers and makes the oracle unreachable regardless of strategy; those cells
-were archived, not cited.
+(`results/adversarial-gate/`). (12) Cascade tasks require the full agent chain (`min_agents`; e.g.
+`rw_e_cascade` at n=3, `t4_cascade` at n=4). Truncating drops later consumers
+and makes the oracle unreachable regardless of strategy; those cells were
+archived, not cited.
 
 **Next:** finish the paid grid on t1–t12 + `rw_*` with valid t12 cells;
 prototype **Level C** (external-system adapter inspired by Terminal Bench /
@@ -326,7 +338,8 @@ emits across-task `comparison_table_overall` and
 `results/grid-v1/_archive_t12_pre_worktree_fix/` and
 `results/grid-v1-calibration/_archive_t12_pre_worktree_fix/`. Archived
 truncated `rw_e_cascade` n=2 cells and prior calib:
-`results/_archive/rw_e_cascade/`. Archived compose-friendly v1 probes and
+`results/_archive/rw_e_cascade/`. Archived truncated `t4_cascade` n=2 cells:
+`results/_archive/t4_cascade_n2/`. Archived compose-friendly v1 probes and
 their grid logs: `tasks/_archive/{t1_stale_read,t3_ww_clobber}/`,
 `results/_archive/t1_stale_read_v1/`, `results/_archive/t3_ww_clobber_v1/`.
 Adversarial gate smoke for hardened siblings + `rw_d`:
