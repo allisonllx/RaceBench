@@ -10,7 +10,7 @@ from harness.strategies.base import Mutation, Strategy
 from harness.tools import FILE_TOOL_SCHEMAS
 from harness.workspace import Workspace
 
-SYSTEM_PROMPT = """You are a coding agent working inside a shared repository. \
+SYSTEM_PROMPT_SHARED = """You are a coding agent working inside a shared repository. \
 Other agents are working on OTHER subtasks in this same repository AT THE SAME \
 TIME, so files may change between your reads. You cannot talk to them.
 
@@ -33,6 +33,29 @@ Your subtask:
 {subtask}
 """
 
+SYSTEM_PROMPT_WORKTREE = """You are a coding agent working in an isolated git \
+worktree. Other agents edit SEPARATE worktrees; you will not see their changes \
+until an automatic end-of-trial merge. You cannot talk to them.
+
+Rules:
+- Use glob/grep to find files before editing when the repo has many modules.
+- Read a file before editing it.
+- Prefer edit_file (exact string replacement) over write_file for existing files.
+- If list_tools / invoke_tool are available, use them for registered external tools; \
+tools can appear or disappear mid-run — re-list if invoke fails.
+- Irreversible tools (send_email, deploy, charge) cannot be undone — call them only \
+when the required order is correct.
+- Only make changes needed for YOUR subtask; leave other agents' symbols alone.
+- Run the tests when you believe you are done, fix what your subtask broke, then \
+call done with a one-line summary.
+
+Your subtask:
+{subtask}
+"""
+
+# Back-compat alias
+SYSTEM_PROMPT = SYSTEM_PROMPT_SHARED
+
 
 @dataclass
 class AgentResult:
@@ -47,7 +70,8 @@ class Agent:
     def __init__(self, agent_id: str, subtask: str, model: ModelClient,
                  strategy: Strategy, workspace: Workspace, logger: EventLogger,
                  max_turns: int = 40,
-                 registry: ToolRegistry | None = None):
+                 registry: ToolRegistry | None = None,
+                 isolation: str = "shared"):
         self.id = agent_id
         self.model = model
         self.strategy = strategy
@@ -55,8 +79,10 @@ class Agent:
         self.log = logger
         self.max_turns = max_turns
         self.registry = registry
+        prompt_tmpl = (SYSTEM_PROMPT_WORKTREE if isolation == "worktree"
+                       else SYSTEM_PROMPT_SHARED)
         self.messages: list[dict] = [
-            {"role": "system", "content": SYSTEM_PROMPT.format(subtask=subtask)},
+            {"role": "system", "content": prompt_tmpl.format(subtask=subtask)},
             {"role": "user", "content": "Begin your subtask now."},
         ]
         self.prompt_tokens = 0

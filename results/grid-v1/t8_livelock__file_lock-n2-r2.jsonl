@@ -1,0 +1,264 @@
+{"ts": 0.2129, "event": "trial_start", "task": "t8_livelock", "failure_mode": "livelock_deadlock", "benign": false, "strategy": "file_lock", "n_agents": 2, "rep": 2, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-ab", "agent-ba"]}
+{"ts": 1.8635, "event": "llm_usage", "agent": "agent-ba", "turn": 1, "prompt_tokens": 631, "completion_tokens": 24}
+{"ts": 1.8637, "event": "tool_call", "agent": "agent-ba", "turn": 1, "tool": "glob", "args": {"pattern": "**/*.py"}}
+{"ts": 1.8822, "event": "search", "agent": "agent-ba", "kind": "glob", "pattern": "**/*.py", "n": 1}
+{"ts": 2.2841, "event": "llm_usage", "agent": "agent-ab", "turn": 1, "prompt_tokens": 633, "completion_tokens": 29}
+{"ts": 2.2842, "event": "tool_call", "agent": "agent-ab", "turn": 1, "tool": "grep", "args": {"pattern": "GREETING", "glob": "**/*"}}
+{"ts": 2.287, "event": "search", "agent": "agent-ab", "kind": "grep", "pattern": "GREETING", "n": 2}
+{"ts": 3.3844, "event": "llm_usage", "agent": "agent-ba", "turn": 2, "prompt_tokens": 664, "completion_tokens": 21}
+{"ts": 3.3845, "event": "tool_call", "agent": "agent-ba", "turn": 2, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 3.3847, "event": "read", "agent": "agent-ba", "path": "tests/test_smoke.py", "found": true, "size": 105}
+{"ts": 3.8146, "event": "llm_usage", "agent": "agent-ab", "turn": 2, "prompt_tokens": 691, "completion_tokens": 18}
+{"ts": 3.8149, "event": "tool_call", "agent": "agent-ab", "turn": 2, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 3.8158, "event": "read", "agent": "agent-ab", "path": "alpha.py", "found": true, "size": 32}
+{"ts": 5.409, "event": "llm_usage", "agent": "agent-ba", "turn": 3, "prompt_tokens": 722, "completion_tokens": 19}
+{"ts": 5.409, "event": "tool_call", "agent": "agent-ba", "turn": 3, "tool": "list_files", "args": {}}
+{"ts": 5.9738, "event": "llm_usage", "agent": "agent-ab", "turn": 3, "prompt_tokens": 733, "completion_tokens": 95}
+{"ts": 5.974, "event": "tool_call", "agent": "agent-ab", "turn": 3, "tool": "grep", "args": {"pattern": "FAREWELL", "glob": "**/*"}}
+{"ts": 5.9779, "event": "search", "agent": "agent-ab", "kind": "grep", "pattern": "FAREWELL", "n": 2}
+{"ts": 6.9808, "event": "llm_usage", "agent": "agent-ba", "turn": 4, "prompt_tokens": 762, "completion_tokens": 24}
+{"ts": 6.981, "event": "tool_call", "agent": "agent-ba", "turn": 4, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 6.9821, "event": "read", "agent": "agent-ba", "path": "beta.py", "found": true, "size": 27}
+{"ts": 7.0233, "event": "llm_usage", "agent": "agent-ab", "turn": 4, "prompt_tokens": 796, "completion_tokens": 18}
+{"ts": 7.0235, "event": "tool_call", "agent": "agent-ab", "turn": 4, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 7.0237, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 9.1354, "event": "llm_usage", "agent": "agent-ba", "turn": 5, "prompt_tokens": 804, "completion_tokens": 88}
+{"ts": 9.1355, "event": "tool_call", "agent": "agent-ba", "turn": 5, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 9.1356, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 37.025, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ab", "path": "beta.py", "waited_s": 30.001}
+{"ts": 37.0252, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": false, "size": 0}
+{"ts": 39.1368, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.001}
+{"ts": 39.137, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 39.3425, "event": "llm_usage", "agent": "agent-ab", "turn": 5, "prompt_tokens": 837, "completion_tokens": 19}
+{"ts": 39.3426, "event": "tool_call", "agent": "agent-ab", "turn": 5, "tool": "list_files", "args": {}}
+{"ts": 40.4069, "event": "llm_usage", "agent": "agent-ab", "turn": 6, "prompt_tokens": 877, "completion_tokens": 18}
+{"ts": 40.4069, "event": "tool_call", "agent": "agent-ab", "turn": 6, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 40.407, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 42.2353, "event": "llm_usage", "agent": "agent-ba", "turn": 6, "prompt_tokens": 845, "completion_tokens": 93}
+{"ts": 42.2354, "event": "tool_call", "agent": "agent-ba", "turn": 6, "tool": "grep", "args": {"pattern": "VERSION", "glob": "**/*.py"}}
+{"ts": 42.2394, "event": "search", "agent": "agent-ba", "kind": "grep", "pattern": "VERSION", "n": 1}
+{"ts": 43.2658, "event": "llm_usage", "agent": "agent-ba", "turn": 7, "prompt_tokens": 890, "completion_tokens": 18}
+{"ts": 43.266, "event": "tool_call", "agent": "agent-ba", "turn": 7, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 43.2662, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 70.4084, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ab", "path": "beta.py", "waited_s": 30.001}
+{"ts": 70.4085, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": false, "size": 0}
+{"ts": 73.2674, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.001}
+{"ts": 73.2675, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 74.8525, "event": "llm_usage", "agent": "agent-ab", "turn": 7, "prompt_tokens": 918, "completion_tokens": 236}
+{"ts": 74.8525, "event": "tool_call", "agent": "agent-ab", "turn": 7, "tool": "edit_file", "args": {"path": "alpha.py", "old_string": "GREETING = \"hi\"", "new_string": "GREETING = \"hello\""}}
+{"ts": 74.8534, "event": "write", "agent": "agent-ab", "path": "alpha.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 76.1865, "event": "llm_usage", "agent": "agent-ab", "turn": 8, "prompt_tokens": 972, "completion_tokens": 18}
+{"ts": 76.1866, "event": "tool_call", "agent": "agent-ab", "turn": 8, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 76.1866, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 76.3009, "event": "llm_usage", "agent": "agent-ba", "turn": 8, "prompt_tokens": 931, "completion_tokens": 104}
+{"ts": 76.301, "event": "tool_call", "agent": "agent-ba", "turn": 8, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "COUNT = 1", "new_string": "COUNT = 2"}}
+{"ts": 76.3027, "event": "write", "agent": "agent-ba", "path": "beta.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 77.7333, "event": "llm_usage", "agent": "agent-ba", "turn": 9, "prompt_tokens": 981, "completion_tokens": 18}
+{"ts": 77.7335, "event": "tool_call", "agent": "agent-ba", "turn": 9, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 77.7336, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 106.3826, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ab", "path": "beta.py", "waited_s": 30.196}
+{"ts": 106.3827, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": false, "size": 0}
+{"ts": 107.7349, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.001}
+{"ts": 107.735, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 107.8841, "event": "llm_usage", "agent": "agent-ab", "turn": 9, "prompt_tokens": 1013, "completion_tokens": 23}
+{"ts": 107.8843, "event": "tool_call", "agent": "agent-ab", "turn": 9, "tool": "grep", "args": {"pattern": "beta.py", "glob": "**/*"}}
+{"ts": 107.8896, "event": "search", "agent": "agent-ab", "kind": "grep", "pattern": "beta.py", "n": 0}
+{"ts": 109.2933, "event": "llm_usage", "agent": "agent-ba", "turn": 10, "prompt_tokens": 1022, "completion_tokens": 24}
+{"ts": 109.2934, "event": "tool_call", "agent": "agent-ba", "turn": 10, "tool": "grep", "args": {"pattern": "GREETING", "glob": "**/*.py"}}
+{"ts": 109.2957, "event": "search", "agent": "agent-ba", "kind": "grep", "pattern": "GREETING", "n": 2}
+{"ts": 110.4213, "event": "llm_usage", "agent": "agent-ba", "turn": 11, "prompt_tokens": 1081, "completion_tokens": 18}
+{"ts": 110.4214, "event": "tool_call", "agent": "agent-ba", "turn": 11, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 110.4215, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 112.0302, "event": "llm_usage", "agent": "agent-ab", "turn": 10, "prompt_tokens": 1049, "completion_tokens": 241}
+{"ts": 112.0304, "event": "tool_call", "agent": "agent-ab", "turn": 10, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "FAREWELL = \"bye\"", "new_string": "FAREWELL = \"goodbye\""}}
+{"ts": 112.0305, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 140.4225, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.001}
+{"ts": 140.4226, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 142.0325, "event": "write", "agent": "agent-ab", "path": "beta.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.002, "changed_symbols": [], "message": "file beta.py is locked by another agent; work on something else and retry later"}
+{"ts": 142.1343, "event": "llm_usage", "agent": "agent-ba", "turn": 12, "prompt_tokens": 1122, "completion_tokens": 40}
+{"ts": 142.1344, "event": "tool_call", "agent": "agent-ba", "turn": 12, "tool": "edit_file", "args": {"path": "alpha.py", "old_string": "VERSION = \"0.1\"", "new_string": "VERSION = \"0.2\""}}
+{"ts": 142.1344, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 143.2923, "event": "llm_usage", "agent": "agent-ab", "turn": 11, "prompt_tokens": 1125, "completion_tokens": 18}
+{"ts": 143.2924, "event": "tool_call", "agent": "agent-ab", "turn": 11, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 143.2925, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 172.1361, "event": "write", "agent": "agent-ba", "path": "alpha.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.002, "changed_symbols": [], "message": "file alpha.py is locked by another agent; work on something else and retry later"}
+{"ts": 173.2937, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ab", "path": "beta.py", "waited_s": 30.001}
+{"ts": 173.2938, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": false, "size": 0}
+{"ts": 174.2384, "event": "llm_usage", "agent": "agent-ba", "turn": 13, "prompt_tokens": 1195, "completion_tokens": 18}
+{"ts": 174.2385, "event": "tool_call", "agent": "agent-ba", "turn": 13, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 174.2421, "event": "read", "agent": "agent-ba", "path": "beta.py", "found": true, "size": 27}
+{"ts": 175.3846, "event": "llm_usage", "agent": "agent-ba", "turn": 14, "prompt_tokens": 1237, "completion_tokens": 18}
+{"ts": 175.3848, "event": "tool_call", "agent": "agent-ba", "turn": 14, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 175.3851, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 176.9636, "event": "llm_usage", "agent": "agent-ab", "turn": 12, "prompt_tokens": 1166, "completion_tokens": 147}
+{"ts": 176.9637, "event": "tool_call", "agent": "agent-ab", "turn": 12, "tool": "list_files", "args": {}}
+{"ts": 178.2051, "event": "llm_usage", "agent": "agent-ab", "turn": 13, "prompt_tokens": 1206, "completion_tokens": 43}
+{"ts": 178.2053, "event": "tool_call", "agent": "agent-ab", "turn": 13, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "FAREWELL = \"bye\"", "new_string": "FAREWELL = \"goodbye\""}}
+{"ts": 178.2053, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 205.3863, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.001}
+{"ts": 205.3864, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 206.8703, "event": "llm_usage", "agent": "agent-ba", "turn": 15, "prompt_tokens": 1278, "completion_tokens": 23}
+{"ts": 206.8704, "event": "tool_call", "agent": "agent-ba", "turn": 15, "tool": "grep", "args": {"pattern": "alpha.py", "glob": "**/*"}}
+{"ts": 206.8762, "event": "search", "agent": "agent-ba", "kind": "grep", "pattern": "alpha.py", "n": 0}
+{"ts": 208.2097, "event": "write", "agent": "agent-ab", "path": "beta.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.004, "changed_symbols": [], "message": "file beta.py is locked by another agent; work on something else and retry later"}
+{"ts": 208.3638, "event": "llm_usage", "agent": "agent-ba", "turn": 16, "prompt_tokens": 1314, "completion_tokens": 13}
+{"ts": 208.3642, "event": "tool_call", "agent": "agent-ba", "turn": 16, "tool": "list_files", "args": {}}
+{"ts": 209.5813, "event": "llm_usage", "agent": "agent-ab", "turn": 14, "prompt_tokens": 1282, "completion_tokens": 18}
+{"ts": 209.5815, "event": "tool_call", "agent": "agent-ab", "turn": 14, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 209.5818, "event": "read", "agent": "agent-ab", "path": "alpha.py", "found": true, "size": 35}
+{"ts": 209.6104, "event": "llm_usage", "agent": "agent-ba", "turn": 17, "prompt_tokens": 1354, "completion_tokens": 18}
+{"ts": 209.6158, "event": "tool_call", "agent": "agent-ba", "turn": 17, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 209.6204, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 210.8427, "event": "llm_usage", "agent": "agent-ab", "turn": 15, "prompt_tokens": 1324, "completion_tokens": 21}
+{"ts": 210.8428, "event": "tool_call", "agent": "agent-ab", "turn": 15, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 210.8428, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "tests/test_smoke.py", "holder": "agent-ba"}
+{"ts": 239.6221, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.002}
+{"ts": 239.6224, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 240.8441, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ab", "path": "tests/test_smoke.py", "waited_s": 30.001}
+{"ts": 240.8442, "event": "read", "agent": "agent-ab", "path": "tests/test_smoke.py", "found": false, "size": 0}
+{"ts": 242.1357, "event": "llm_usage", "agent": "agent-ab", "turn": 16, "prompt_tokens": 1371, "completion_tokens": 22}
+{"ts": 242.1358, "event": "tool_call", "agent": "agent-ab", "turn": 16, "tool": "grep", "args": {"pattern": "tests", "glob": "**/*"}}
+{"ts": 242.1419, "event": "search", "agent": "agent-ab", "kind": "grep", "pattern": "tests", "n": 0}
+{"ts": 243.3741, "event": "llm_usage", "agent": "agent-ab", "turn": 17, "prompt_tokens": 1406, "completion_tokens": 13}
+{"ts": 243.3743, "event": "tool_call", "agent": "agent-ab", "turn": 17, "tool": "list_files", "args": {}}
+{"ts": 243.7304, "event": "llm_usage", "agent": "agent-ba", "turn": 18, "prompt_tokens": 1395, "completion_tokens": 216}
+{"ts": 243.7305, "event": "tool_call", "agent": "agent-ba", "turn": 18, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 243.7306, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 244.4895, "event": "llm_usage", "agent": "agent-ab", "turn": 18, "prompt_tokens": 1446, "completion_tokens": 18}
+{"ts": 244.4896, "event": "tool_call", "agent": "agent-ab", "turn": 18, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 244.4897, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 273.7319, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.001}
+{"ts": 273.7321, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 274.491, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ab", "path": "beta.py", "waited_s": 30.001}
+{"ts": 274.4912, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": false, "size": 0}
+{"ts": 275.1073, "event": "llm_usage", "agent": "agent-ba", "turn": 19, "prompt_tokens": 1436, "completion_tokens": 24}
+{"ts": 275.1074, "event": "tool_call", "agent": "agent-ba", "turn": 19, "tool": "grep", "args": {"pattern": "VERSION =", "glob": "**/*.py"}}
+{"ts": 275.1116, "event": "search", "agent": "agent-ba", "kind": "grep", "pattern": "VERSION =", "n": 1}
+{"ts": 276.1686, "event": "llm_usage", "agent": "agent-ab", "turn": 19, "prompt_tokens": 1487, "completion_tokens": 25}
+{"ts": 276.1687, "event": "tool_call", "agent": "agent-ab", "turn": 19, "tool": "grep", "args": {"pattern": "FAREWELL", "glob": "**/*"}}
+{"ts": 276.1717, "event": "search", "agent": "agent-ab", "kind": "grep", "pattern": "FAREWELL", "n": 2}
+{"ts": 276.6259, "event": "llm_usage", "agent": "agent-ba", "turn": 20, "prompt_tokens": 1482, "completion_tokens": 18}
+{"ts": 276.6259, "event": "tool_call", "agent": "agent-ba", "turn": 20, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 276.626, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 277.3889, "event": "llm_usage", "agent": "agent-ab", "turn": 20, "prompt_tokens": 1550, "completion_tokens": 18}
+{"ts": 277.3891, "event": "tool_call", "agent": "agent-ab", "turn": 20, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 277.3893, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 306.6272, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.001}
+{"ts": 306.6273, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 307.3905, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ab", "path": "beta.py", "waited_s": 30.001}
+{"ts": 307.3905, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": false, "size": 0}
+{"ts": 308.0311, "event": "llm_usage", "agent": "agent-ba", "turn": 21, "prompt_tokens": 1523, "completion_tokens": 40}
+{"ts": 308.0312, "event": "tool_call", "agent": "agent-ba", "turn": 21, "tool": "edit_file", "args": {"path": "alpha.py", "old_string": "VERSION = \"0.1\"", "new_string": "VERSION = \"0.2\""}}
+{"ts": 308.0313, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 308.9805, "event": "llm_usage", "agent": "agent-ab", "turn": 21, "prompt_tokens": 1591, "completion_tokens": 20}
+{"ts": 308.9807, "event": "tool_call", "agent": "agent-ab", "turn": 21, "tool": "read_file", "args": {"path": "conftest.py"}}
+{"ts": 308.9819, "event": "read", "agent": "agent-ab", "path": "conftest.py", "found": true, "size": 92}
+{"ts": 310.3767, "event": "llm_usage", "agent": "agent-ab", "turn": 22, "prompt_tokens": 1645, "completion_tokens": 21}
+{"ts": 310.3768, "event": "tool_call", "agent": "agent-ab", "turn": 22, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 310.3769, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "tests/test_smoke.py", "holder": "agent-ba"}
+{"ts": 338.0327, "event": "write", "agent": "agent-ba", "path": "alpha.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.001, "changed_symbols": [], "message": "file alpha.py is locked by another agent; work on something else and retry later"}
+{"ts": 340.378, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ab", "path": "tests/test_smoke.py", "waited_s": 30.001}
+{"ts": 340.3781, "event": "read", "agent": "agent-ab", "path": "tests/test_smoke.py", "found": false, "size": 0}
+{"ts": 341.0349, "event": "llm_usage", "agent": "agent-ba", "turn": 22, "prompt_tokens": 1596, "completion_tokens": 152}
+{"ts": 341.035, "event": "tool_call", "agent": "agent-ba", "turn": 22, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 341.0353, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 341.9242, "event": "llm_usage", "agent": "agent-ab", "turn": 23, "prompt_tokens": 1692, "completion_tokens": 43}
+{"ts": 341.9244, "event": "tool_call", "agent": "agent-ab", "turn": 23, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "FAREWELL = \"bye\"", "new_string": "FAREWELL = \"goodbye\""}}
+{"ts": 341.9245, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 371.0367, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.001}
+{"ts": 371.0368, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 371.9257, "event": "write", "agent": "agent-ab", "path": "beta.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.001, "changed_symbols": [], "message": "file beta.py is locked by another agent; work on something else and retry later"}
+{"ts": 372.585, "event": "llm_usage", "agent": "agent-ba", "turn": 23, "prompt_tokens": 1637, "completion_tokens": 25}
+{"ts": 372.5851, "event": "tool_call", "agent": "agent-ba", "turn": 23, "tool": "grep", "args": {"pattern": "GREETING =", "glob": "**/*.py"}}
+{"ts": 372.5903, "event": "search", "agent": "agent-ba", "kind": "grep", "pattern": "GREETING =", "n": 1}
+{"ts": 373.8399, "event": "llm_usage", "agent": "agent-ba", "turn": 24, "prompt_tokens": 1683, "completion_tokens": 18}
+{"ts": 373.8401, "event": "tool_call", "agent": "agent-ba", "turn": 24, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 373.8404, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 376.6415, "event": "llm_usage", "agent": "agent-ab", "turn": 24, "prompt_tokens": 1768, "completion_tokens": 216}
+{"ts": 376.6416, "event": "tool_call", "agent": "agent-ab", "turn": 24, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 376.6417, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 403.8428, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.002}
+{"ts": 403.8434, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 405.161, "event": "llm_usage", "agent": "agent-ba", "turn": 25, "prompt_tokens": 1724, "completion_tokens": 13}
+{"ts": 405.1612, "event": "tool_call", "agent": "agent-ba", "turn": 25, "tool": "run_tests", "args": {}}
+{"ts": 405.6336, "event": "run_tests", "agent": "agent-ba", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 406.6427, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ab", "path": "beta.py", "waited_s": 30.001}
+{"ts": 406.6428, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": false, "size": 0}
+{"ts": 407.6922, "event": "llm_usage", "agent": "agent-ba", "turn": 26, "prompt_tokens": 1763, "completion_tokens": 40}
+{"ts": 407.6923, "event": "tool_call", "agent": "agent-ba", "turn": 26, "tool": "edit_file", "args": {"path": "alpha.py", "old_string": "VERSION = \"0.1\"", "new_string": "VERSION = \"0.2\""}}
+{"ts": 407.6924, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 408.3194, "event": "llm_usage", "agent": "agent-ab", "turn": 25, "prompt_tokens": 1809, "completion_tokens": 22}
+{"ts": 408.3195, "event": "tool_call", "agent": "agent-ab", "turn": 25, "tool": "grep", "args": {"pattern": "bye", "glob": "**/*"}}
+{"ts": 408.3281, "event": "search", "agent": "agent-ab", "kind": "grep", "pattern": "bye", "n": 1}
+{"ts": 409.8364, "event": "llm_usage", "agent": "agent-ab", "turn": 26, "prompt_tokens": 1854, "completion_tokens": 18}
+{"ts": 409.8366, "event": "tool_call", "agent": "agent-ab", "turn": 26, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 409.8367, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 437.6937, "event": "write", "agent": "agent-ba", "path": "alpha.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.001, "changed_symbols": [], "message": "file alpha.py is locked by another agent; work on something else and retry later"}
+{"ts": 439.1823, "event": "llm_usage", "agent": "agent-ba", "turn": 27, "prompt_tokens": 1836, "completion_tokens": 18}
+{"ts": 439.1825, "event": "tool_call", "agent": "agent-ba", "turn": 27, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 439.1828, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 439.8379, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ab", "path": "beta.py", "waited_s": 30.001}
+{"ts": 439.838, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": false, "size": 0}
+{"ts": 441.1725, "event": "llm_usage", "agent": "agent-ab", "turn": 27, "prompt_tokens": 1895, "completion_tokens": 17}
+{"ts": 441.1731, "event": "tool_call", "agent": "agent-ab", "turn": 27, "tool": "list_files", "args": {"pattern": "*"}}
+{"ts": 445.0591, "event": "llm_usage", "agent": "agent-ab", "turn": 28, "prompt_tokens": 1939, "completion_tokens": 177}
+{"ts": 445.0594, "event": "tool_call", "agent": "agent-ab", "turn": 28, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "FAREWELL = \"bye\"", "new_string": "FAREWELL = \"goodbye\""}}
+{"ts": 445.0595, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 469.1845, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.002}
+{"ts": 469.1847, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 470.5663, "event": "llm_usage", "agent": "agent-ba", "turn": 28, "prompt_tokens": 1877, "completion_tokens": 23}
+{"ts": 470.5664, "event": "tool_call", "agent": "agent-ba", "turn": 28, "tool": "grep", "args": {"pattern": "VERSION", "glob": "**/*.py"}}
+{"ts": 470.5715, "event": "search", "agent": "agent-ba", "kind": "grep", "pattern": "VERSION", "n": 1}
+{"ts": 471.8944, "event": "llm_usage", "agent": "agent-ba", "turn": 29, "prompt_tokens": 1922, "completion_tokens": 18}
+{"ts": 471.8945, "event": "tool_call", "agent": "agent-ba", "turn": 29, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 471.8946, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 475.0606, "event": "write", "agent": "agent-ab", "path": "beta.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.001, "changed_symbols": [], "message": "file beta.py is locked by another agent; work on something else and retry later"}
+{"ts": 478.8845, "event": "llm_usage", "agent": "agent-ab", "turn": 29, "prompt_tokens": 2015, "completion_tokens": 241}
+{"ts": 478.8846, "event": "tool_call", "agent": "agent-ab", "turn": 29, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "FAREWELL = \"bye\"", "new_string": "FAREWELL = \"goodbye\""}}
+{"ts": 478.8846, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 501.8961, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.001}
+{"ts": 501.8962, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 503.5541, "event": "llm_usage", "agent": "agent-ba", "turn": 30, "prompt_tokens": 1963, "completion_tokens": 36}
+{"ts": 503.5543, "event": "tool_call", "agent": "agent-ba", "turn": 30, "tool": "write_file", "args": {"path": "alpha.py", "content": "GREETING = \"hello\"\nVERSION = \"0.2\"\n"}}
+{"ts": 503.5544, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 508.8858, "event": "write", "agent": "agent-ab", "path": "beta.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.001, "changed_symbols": [], "message": "file beta.py is locked by another agent; work on something else and retry later"}
+{"ts": 510.2456, "event": "llm_usage", "agent": "agent-ab", "turn": 30, "prompt_tokens": 2091, "completion_tokens": 18}
+{"ts": 510.2458, "event": "tool_call", "agent": "agent-ab", "turn": 30, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 510.2471, "event": "read", "agent": "agent-ab", "path": "alpha.py", "found": true, "size": 35}
+{"ts": 511.5743, "event": "llm_usage", "agent": "agent-ab", "turn": 31, "prompt_tokens": 2133, "completion_tokens": 26}
+{"ts": 511.5744, "event": "tool_call", "agent": "agent-ab", "turn": 31, "tool": "grep", "args": {"pattern": "FAREWELL =", "glob": "**/*"}}
+{"ts": 511.5811, "event": "search", "agent": "agent-ab", "kind": "grep", "pattern": "FAREWELL =", "n": 1}
+{"ts": 513.0603, "event": "llm_usage", "agent": "agent-ab", "turn": 32, "prompt_tokens": 2182, "completion_tokens": 13}
+{"ts": 513.0604, "event": "tool_call", "agent": "agent-ab", "turn": 32, "tool": "run_tests", "args": {}}
+{"ts": 513.2984, "event": "run_tests", "agent": "agent-ab", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 514.7177, "event": "llm_usage", "agent": "agent-ab", "turn": 33, "prompt_tokens": 2221, "completion_tokens": 43}
+{"ts": 514.7177, "event": "tool_call", "agent": "agent-ab", "turn": 33, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "FAREWELL = \"bye\"", "new_string": "FAREWELL = \"goodbye\""}}
+{"ts": 514.7177, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 533.5569, "event": "write", "agent": "agent-ba", "path": "alpha.py", "kind": "overwrite", "status": "lock_timeout", "waited_s": 30.002, "changed_symbols": [], "message": "file alpha.py is locked by another agent; work on something else and retry later"}
+{"ts": 535.0289, "event": "llm_usage", "agent": "agent-ba", "turn": 31, "prompt_tokens": 2032, "completion_tokens": 18}
+{"ts": 535.029, "event": "tool_call", "agent": "agent-ba", "turn": 31, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 535.0296, "event": "read", "agent": "agent-ba", "path": "beta.py", "found": true, "size": 27}
+{"ts": 536.3722, "event": "llm_usage", "agent": "agent-ba", "turn": 32, "prompt_tokens": 2074, "completion_tokens": 23}
+{"ts": 536.3723, "event": "tool_call", "agent": "agent-ba", "turn": 32, "tool": "grep", "args": {"pattern": "VERSION", "glob": "**/*.py"}}
+{"ts": 536.377, "event": "search", "agent": "agent-ba", "kind": "grep", "pattern": "VERSION", "n": 1}
+{"ts": 537.8447, "event": "llm_usage", "agent": "agent-ba", "turn": 33, "prompt_tokens": 2119, "completion_tokens": 18}
+{"ts": 537.8449, "event": "tool_call", "agent": "agent-ba", "turn": 33, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 537.8453, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "holder": "agent-ab"}
+{"ts": 544.7201, "event": "write", "agent": "agent-ab", "path": "beta.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.002, "changed_symbols": [], "message": "file beta.py is locked by another agent; work on something else and retry later"}
+{"ts": 546.5154, "event": "llm_usage", "agent": "agent-ab", "turn": 34, "prompt_tokens": 2297, "completion_tokens": 18}
+{"ts": 546.5154, "event": "tool_call", "agent": "agent-ab", "turn": 34, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 546.5156, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "holder": "agent-ba"}
+{"ts": 567.8498, "event": "coord", "strategy": "file_lock", "action": "lock_timeout", "agent": "agent-ba", "path": "alpha.py", "waited_s": 30.004}
+{"ts": 567.8505, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": false, "size": 0}
+{"ts": 569.692, "event": "llm_usage", "agent": "agent-ba", "turn": 34, "prompt_tokens": 2160, "completion_tokens": 49}
+{"ts": 569.6921, "event": "tool_call", "agent": "agent-ba", "turn": 34, "tool": "done", "args": {"summary": "Updated beta.py COUNT from 1 to 2; attempted to update alpha.py VERSION to 0.2 but file was locked by another agent — beta change applied."}}
+{"ts": 569.6921, "event": "agent_done_coord", "agent": "agent-ba"}
+{"ts": 569.6921, "event": "agent_done", "agent": "agent-ba", "status": "done", "turns": 34, "prompt_tokens": 47055, "completion_tokens": 1330}
+{"ts": 569.6934, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": true, "size": 27}
+{"ts": 571.4353, "event": "llm_usage", "agent": "agent-ab", "turn": 35, "prompt_tokens": 2339, "completion_tokens": 43}
+{"ts": 571.4354, "event": "tool_call", "agent": "agent-ab", "turn": 35, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "FAREWELL = \"bye\"", "new_string": "FAREWELL = \"goodbye\""}}
+{"ts": 571.4359, "event": "write", "agent": "agent-ab", "path": "beta.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 900.2597, "event": "agent_done_coord", "agent": "agent-ab"}
+{"ts": 900.2604, "event": "agent_done", "agent": "agent-ab", "status": "max_turns", "turns": 36, "prompt_tokens": 51353, "completion_tokens": 1994}
+{"ts": 900.2606, "event": "trial_timeout"}
+{"ts": 900.8416, "event": "trial_end", "correct": false, "oracle_passed": 0, "oracle_total": 1, "wall_clock_s": 900.01, "prompt_tokens": 0, "completion_tokens": 0, "agent_statuses": {}, "oracle_output": "F                                                                        [100%]\n=================================== FAILURES ===================================\nE   AssertionError: assert '0.1' == '0.2'\n      \n      - 0.2\n      + 0.1\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t8_livelock-file_lock-n2-r2/oracle_tests/test_oracle_t8.py:7: AssertionError: assert '0.1' == '0.2'\n=========================== short test summary info ============================\nFAILED oracle_tests/test_oracle_t8.py::test_all_edits_landed - AssertionError...\n1 failed in 0.02s\n"}

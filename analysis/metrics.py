@@ -6,8 +6,10 @@ Definitions (also quoted in the write-up):
 - wasted_tokens: tokens of every agent turn whose tool results included a
   refused write (edit_failed / conflict / lock_timeout). Those turns produced
   work the coordination layer discarded.
-- estimated_usd: list-price USD from trial_end prompt/completion counts and
-  the price table (run_meta.json, --prices-config, or harness.pricing defaults).
+- estimated_usd: list-price USD from prompt/completion counts and the price
+  table (run_meta.json, --prices-config, or harness.pricing defaults). Prefer
+  trial_end totals; if those are 0 (legacy trial_timeout bug), fall back to
+  summing llm_usage events.
 - stall_events: coordination events that delayed or refused an agent action
   (blocked, lock_timeout, merge_conflict).
 - false-positive stall: a stall between two agents whose applied writes to the
@@ -54,10 +56,13 @@ def trial_metrics(log_path: Path, prices: dict | None = None) -> dict | None:
 
     # --- token accounting per (agent, turn), to attribute waste
     turn_tokens: dict[tuple[str, int], int] = {}
+    usage_prompt = usage_completion = 0
     for e in events:
         if e["event"] == "llm_usage":
             turn_tokens[(e["agent"], e["turn"])] = (
                 e["prompt_tokens"] + e["completion_tokens"])
+            usage_prompt += int(e.get("prompt_tokens") or 0)
+            usage_completion += int(e.get("completion_tokens") or 0)
 
     # tool_call events carry (agent, turn); write events follow their tool_call.
     # Walk in order, remembering the current turn per agent.
@@ -111,15 +116,25 @@ def trial_metrics(log_path: Path, prices: dict | None = None) -> dict | None:
         ):
             fp_stalls += 1
 
-    statuses = end.get("agent_statuses", {}) or {}
+    statuses = dict(end.get("agent_statuses", {}) or {})
+    timed_out = any(e["event"] == "trial_timeout" for e in events)
+    if not statuses and timed_out:
+        for aid in start.get("agent_ids") or []:
+            statuses[aid] = "timeout"
+
     critical = _critical_paths(start["task"])
     if critical:
         hit = sum(1 for p in critical if p in read_paths)
         critical_frac = hit / len(critical)
     else:
         critical_frac = None
+
+    # Prefer trial_end totals; fall back to llm_usage when timeout wiped them.
     prompt_tokens = int(end.get("prompt_tokens", 0))
     completion_tokens = int(end.get("completion_tokens", 0))
+    if prompt_tokens + completion_tokens == 0 and usage_prompt + usage_completion > 0:
+        prompt_tokens, completion_tokens = usage_prompt, usage_completion
+
     model = start.get("model", "")
     return {
         "task": start["task"],
@@ -149,8 +164,10 @@ def trial_metrics(log_path: Path, prices: dict | None = None) -> dict | None:
         "reads_observed": reads,
         "read_set_visibility": 1.0,
         "critical_paths_read_fraction": critical_frac,
+        "timed_out": timed_out,
         "agents_done": sum(1 for v in statuses.values() if v == "done"),
         "agents_errored": sum(1 for v in statuses.values() if v == "error"),
+        "agents_timeout": sum(1 for v in statuses.values() if v == "timeout"),
     }
 
 

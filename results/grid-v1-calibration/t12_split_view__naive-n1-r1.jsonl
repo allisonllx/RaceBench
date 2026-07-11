@@ -1,27 +1,27 @@
-{"ts": 0.2264, "event": "trial_start", "task": "t12_split_view", "failure_mode": "split_view_divergence", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 1, "model": "gpt-5-mini", "isolation": "worktree", "agent_ids": ["solo"]}
-{"ts": 1.5362, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 754, "completion_tokens": 24}
-{"ts": 1.5363, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "glob", "args": {"pattern": "**/*.py"}}
-{"ts": 1.5373, "event": "search", "agent": "solo", "kind": "glob", "pattern": "**/*.py", "n": 0}
-{"ts": 2.823, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 785, "completion_tokens": 19}
-{"ts": 2.8233, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "list_files", "args": {}}
-{"ts": 5.0271, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 809, "completion_tokens": 94}
-{"ts": 5.0273, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "grep", "args": {"pattern": "Greeter", "glob": "**/*.py"}}
-{"ts": 5.0283, "event": "search", "agent": "solo", "kind": "grep", "pattern": "Greeter", "n": 0}
-{"ts": 15.0197, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 846, "completion_tokens": 928}
-{"ts": 15.0199, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "write_file", "args": {"path": "lib/api.py", "content": "class Greeter:\n    def greet(self, name: str) -> str:\n        return f\"hello,{name}\"\n\n    def ping(self) -> str:\n        return \"pong\"\n\n    def farewell(self, name: str) -> str:\n        return f\"bye,{"}}
-{"ts": 15.0212, "event": "write", "agent": "solo", "path": "lib/api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["Greeter"], "message": ""}
-{"ts": 16.4807, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 952, "completion_tokens": 56}
-{"ts": 16.4808, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "write_file", "args": {"path": "apps/cli.py", "content": "from lib.api import Greeter\n\ng = Greeter()\n\ndef welcome(name: str) -> str:\n    return g.greet(name)\n"}}
-{"ts": 16.4817, "event": "write", "agent": "solo", "path": "apps/cli.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "welcome"], "message": ""}
-{"ts": 17.9092, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 1024, "completion_tokens": 57}
-{"ts": 17.9094, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "write_file", "args": {"path": "services/worker.py", "content": "from lib.api import Greeter\n\nw = Greeter()\n\ndef goodbye(name: str) -> str:\n    return w.farewell(name)\n"}}
-{"ts": 17.9117, "event": "write", "agent": "solo", "path": "services/worker.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "goodbye"], "message": ""}
-{"ts": 18.9441, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 1097, "completion_tokens": 13}
-{"ts": 18.9441, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "run_tests", "args": {}}
-{"ts": 19.5719, "event": "run_tests", "agent": "solo", "passed": 1, "failed": 0, "errored": 0}
-{"ts": 20.7787, "event": "llm_usage", "agent": "solo", "turn": 8, "prompt_tokens": 1136, "completion_tokens": 44}
-{"ts": 20.7788, "event": "tool_call", "agent": "solo", "turn": 8, "tool": "done", "args": {"summary": "Added greet and farewell to lib/api.py; updated apps/cli.py to call greet and services/worker.py to call farewell; tests pass."}}
-{"ts": 20.7789, "event": "agent_done_coord", "agent": "solo"}
-{"ts": 20.7789, "event": "agent_done", "agent": "solo", "status": "done", "turns": 8, "prompt_tokens": 7403, "completion_tokens": 1235}
-{"ts": 20.9665, "event": "worktree_merge", "ok": true, "conflicts": [], "message": "clean"}
-{"ts": 21.2459, "event": "trial_end", "correct": false, "oracle_passed": 0, "oracle_total": 2, "wall_clock_s": 20.53, "prompt_tokens": 7403, "completion_tokens": 1235, "agent_statuses": {"solo": "done"}, "oracle_output": "FF                                                                       [100%]\n=================================== FAILURES ===================================\nE   AttributeError: 'Greeter' object has no attribute 'greet'\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t12_split_view-naive-n1-r1/oracle_tests/test_oracle_t12.py:9: AttributeError: 'Greeter' object has no attribute 'greet'\nE   AssertionError: assert 'pong' == 'hello,ada'\n      \n      - hello,ada\n      + pong\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t12_split_view-naive-n1-r1/oracle_tests/test_oracle_t12.py:15: AssertionError: assert 'pong' == 'hello,ada'\n=========================== short test summary info ============================\nFAILED oracle_tests/test_oracle_t12.py::test_greeter_both_methods - Attribute...\nFAILED oracle_tests/test_oracle_t12.py::test_call_sites - AssertionError: ass...\n2 failed in 0.01s\n"}
+{"ts": 0.2062, "event": "trial_start", "task": "t12_split_view", "failure_mode": "split_view_divergence", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 1, "model": "gpt-5-mini", "isolation": "worktree", "agent_ids": ["solo"]}
+{"ts": 1.7863, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 720, "completion_tokens": 19}
+{"ts": 1.7865, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.9891, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 744, "completion_tokens": 17}
+{"ts": 2.9892, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "glob", "args": {"pattern": "**/*"}}
+{"ts": 2.9904, "event": "search", "agent": "solo", "kind": "glob", "pattern": "**/*", "n": 0}
+{"ts": 4.4476, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 774, "completion_tokens": 31}
+{"ts": 4.4477, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "grep", "args": {"pattern": "class Greeter", "glob": "**/*.py"}}
+{"ts": 4.4486, "event": "search", "agent": "solo", "kind": "grep", "pattern": "class Greeter", "n": 0}
+{"ts": 9.7945, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 812, "completion_tokens": 544}
+{"ts": 9.7946, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "write_file", "args": {"path": "lib/api.py", "content": "class Greeter:\n    def greet(self, name: str) -> str:\n        return f\"hello,{name}\"\n\n    def ping(self) -> str:\n        return \"pong\"\n\n    def farewell(self, name: str) -> str:\n        return f\"bye,{"}}
+{"ts": 9.7961, "event": "write", "agent": "solo", "path": "lib/api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["Greeter"], "message": ""}
+{"ts": 11.1368, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 918, "completion_tokens": 56}
+{"ts": 11.1369, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "write_file", "args": {"path": "apps/cli.py", "content": "from lib.api import Greeter\n\ndef welcome(name: str) -> str:\n    g = Greeter()\n    return g.greet(name)\n"}}
+{"ts": 11.138, "event": "write", "agent": "solo", "path": "apps/cli.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["welcome"], "message": ""}
+{"ts": 12.5205, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 990, "completion_tokens": 57}
+{"ts": 12.5207, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "write_file", "args": {"path": "services/worker.py", "content": "from lib.api import Greeter\n\ndef goodbye(name: str) -> str:\n    g = Greeter()\n    return g.farewell(name)\n"}}
+{"ts": 12.5219, "event": "write", "agent": "solo", "path": "services/worker.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["goodbye"], "message": ""}
+{"ts": 13.7192, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 1063, "completion_tokens": 13}
+{"ts": 13.7193, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "run_tests", "args": {}}
+{"ts": 14.1481, "event": "run_tests", "agent": "solo", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 15.2438, "event": "llm_usage", "agent": "solo", "turn": 8, "prompt_tokens": 1102, "completion_tokens": 39}
+{"ts": 15.2439, "event": "tool_call", "agent": "solo", "turn": 8, "tool": "done", "args": {"summary": "Added greet and farewell methods to lib/api.py and updated apps/cli.py and services/worker.py to use them."}}
+{"ts": 15.244, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 15.244, "event": "agent_done", "agent": "solo", "status": "done", "turns": 8, "prompt_tokens": 7123, "completion_tokens": 776}
+{"ts": 16.146, "event": "worktree_merge", "ok": false, "conflicts": ["solo"], "message": "conflicts for agents: ['solo']; per-file merged"}
+{"ts": 16.4149, "event": "trial_end", "correct": true, "oracle_passed": 2, "oracle_total": 2, "wall_clock_s": 15.02, "prompt_tokens": 7123, "completion_tokens": 776, "agent_statuses": {"solo": "done"}, "oracle_output": "..                                                                       [100%]\n2 passed in 0.01s\n"}

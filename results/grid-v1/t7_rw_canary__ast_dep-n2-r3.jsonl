@@ -1,0 +1,65 @@
+{"ts": 0.1687, "event": "trial_start", "task": "t7_rw_canary", "failure_mode": "antidependency_silent_invalidation", "benign": false, "strategy": "ast_dep", "n_agents": 2, "rep": 3, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-schema", "agent-handlers"]}
+{"ts": 1.5455, "event": "llm_usage", "agent": "agent-handlers", "turn": 1, "prompt_tokens": 637, "completion_tokens": 19}
+{"ts": 1.5457, "event": "tool_call", "agent": "agent-handlers", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 1.7212, "event": "llm_usage", "agent": "agent-schema", "turn": 1, "prompt_tokens": 633, "completion_tokens": 23}
+{"ts": 1.7213, "event": "tool_call", "agent": "agent-schema", "turn": 1, "tool": "glob", "args": {"pattern": "**/*"}}
+{"ts": 1.7252, "event": "search", "agent": "agent-schema", "kind": "glob", "pattern": "**/*", "n": 7}
+{"ts": 2.6786, "event": "llm_usage", "agent": "agent-handlers", "turn": 2, "prompt_tokens": 704, "completion_tokens": 19}
+{"ts": 2.6788, "event": "tool_call", "agent": "agent-handlers", "turn": 2, "tool": "read_file", "args": {"path": "handlers/report.py"}}
+{"ts": 2.6983, "event": "read", "agent": "agent-handlers", "path": "handlers/report.py", "found": true, "size": 363}
+{"ts": 2.8676, "event": "llm_usage", "agent": "agent-schema", "turn": 2, "prompt_tokens": 698, "completion_tokens": 19}
+{"ts": 2.8677, "event": "tool_call", "agent": "agent-schema", "turn": 2, "tool": "read_file", "args": {"path": "schema/constants.py"}}
+{"ts": 2.8685, "event": "read", "agent": "agent-schema", "path": "schema/constants.py", "found": true, "size": 86}
+{"ts": 3.7545, "event": "llm_usage", "agent": "agent-handlers", "turn": 3, "prompt_tokens": 808, "completion_tokens": 19}
+{"ts": 3.7545, "event": "tool_call", "agent": "agent-handlers", "turn": 3, "tool": "read_file", "args": {"path": "schema/constants.py"}}
+{"ts": 3.755, "event": "read", "agent": "agent-handlers", "path": "schema/constants.py", "found": true, "size": 86}
+{"ts": 4.082, "event": "llm_usage", "agent": "agent-schema", "turn": 3, "prompt_tokens": 746, "completion_tokens": 21}
+{"ts": 4.0822, "event": "tool_call", "agent": "agent-schema", "turn": 3, "tool": "read_file", "args": {"path": "schema/__init__.py"}}
+{"ts": 4.0827, "event": "read", "agent": "agent-schema", "path": "schema/__init__.py", "found": true, "size": 108}
+{"ts": 4.8623, "event": "llm_usage", "agent": "agent-handlers", "turn": 4, "prompt_tokens": 856, "completion_tokens": 21}
+{"ts": 4.8624, "event": "tool_call", "agent": "agent-handlers", "turn": 4, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 4.8631, "event": "read", "agent": "agent-handlers", "path": "tests/test_smoke.py", "found": true, "size": 228}
+{"ts": 6.0466, "event": "llm_usage", "agent": "agent-schema", "turn": 4, "prompt_tokens": 802, "completion_tokens": 21}
+{"ts": 6.0467, "event": "tool_call", "agent": "agent-schema", "turn": 4, "tool": "read_file", "args": {"path": "exporters/status_export.py"}}
+{"ts": 6.0472, "event": "read", "agent": "agent-schema", "path": "exporters/status_export.py", "found": true, "size": 192}
+{"ts": 9.8589, "event": "llm_usage", "agent": "agent-schema", "turn": 5, "prompt_tokens": 867, "completion_tokens": 219}
+{"ts": 9.8591, "event": "tool_call", "agent": "agent-schema", "turn": 5, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 9.8608, "event": "read", "agent": "agent-schema", "path": "tests/test_smoke.py", "found": true, "size": 228}
+{"ts": 10.6115, "event": "llm_usage", "agent": "agent-handlers", "turn": 5, "prompt_tokens": 944, "completion_tokens": 408}
+{"ts": 10.6117, "event": "tool_call", "agent": "agent-handlers", "turn": 5, "tool": "edit_file", "args": {"path": "handlers/report.py", "old_string": "\"\"\"Report handlers — stubs.\"\"\"\n\n\ndef filter_active(records):\n    \"\"\"Return records whose status equals schema.constants.STATUS_ACTIVE\n    (the live constant value, not a hard-coded string).\"\"\"\n    rai", "new_string": "\"\"\"Report handlers — stubs.\"\"\"\n\nfrom schema.constants import STATUS_ACTIVE\n\n\ndef filter_active(records):\n    \"\"\"Return records whose status equals schema.constants.STATUS_ACTIVE\n    (the live constant"}}
+{"ts": 10.614, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-handlers", "reader": "agent-schema", "path": "handlers/report.py", "symbols": ["schema/constants.py:STATUS_ACTIVE"]}
+{"ts": 10.6224, "event": "write", "agent": "agent-handlers", "path": "handlers/report.py", "kind": "replace", "status": "applied", "waited_s": 0.004, "changed_symbols": ["<module>", "filter_active", "summarize_active"], "message": ""}
+{"ts": 11.7956, "event": "llm_usage", "agent": "agent-handlers", "turn": 6, "prompt_tokens": 1234, "completion_tokens": 13}
+{"ts": 11.7956, "event": "tool_call", "agent": "agent-handlers", "turn": 6, "tool": "run_tests", "args": {}}
+{"ts": 12.215, "event": "run_tests", "agent": "agent-handlers", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 13.5333, "event": "llm_usage", "agent": "agent-handlers", "turn": 7, "prompt_tokens": 1273, "completion_tokens": 37}
+{"ts": 13.5334, "event": "tool_call", "agent": "agent-handlers", "turn": 7, "tool": "done", "args": {"summary": "Implemented filter_active and summarize_active in handlers/report.py to use schema.constants.STATUS_ACTIVE and return correct active count."}}
+{"ts": 13.5335, "event": "agent_done_coord", "agent": "agent-handlers"}
+{"ts": 13.5335, "event": "agent_done", "agent": "agent-handlers", "status": "done", "turns": 7, "prompt_tokens": 6456, "completion_tokens": 536}
+{"ts": 15.8865, "event": "llm_usage", "agent": "agent-schema", "turn": 6, "prompt_tokens": 955, "completion_tokens": 284}
+{"ts": 15.8866, "event": "tool_call", "agent": "agent-schema", "turn": 6, "tool": "read_file", "args": {"path": "exporters/__init__.py"}}
+{"ts": 15.8871, "event": "read", "agent": "agent-schema", "path": "exporters/__init__.py", "found": true, "size": 77}
+{"ts": 27.0757, "event": "llm_usage", "agent": "agent-schema", "turn": 7, "prompt_tokens": 1004, "completion_tokens": 733}
+{"ts": 27.0758, "event": "tool_call", "agent": "agent-schema", "turn": 7, "tool": "grep", "args": {"pattern": "STATUS_ACTIVE", "glob": "**/*"}}
+{"ts": 27.0816, "event": "search", "agent": "agent-schema", "kind": "grep", "pattern": "STATUS_ACTIVE", "n": 8}
+{"ts": 28.3392, "event": "llm_usage", "agent": "agent-schema", "turn": 8, "prompt_tokens": 1172, "completion_tokens": 19}
+{"ts": 28.3394, "event": "tool_call", "agent": "agent-schema", "turn": 8, "tool": "read_file", "args": {"path": "handlers/report.py"}}
+{"ts": 28.3406, "event": "read", "agent": "agent-schema", "path": "handlers/report.py", "found": true, "size": 558}
+{"ts": 45.7451, "event": "llm_usage", "agent": "agent-schema", "turn": 9, "prompt_tokens": 1322, "completion_tokens": 1237}
+{"ts": 45.7452, "event": "tool_call", "agent": "agent-schema", "turn": 9, "tool": "edit_file", "args": {"path": "schema/constants.py", "old_string": "\"\"\"Public status constants.\"\"\"\n\nSTATUS_ACTIVE = \"active\"\nSTATUS_INACTIVE = \"inactive\"\n", "new_string": "\"\"\"Public status constants.\"\"\"\n\nSTATUS_ACTIVE = \"enabled\"\nSTATUS_INACTIVE = \"inactive\"\n"}}
+{"ts": 45.7537, "event": "write", "agent": "agent-schema", "path": "schema/constants.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 55.1301, "event": "llm_usage", "agent": "agent-schema", "turn": 10, "prompt_tokens": 1417, "completion_tokens": 604}
+{"ts": 55.1303, "event": "tool_call", "agent": "agent-schema", "turn": 10, "tool": "grep", "args": {"pattern": "enabled", "glob": "**/*"}}
+{"ts": 55.1371, "event": "search", "agent": "agent-schema", "kind": "grep", "pattern": "enabled", "n": 1}
+{"ts": 56.4551, "event": "llm_usage", "agent": "agent-schema", "turn": 11, "prompt_tokens": 1461, "completion_tokens": 23}
+{"ts": 56.4552, "event": "tool_call", "agent": "agent-schema", "turn": 11, "tool": "grep", "args": {"pattern": "active\"", "glob": "**/*"}}
+{"ts": 56.4592, "event": "search", "agent": "agent-schema", "kind": "grep", "pattern": "active\"", "n": 2}
+{"ts": 61.9446, "event": "llm_usage", "agent": "agent-schema", "turn": 12, "prompt_tokens": 1529, "completion_tokens": 275}
+{"ts": 61.9449, "event": "tool_call", "agent": "agent-schema", "turn": 12, "tool": "run_tests", "args": {}}
+{"ts": 62.2625, "event": "run_tests", "agent": "agent-schema", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 64.2958, "event": "llm_usage", "agent": "agent-schema", "turn": 13, "prompt_tokens": 1568, "completion_tokens": 81}
+{"ts": 67.9339, "event": "llm_usage", "agent": "agent-schema", "turn": 14, "prompt_tokens": 1665, "completion_tokens": 165}
+{"ts": 67.934, "event": "tool_call", "agent": "agent-schema", "turn": 14, "tool": "done", "args": {"summary": "Rename STATUS_ACTIVE value to \"enabled\" in schema/constants.py; tests passed."}}
+{"ts": 67.934, "event": "agent_done_coord", "agent": "agent-schema"}
+{"ts": 67.9341, "event": "agent_done", "agent": "agent-schema", "status": "done", "turns": 14, "prompt_tokens": 15839, "completion_tokens": 3724}
+{"ts": 68.4625, "event": "trial_end", "correct": true, "oracle_passed": 4, "oracle_total": 4, "wall_clock_s": 67.72, "prompt_tokens": 22295, "completion_tokens": 4260, "agent_statuses": {"agent-schema": "done", "agent-handlers": "done"}, "oracle_output": "....                                                                     [100%]\n4 passed in 0.01s\n"}

@@ -1,0 +1,139 @@
+{"ts": 0.3049, "event": "trial_start", "task": "t12_split_view", "failure_mode": "split_view_divergence", "benign": false, "strategy": "ast_scope", "n_agents": 2, "rep": 0, "model": "gpt-5-mini", "isolation": "worktree", "agent_ids": ["agent-core", "agent-ext"]}
+{"ts": 1.6461, "event": "llm_usage", "agent": "agent-ext", "turn": 1, "prompt_tokens": 623, "completion_tokens": 23}
+{"ts": 1.6462, "event": "tool_call", "agent": "agent-ext", "turn": 1, "tool": "glob", "args": {"pattern": "**/*"}}
+{"ts": 1.6495, "event": "search", "agent": "agent-ext", "kind": "glob", "pattern": "**/*", "n": 0}
+{"ts": 1.8767, "event": "llm_usage", "agent": "agent-core", "turn": 1, "prompt_tokens": 622, "completion_tokens": 19}
+{"ts": 1.8768, "event": "tool_call", "agent": "agent-core", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.8311, "event": "llm_usage", "agent": "agent-ext", "turn": 2, "prompt_tokens": 653, "completion_tokens": 19}
+{"ts": 2.8312, "event": "tool_call", "agent": "agent-ext", "turn": 2, "tool": "list_files", "args": {}}
+{"ts": 2.8647, "event": "llm_usage", "agent": "agent-core", "turn": 2, "prompt_tokens": 646, "completion_tokens": 17}
+{"ts": 2.8648, "event": "tool_call", "agent": "agent-core", "turn": 2, "tool": "glob", "args": {"pattern": "**/*"}}
+{"ts": 2.8656, "event": "search", "agent": "agent-core", "kind": "glob", "pattern": "**/*", "n": 0}
+{"ts": 5.1201, "event": "llm_usage", "agent": "agent-ext", "turn": 3, "prompt_tokens": 677, "completion_tokens": 31}
+{"ts": 5.1203, "event": "tool_call", "agent": "agent-ext", "turn": 3, "tool": "grep", "args": {"pattern": "class Greeter", "glob": "**/*.py"}}
+{"ts": 5.1216, "event": "search", "agent": "agent-ext", "kind": "grep", "pattern": "class Greeter", "n": 0}
+{"ts": 5.1227, "event": "llm_usage", "agent": "agent-core", "turn": 3, "prompt_tokens": 676, "completion_tokens": 23}
+{"ts": 5.1228, "event": "tool_call", "agent": "agent-core", "turn": 3, "tool": "glob", "args": {"pattern": "lib/**"}}
+{"ts": 5.1237, "event": "search", "agent": "agent-core", "kind": "glob", "pattern": "lib/**", "n": 0}
+{"ts": 6.817, "event": "llm_usage", "agent": "agent-ext", "turn": 4, "prompt_tokens": 715, "completion_tokens": 24}
+{"ts": 6.8171, "event": "tool_call", "agent": "agent-ext", "turn": 4, "tool": "glob", "args": {"pattern": "lib/**/*.py"}}
+{"ts": 6.8184, "event": "search", "agent": "agent-ext", "kind": "glob", "pattern": "lib/**/*.py", "n": 0}
+{"ts": 7.3675, "event": "llm_usage", "agent": "agent-core", "turn": 4, "prompt_tokens": 706, "completion_tokens": 88}
+{"ts": 7.3677, "event": "tool_call", "agent": "agent-core", "turn": 4, "tool": "glob", "args": {"pattern": "**/*.py"}}
+{"ts": 7.3685, "event": "search", "agent": "agent-core", "kind": "glob", "pattern": "**/*.py", "n": 0}
+{"ts": 7.9845, "event": "llm_usage", "agent": "agent-ext", "turn": 5, "prompt_tokens": 746, "completion_tokens": 18}
+{"ts": 7.9846, "event": "tool_call", "agent": "agent-ext", "turn": 5, "tool": "glob", "args": {"pattern": "**/*.py"}}
+{"ts": 7.9854, "event": "search", "agent": "agent-ext", "kind": "glob", "pattern": "**/*.py", "n": 0}
+{"ts": 8.9471, "event": "llm_usage", "agent": "agent-core", "turn": 5, "prompt_tokens": 737, "completion_tokens": 83}
+{"ts": 8.9472, "event": "tool_call", "agent": "agent-core", "turn": 5, "tool": "list_files", "args": {}}
+{"ts": 11.2912, "event": "llm_usage", "agent": "agent-core", "turn": 6, "prompt_tokens": 761, "completion_tokens": 158}
+{"ts": 11.2913, "event": "tool_call", "agent": "agent-core", "turn": 6, "tool": "grep", "args": {"pattern": "class Greeter", "glob": "**/*"}}
+{"ts": 11.2928, "event": "search", "agent": "agent-core", "kind": "grep", "pattern": "class Greeter", "n": 0}
+{"ts": 12.7882, "event": "llm_usage", "agent": "agent-ext", "turn": 6, "prompt_tokens": 777, "completion_tokens": 479}
+{"ts": 12.7883, "event": "tool_call", "agent": "agent-ext", "turn": 6, "tool": "write_file", "args": {"path": "lib/__init__.py", "content": ""}}
+{"ts": 12.7919, "event": "write", "agent": "agent-ext", "path": "lib/__init__.py", "kind": "overwrite", "status": "applied", "waited_s": 0.003, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 17.2925, "event": "llm_usage", "agent": "agent-ext", "turn": 7, "prompt_tokens": 818, "completion_tokens": 70}
+{"ts": 17.2927, "event": "tool_call", "agent": "agent-ext", "turn": 7, "tool": "write_file", "args": {"path": "lib/api.py", "content": "class Greeter:\n    def ping(self, name: str) -> str:\n        return f\"hi,{name}\"\n\n    def greet(self, name: str) -> str:\n        raise NotImplementedError\n"}}
+{"ts": 17.2953, "event": "write", "agent": "agent-ext", "path": "lib/api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.003, "changed_symbols": ["Greeter"], "message": ""}
+{"ts": 17.2966, "event": "llm_usage", "agent": "agent-core", "turn": 7, "prompt_tokens": 798, "completion_tokens": 543}
+{"ts": 17.2967, "event": "tool_call", "agent": "agent-core", "turn": 7, "tool": "write_file", "args": {"path": "lib/api.py", "content": "from typing import Any\n\n\nclass Greeter:\n    def greet(self, name: str) -> str:\n        return f\"hello,{name}\"\n\n    def ping(self) -> str:\n        return \"pong\"\n\n    def farewell(self) -> str:\n        "}}
+{"ts": 17.2992, "event": "coord", "strategy": "ast_scope", "action": "blocked", "agent": "agent-core", "path": "lib/api.py", "symbols": ["Greeter"], "holders": ["agent-ext"]}
+{"ts": 19.5806, "event": "llm_usage", "agent": "agent-ext", "turn": 8, "prompt_tokens": 904, "completion_tokens": 56}
+{"ts": 19.5808, "event": "tool_call", "agent": "agent-ext", "turn": 8, "tool": "write_file", "args": {"path": "services/worker.py", "content": "from lib.api import Greeter\n\ndef goodbye(name: str) -> str:\n    g = Greeter()\n    return g.ping(name)\n"}}
+{"ts": 19.5826, "event": "write", "agent": "agent-ext", "path": "services/worker.py", "kind": "overwrite", "status": "applied", "waited_s": 0.002, "changed_symbols": ["goodbye"], "message": ""}
+{"ts": 20.6837, "event": "llm_usage", "agent": "agent-ext", "turn": 9, "prompt_tokens": 976, "completion_tokens": 24}
+{"ts": 20.6839, "event": "tool_call", "agent": "agent-ext", "turn": 9, "tool": "grep", "args": {"pattern": "farewell", "glob": "**/*.py"}}
+{"ts": 20.6858, "event": "search", "agent": "agent-ext", "kind": "grep", "pattern": "farewell", "n": 0}
+{"ts": 22.4912, "event": "llm_usage", "agent": "agent-ext", "turn": 10, "prompt_tokens": 1013, "completion_tokens": 89}
+{"ts": 22.4914, "event": "tool_call", "agent": "agent-ext", "turn": 10, "tool": "edit_file", "args": {"path": "lib/api.py", "old_string": "    def greet(self, name: str) -> str:\n        raise NotImplementedError\n", "new_string": "    def greet(self, name: str) -> str:\n        raise NotImplementedError\n\n    def farewell(self, name: str) -> str:\n        return f\"bye,{name}\"\n"}}
+{"ts": 22.4991, "event": "write", "agent": "agent-ext", "path": "lib/api.py", "kind": "replace", "status": "applied", "waited_s": 0.008, "changed_symbols": ["Greeter"], "message": ""}
+{"ts": 24.0769, "event": "llm_usage", "agent": "agent-ext", "turn": 11, "prompt_tokens": 1118, "completion_tokens": 45}
+{"ts": 24.077, "event": "tool_call", "agent": "agent-ext", "turn": 11, "tool": "edit_file", "args": {"path": "services/worker.py", "old_string": "    return g.ping(name)\n", "new_string": "    return g.farewell(name)\n"}}
+{"ts": 24.078, "event": "write", "agent": "agent-ext", "path": "services/worker.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["goodbye"], "message": ""}
+{"ts": 25.2995, "event": "llm_usage", "agent": "agent-ext", "turn": 12, "prompt_tokens": 1179, "completion_tokens": 24}
+{"ts": 25.2996, "event": "tool_call", "agent": "agent-ext", "turn": 12, "tool": "grep", "args": {"pattern": "Greeter", "glob": "**/*.py"}}
+{"ts": 25.3008, "event": "search", "agent": "agent-ext", "kind": "grep", "pattern": "Greeter", "n": 0}
+{"ts": 26.8025, "event": "llm_usage", "agent": "agent-ext", "turn": 13, "prompt_tokens": 1216, "completion_tokens": 24}
+{"ts": 26.8027, "event": "tool_call", "agent": "agent-ext", "turn": 13, "tool": "grep", "args": {"pattern": "goodbye", "glob": "**/*.py"}}
+{"ts": 26.8039, "event": "search", "agent": "agent-ext", "kind": "grep", "pattern": "goodbye", "n": 0}
+{"ts": 27.9496, "event": "llm_usage", "agent": "agent-ext", "turn": 14, "prompt_tokens": 1253, "completion_tokens": 19}
+{"ts": 27.9497, "event": "tool_call", "agent": "agent-ext", "turn": 14, "tool": "read_file", "args": {"path": "lib/api.py"}}
+{"ts": 27.9502, "event": "read", "agent": "agent-ext", "path": "lib/api.py", "found": true, "size": 227}
+{"ts": 28.9962, "event": "llm_usage", "agent": "agent-ext", "turn": 15, "prompt_tokens": 1345, "completion_tokens": 20}
+{"ts": 28.9963, "event": "tool_call", "agent": "agent-ext", "turn": 15, "tool": "read_file", "args": {"path": "services/worker.py"}}
+{"ts": 28.9967, "event": "read", "agent": "agent-ext", "path": "services/worker.py", "found": true, "size": 106}
+{"ts": 30.3773, "event": "llm_usage", "agent": "agent-ext", "turn": 16, "prompt_tokens": 1406, "completion_tokens": 13}
+{"ts": 30.3775, "event": "tool_call", "agent": "agent-ext", "turn": 16, "tool": "run_tests", "args": {}}
+{"ts": 31.717, "event": "run_tests", "agent": "agent-ext", "passed": 0, "failed": 1, "errored": 0}
+{"ts": 33.5682, "event": "llm_usage", "agent": "agent-ext", "turn": 17, "prompt_tokens": 1564, "completion_tokens": 83}
+{"ts": 33.5685, "event": "tool_call", "agent": "agent-ext", "turn": 17, "tool": "list_files", "args": {}}
+{"ts": 37.5231, "event": "llm_usage", "agent": "agent-ext", "turn": 18, "prompt_tokens": 1588, "completion_tokens": 222}
+{"ts": 37.5232, "event": "tool_call", "agent": "agent-ext", "turn": 18, "tool": "grep", "args": {"pattern": "test_smoke", "glob": "**/*"}}
+{"ts": 37.5242, "event": "search", "agent": "agent-ext", "kind": "grep", "pattern": "test_smoke", "n": 0}
+{"ts": 47.8484, "event": "write", "agent": "agent-core", "path": "lib/api.py", "kind": "overwrite", "status": "lock_timeout", "waited_s": 30.552, "changed_symbols": [], "message": "symbols ['Greeter'] in lib/api.py are being changed by another agent; retry later"}
+{"ts": 50.3436, "event": "llm_usage", "agent": "agent-ext", "turn": 19, "prompt_tokens": 1625, "completion_tokens": 1525}
+{"ts": 50.3488, "event": "tool_call", "agent": "agent-ext", "turn": 19, "tool": "edit_file", "args": {"path": "lib/api.py", "old_string": "class Greeter:\n    def ping(self, name: str) -> str:\n        return f\"hi,{name}\"\n\n    def greet(self, name: str) -> str:\n        raise NotImplementedError\n\n    def farewell(self, name: str) -> str:\n  ", "new_string": "class Greeter:\n    @staticmethod\n    def ping(name: str = \"\") -> str:\n        return f\"hi,{name}\"\n\n    def greet(self, name: str) -> str:\n        raise NotImplementedError\n\n    def farewell(self, name"}}
+{"ts": 50.3578, "event": "write", "agent": "agent-ext", "path": "lib/api.py", "kind": "replace", "status": "applied", "waited_s": 0.009, "changed_symbols": ["Greeter"], "message": ""}
+{"ts": 50.5173, "event": "llm_usage", "agent": "agent-core", "turn": 8, "prompt_tokens": 922, "completion_tokens": 153}
+{"ts": 50.5174, "event": "tool_call", "agent": "agent-core", "turn": 8, "tool": "read_file", "args": {"path": "lib/api.py"}}
+{"ts": 50.5179, "event": "read", "agent": "agent-core", "path": "lib/api.py", "found": true, "size": 145}
+{"ts": 51.5596, "event": "llm_usage", "agent": "agent-ext", "turn": 20, "prompt_tokens": 1816, "completion_tokens": 13}
+{"ts": 51.5597, "event": "tool_call", "agent": "agent-ext", "turn": 20, "tool": "run_tests", "args": {}}
+{"ts": 51.8372, "event": "run_tests", "agent": "agent-ext", "passed": 0, "failed": 1, "errored": 0}
+{"ts": 52.3827, "event": "llm_usage", "agent": "agent-core", "turn": 9, "prompt_tokens": 984, "completion_tokens": 95}
+{"ts": 52.3831, "event": "tool_call", "agent": "agent-core", "turn": 9, "tool": "grep", "args": {"pattern": "apps/cli.py", "glob": "**/*"}}
+{"ts": 52.3862, "event": "search", "agent": "agent-core", "kind": "grep", "pattern": "apps/cli.py", "n": 0}
+{"ts": 53.7405, "event": "llm_usage", "agent": "agent-core", "turn": 10, "prompt_tokens": 1022, "completion_tokens": 17}
+{"ts": 53.7407, "event": "tool_call", "agent": "agent-core", "turn": 10, "tool": "glob", "args": {"pattern": "apps/**"}}
+{"ts": 53.7421, "event": "search", "agent": "agent-core", "kind": "glob", "pattern": "apps/**", "n": 0}
+{"ts": 58.2135, "event": "llm_usage", "agent": "agent-core", "turn": 11, "prompt_tokens": 1052, "completion_tokens": 413}
+{"ts": 58.2136, "event": "tool_call", "agent": "agent-core", "turn": 11, "tool": "grep", "args": {"pattern": "def welcome", "glob": "**/*"}}
+{"ts": 58.2147, "event": "search", "agent": "agent-core", "kind": "grep", "pattern": "def welcome", "n": 0}
+{"ts": 60.1817, "event": "llm_usage", "agent": "agent-ext", "turn": 21, "prompt_tokens": 1966, "completion_tokens": 880}
+{"ts": 60.1817, "event": "tool_call", "agent": "agent-ext", "turn": 21, "tool": "edit_file", "args": {"path": "lib/api.py", "old_string": "class Greeter:\n    @staticmethod\n    def ping(name: str = \"\") -> str:\n        return f\"hi,{name}\"\n\n    def greet(self, name: str) -> str:\n        raise NotImplementedError\n\n    def farewell(self, name", "new_string": "class Greeter:\n    @staticmethod\n    def ping() -> str:\n        return \"pong\"\n\n    def farewell(self, name: str) -> str:\n        return f\"bye,{name}\"\n\n    def greet(self, name: str) -> str:\n        ra"}}
+{"ts": 60.182, "event": "coord", "strategy": "ast_scope", "action": "read_write_intersection", "writer": "agent-ext", "reader": "agent-core", "path": "lib/api.py", "symbols": ["Greeter"]}
+{"ts": 60.1824, "event": "write", "agent": "agent-ext", "path": "lib/api.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["Greeter"], "message": ""}
+{"ts": 61.5058, "event": "llm_usage", "agent": "agent-ext", "turn": 22, "prompt_tokens": 2152, "completion_tokens": 19}
+{"ts": 61.506, "event": "tool_call", "agent": "agent-ext", "turn": 22, "tool": "read_file", "args": {"path": "lib/api.py"}}
+{"ts": 61.5074, "event": "read", "agent": "agent-ext", "path": "lib/api.py", "found": true, "size": 224}
+{"ts": 62.1609, "event": "llm_usage", "agent": "agent-core", "turn": 12, "prompt_tokens": 1088, "completion_tokens": 349}
+{"ts": 62.161, "event": "tool_call", "agent": "agent-core", "turn": 12, "tool": "grep", "args": {"pattern": "ping(", "glob": "**/*"}}
+{"ts": 62.2378, "event": "search", "agent": "agent-core", "kind": "grep", "pattern": "ping(", "n": 0}
+{"ts": 62.8873, "event": "llm_usage", "agent": "agent-ext", "turn": 23, "prompt_tokens": 2240, "completion_tokens": 13}
+{"ts": 62.8876, "event": "tool_call", "agent": "agent-ext", "turn": 23, "tool": "run_tests", "args": {}}
+{"ts": 63.8274, "event": "run_tests", "agent": "agent-ext", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 65.0336, "event": "llm_usage", "agent": "agent-ext", "turn": 24, "prompt_tokens": 2279, "completion_tokens": 13}
+{"ts": 65.0337, "event": "tool_call", "agent": "agent-ext", "turn": 24, "tool": "list_files", "args": {}}
+{"ts": 66.3795, "event": "llm_usage", "agent": "agent-ext", "turn": 25, "prompt_tokens": 2303, "completion_tokens": 46}
+{"ts": 66.3796, "event": "tool_call", "agent": "agent-ext", "turn": 25, "tool": "done", "args": {"summary": "Added Greeter.farewell returning 'bye,{name}' and updated services.worker.goodbye to call it; adjusted Greeter.ping to satisfy tests."}}
+{"ts": 66.3797, "event": "agent_done_coord", "agent": "agent-ext"}
+{"ts": 66.3798, "event": "agent_done", "agent": "agent-ext", "status": "done", "turns": 25, "prompt_tokens": 32952, "completion_tokens": 3792}
+{"ts": 69.1557, "event": "llm_usage", "agent": "agent-core", "turn": 13, "prompt_tokens": 1123, "completion_tokens": 651}
+{"ts": 69.1558, "event": "tool_call", "agent": "agent-core", "turn": 13, "tool": "edit_file", "args": {"path": "lib/api.py", "old_string": "class Greeter:\n    \"\"\"Public greeting API — agents extend this class in separate worktrees.\"\"\"\n\n    def ping(self) -> str:\n        return \"pong\"\n", "new_string": "class Greeter:\n    \"\"\"Public greeting API — agents extend this class in separate worktrees.\"\"\"\n\n    def greet(self, name: str) -> str:\n        return f\"hello,{name}\"\n\n    def ping(self) -> str:\n      "}}
+{"ts": 69.1577, "event": "write", "agent": "agent-core", "path": "lib/api.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["Greeter"], "message": ""}
+{"ts": 70.1418, "event": "llm_usage", "agent": "agent-core", "turn": 14, "prompt_tokens": 1272, "completion_tokens": 23}
+{"ts": 70.1419, "event": "tool_call", "agent": "agent-core", "turn": 14, "tool": "grep", "args": {"pattern": "def welcome", "glob": "**/*"}}
+{"ts": 70.1431, "event": "search", "agent": "agent-core", "kind": "grep", "pattern": "def welcome", "n": 0}
+{"ts": 71.3313, "event": "llm_usage", "agent": "agent-core", "turn": 15, "prompt_tokens": 1308, "completion_tokens": 22}
+{"ts": 71.3314, "event": "tool_call", "agent": "agent-core", "turn": 15, "tool": "grep", "args": {"pattern": "welcome(", "glob": "**/*"}}
+{"ts": 71.3322, "event": "search", "agent": "agent-core", "kind": "grep", "pattern": "welcome(", "n": 0}
+{"ts": 72.4835, "event": "llm_usage", "agent": "agent-core", "turn": 16, "prompt_tokens": 1343, "completion_tokens": 13}
+{"ts": 72.4841, "event": "tool_call", "agent": "agent-core", "turn": 16, "tool": "list_files", "args": {}}
+{"ts": 74.2044, "event": "llm_usage", "agent": "agent-core", "turn": 17, "prompt_tokens": 1367, "completion_tokens": 75}
+{"ts": 74.2045, "event": "tool_call", "agent": "agent-core", "turn": 17, "tool": "write_file", "args": {"path": "apps/cli.py", "content": "from lib.api import Greeter\n\n\ndef welcome(name: str) -> str:\n    g = Greeter()\n    return g.greet(name)\n\n\ndef farewell(name: str) -> str:\n    raise NotImplementedError\n"}}
+{"ts": 74.2062, "event": "write", "agent": "agent-core", "path": "apps/cli.py", "kind": "overwrite", "status": "applied", "waited_s": 0.002, "changed_symbols": ["farewell", "welcome"], "message": ""}
+{"ts": 75.2361, "event": "llm_usage", "agent": "agent-core", "turn": 18, "prompt_tokens": 1458, "completion_tokens": 19}
+{"ts": 75.2362, "event": "tool_call", "agent": "agent-core", "turn": 18, "tool": "read_file", "args": {"path": "lib/api.py"}}
+{"ts": 75.2368, "event": "read", "agent": "agent-core", "path": "lib/api.py", "found": true, "size": 216}
+{"ts": 76.438, "event": "llm_usage", "agent": "agent-core", "turn": 19, "prompt_tokens": 1540, "completion_tokens": 20}
+{"ts": 76.4381, "event": "tool_call", "agent": "agent-core", "turn": 19, "tool": "read_file", "args": {"path": "apps/cli.py"}}
+{"ts": 76.4386, "event": "read", "agent": "agent-core", "path": "apps/cli.py", "found": true, "size": 168}
+{"ts": 77.9201, "event": "llm_usage", "agent": "agent-core", "turn": 20, "prompt_tokens": 1615, "completion_tokens": 13}
+{"ts": 77.9201, "event": "tool_call", "agent": "agent-core", "turn": 20, "tool": "run_tests", "args": {}}
+{"ts": 78.2292, "event": "run_tests", "agent": "agent-core", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 79.6093, "event": "llm_usage", "agent": "agent-core", "turn": 21, "prompt_tokens": 1654, "completion_tokens": 39}
+{"ts": 79.6094, "event": "tool_call", "agent": "agent-core", "turn": 21, "tool": "done", "args": {"summary": "Added Greeter.greet to lib/api.py and updated apps/cli.py::welcome to call greet; tests pass."}}
+{"ts": 79.6094, "event": "agent_done_coord", "agent": "agent-core"}
+{"ts": 79.6095, "event": "agent_done", "agent": "agent-core", "status": "done", "turns": 21, "prompt_tokens": 22694, "completion_tokens": 2833}
+{"ts": 80.5365, "event": "worktree_merge", "ok": false, "conflicts": ["agent-core", "agent-ext"], "message": "conflicts for agents: ['agent-core', 'agent-ext']; per-file merged"}
+{"ts": 81.5618, "event": "trial_end", "correct": true, "oracle_passed": 2, "oracle_total": 2, "wall_clock_s": 79.25, "prompt_tokens": 55646, "completion_tokens": 6625, "agent_statuses": {"agent-core": "done", "agent-ext": "done"}, "oracle_output": "..                                                                       [100%]\n2 passed in 0.02s\n"}

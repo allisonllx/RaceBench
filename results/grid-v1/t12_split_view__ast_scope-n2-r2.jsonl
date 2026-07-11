@@ -1,0 +1,30 @@
+{"ts": 1.4808, "event": "trial_start", "task": "t12_split_view", "failure_mode": "split_view_divergence", "benign": false, "strategy": "ast_scope", "n_agents": 2, "rep": 2, "model": "gpt-5-mini", "isolation": "worktree", "agent_ids": ["agent-core", "agent-ext"]}
+{"ts": 3.0467, "event": "llm_usage", "agent": "agent-ext", "turn": 1, "prompt_tokens": 623, "completion_tokens": 24}
+{"ts": 3.0468, "event": "tool_call", "agent": "agent-ext", "turn": 1, "tool": "glob", "args": {"pattern": "**/*.py"}}
+{"ts": 3.0481, "event": "search", "agent": "agent-ext", "kind": "glob", "pattern": "**/*.py", "n": 0}
+{"ts": 3.2039, "event": "llm_usage", "agent": "agent-core", "turn": 1, "prompt_tokens": 622, "completion_tokens": 24}
+{"ts": 3.2041, "event": "tool_call", "agent": "agent-core", "turn": 1, "tool": "glob", "args": {"pattern": "**/*.py"}}
+{"ts": 3.2053, "event": "search", "agent": "agent-core", "kind": "glob", "pattern": "**/*.py", "n": 0}
+{"ts": 4.6774, "event": "llm_usage", "agent": "agent-ext", "turn": 2, "prompt_tokens": 654, "completion_tokens": 83}
+{"ts": 4.6776, "event": "tool_call", "agent": "agent-ext", "turn": 2, "tool": "list_files", "args": {}}
+{"ts": 4.6862, "event": "llm_usage", "agent": "agent-core", "turn": 2, "prompt_tokens": 653, "completion_tokens": 19}
+{"ts": 4.6863, "event": "tool_call", "agent": "agent-core", "turn": 2, "tool": "list_files", "args": {}}
+{"ts": 6.4432, "event": "llm_usage", "agent": "agent-ext", "turn": 3, "prompt_tokens": 678, "completion_tokens": 94}
+{"ts": 6.4434, "event": "tool_call", "agent": "agent-ext", "turn": 3, "tool": "grep", "args": {"pattern": "class Greeter", "glob": "**/*"}}
+{"ts": 6.4446, "event": "search", "agent": "agent-ext", "kind": "grep", "pattern": "class Greeter", "n": 0}
+{"ts": 8.2157, "event": "llm_usage", "agent": "agent-ext", "turn": 4, "prompt_tokens": 715, "completion_tokens": 93}
+{"ts": 8.2158, "event": "tool_call", "agent": "agent-ext", "turn": 4, "tool": "grep", "args": {"pattern": "def ping", "glob": "**/*"}}
+{"ts": 8.2166, "event": "search", "agent": "agent-ext", "kind": "grep", "pattern": "def ping", "n": 0}
+{"ts": 10.5307, "event": "llm_usage", "agent": "agent-core", "turn": 3, "prompt_tokens": 677, "completion_tokens": 456}
+{"ts": 10.5308, "event": "tool_call", "agent": "agent-core", "turn": 3, "tool": "write_file", "args": {"path": "lib/api.py", "content": "class Greeter:\n    def greet(self, name: str) -> str:\n        return f\"hello,{name}\"\n\n    def ping(self) -> str:\n        return \"pong\"\n"}}
+{"ts": 10.5634, "event": "write", "agent": "agent-core", "path": "lib/api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.033, "changed_symbols": ["Greeter"], "message": ""}
+{"ts": 11.8979, "event": "llm_usage", "agent": "agent-core", "turn": 4, "prompt_tokens": 759, "completion_tokens": 57}
+{"ts": 11.898, "event": "tool_call", "agent": "agent-core", "turn": 4, "tool": "write_file", "args": {"path": "apps/cli.py", "content": "from lib.api import Greeter\n\n\ndef welcome(name: str) -> str:\n    g = Greeter()\n    return g.greet(name)\n"}}
+{"ts": 11.899, "event": "write", "agent": "agent-core", "path": "apps/cli.py", "kind": "overwrite", "status": "applied", "waited_s": 0.001, "changed_symbols": ["welcome"], "message": ""}
+{"ts": 13.0992, "event": "llm_usage", "agent": "agent-core", "turn": 5, "prompt_tokens": 832, "completion_tokens": 13}
+{"ts": 13.0993, "event": "tool_call", "agent": "agent-core", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 13.9117, "event": "run_tests", "agent": "agent-core", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 15.1475, "event": "llm_usage", "agent": "agent-core", "turn": 6, "prompt_tokens": 871, "completion_tokens": 40}
+{"ts": 15.1476, "event": "tool_call", "agent": "agent-core", "turn": 6, "tool": "done", "args": {"summary": "Added Greeter.greet(name) in lib/api.py and updated apps/cli.py welcome to call greet; tests pass."}}
+{"ts": 15.1477, "event": "agent_done_coord", "agent": "agent-core"}
+{"ts": 15.1477, "event": "agent_done", "agent": "agent-core", "status": "done", "turns": 6, "prompt_tokens": 4414, "completion_tokens": 609}

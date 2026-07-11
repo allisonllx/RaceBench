@@ -1,0 +1,67 @@
+{"ts": 0.2223, "event": "trial_start", "task": "t8_livelock", "failure_mode": "livelock_deadlock", "benign": false, "strategy": "notify", "n_agents": 2, "rep": 4, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-ab", "agent-ba"]}
+{"ts": 1.595, "event": "llm_usage", "agent": "agent-ba", "turn": 1, "prompt_tokens": 631, "completion_tokens": 19}
+{"ts": 1.5951, "event": "tool_call", "agent": "agent-ba", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 1.6281, "event": "llm_usage", "agent": "agent-ab", "turn": 1, "prompt_tokens": 633, "completion_tokens": 19}
+{"ts": 1.6282, "event": "tool_call", "agent": "agent-ab", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.4968, "event": "llm_usage", "agent": "agent-ba", "turn": 2, "prompt_tokens": 671, "completion_tokens": 18}
+{"ts": 2.4969, "event": "tool_call", "agent": "agent-ba", "turn": 2, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 2.4976, "event": "read", "agent": "agent-ba", "path": "beta.py", "found": true, "size": 27}
+{"ts": 2.648, "event": "llm_usage", "agent": "agent-ab", "turn": 2, "prompt_tokens": 673, "completion_tokens": 18}
+{"ts": 2.6482, "event": "tool_call", "agent": "agent-ab", "turn": 2, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 2.6491, "event": "read", "agent": "agent-ab", "path": "alpha.py", "found": true, "size": 32}
+{"ts": 3.5945, "event": "llm_usage", "agent": "agent-ba", "turn": 3, "prompt_tokens": 713, "completion_tokens": 18}
+{"ts": 3.5949, "event": "tool_call", "agent": "agent-ba", "turn": 3, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 3.5967, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": true, "size": 32}
+{"ts": 3.5984, "event": "llm_usage", "agent": "agent-ab", "turn": 3, "prompt_tokens": 715, "completion_tokens": 18}
+{"ts": 3.5985, "event": "tool_call", "agent": "agent-ab", "turn": 3, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 3.6063, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": true, "size": 27}
+{"ts": 7.3, "event": "llm_usage", "agent": "agent-ba", "turn": 4, "prompt_tokens": 755, "completion_tokens": 232}
+{"ts": 7.3002, "event": "tool_call", "agent": "agent-ba", "turn": 4, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "COUNT = 1", "new_string": "COUNT = 2"}}
+{"ts": 7.3012, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-ba", "reader": "agent-ab", "path": "beta.py", "symbols": ["<module>"]}
+{"ts": 7.3013, "event": "write", "agent": "agent-ba", "path": "beta.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 7.3061, "event": "llm_usage", "agent": "agent-ab", "turn": 4, "prompt_tokens": 757, "completion_tokens": 172}
+{"ts": 7.3061, "event": "tool_call", "agent": "agent-ab", "turn": 4, "tool": "edit_file", "args": {"path": "alpha.py", "old_string": "GREETING = \"hi\"", "new_string": "GREETING = \"hello\""}}
+{"ts": 7.3065, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-ab", "reader": "agent-ba", "path": "alpha.py", "symbols": ["<module>"]}
+{"ts": 7.3065, "event": "write", "agent": "agent-ab", "path": "alpha.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 7.3067, "event": "notification_delivered", "agent": "agent-ab", "turn": 5, "note": "[coordination notice] Another agent just modified beta.py (changed: <module>). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 8.2942, "event": "llm_usage", "agent": "agent-ba", "turn": 5, "prompt_tokens": 805, "completion_tokens": 18}
+{"ts": 8.2943, "event": "tool_call", "agent": "agent-ba", "turn": 5, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 8.295, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": true, "size": 35}
+{"ts": 8.2951, "event": "notification_delivered", "agent": "agent-ba", "turn": 6, "note": "[coordination notice] Another agent just modified alpha.py (changed: <module>). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 8.8796, "event": "llm_usage", "agent": "agent-ab", "turn": 5, "prompt_tokens": 856, "completion_tokens": 24}
+{"ts": 8.8797, "event": "tool_call", "agent": "agent-ab", "turn": 5, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 8.88, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": true, "size": 27}
+{"ts": 12.0935, "event": "llm_usage", "agent": "agent-ba", "turn": 6, "prompt_tokens": 892, "completion_tokens": 174}
+{"ts": 12.0936, "event": "tool_call", "agent": "agent-ba", "turn": 6, "tool": "edit_file", "args": {"path": "alpha.py", "old_string": "VERSION = \"0.1\"", "new_string": "VERSION = \"0.2\""}}
+{"ts": 12.094, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-ba", "reader": "agent-ab", "path": "alpha.py", "symbols": ["<module>"]}
+{"ts": 12.094, "event": "write", "agent": "agent-ba", "path": "alpha.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 12.1562, "event": "llm_usage", "agent": "agent-ab", "turn": 6, "prompt_tokens": 898, "completion_tokens": 177}
+{"ts": 12.1563, "event": "tool_call", "agent": "agent-ab", "turn": 6, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "FAREWELL = \"bye\"", "new_string": "FAREWELL = \"goodbye\""}}
+{"ts": 12.1568, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-ab", "reader": "agent-ba", "path": "beta.py", "symbols": ["<module>"]}
+{"ts": 12.1569, "event": "write", "agent": "agent-ab", "path": "beta.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 12.1569, "event": "notification_delivered", "agent": "agent-ab", "turn": 7, "note": "[coordination notice] Another agent just modified alpha.py (changed: <module>). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 13.105, "event": "llm_usage", "agent": "agent-ab", "turn": 7, "prompt_tokens": 1002, "completion_tokens": 18}
+{"ts": 13.1051, "event": "tool_call", "agent": "agent-ab", "turn": 7, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 13.1054, "event": "read", "agent": "agent-ab", "path": "alpha.py", "found": true, "size": 35}
+{"ts": 13.2261, "event": "llm_usage", "agent": "agent-ba", "turn": 7, "prompt_tokens": 948, "completion_tokens": 18}
+{"ts": 13.2262, "event": "tool_call", "agent": "agent-ba", "turn": 7, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 13.2267, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": true, "size": 35}
+{"ts": 13.2267, "event": "notification_delivered", "agent": "agent-ba", "turn": 8, "note": "[coordination notice] Another agent just modified beta.py (changed: <module>). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 14.0915, "event": "llm_usage", "agent": "agent-ab", "turn": 8, "prompt_tokens": 1044, "completion_tokens": 13}
+{"ts": 14.0916, "event": "tool_call", "agent": "agent-ab", "turn": 8, "tool": "run_tests", "args": {}}
+{"ts": 14.2099, "event": "llm_usage", "agent": "agent-ba", "turn": 8, "prompt_tokens": 1035, "completion_tokens": 18}
+{"ts": 14.21, "event": "tool_call", "agent": "agent-ba", "turn": 8, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 14.2103, "event": "read", "agent": "agent-ba", "path": "beta.py", "found": true, "size": 31}
+{"ts": 14.7758, "event": "run_tests", "agent": "agent-ab", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 15.0933, "event": "llm_usage", "agent": "agent-ba", "turn": 9, "prompt_tokens": 1078, "completion_tokens": 13}
+{"ts": 15.0936, "event": "tool_call", "agent": "agent-ba", "turn": 9, "tool": "run_tests", "args": {}}
+{"ts": 15.7333, "event": "run_tests", "agent": "agent-ba", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 16.1662, "event": "llm_usage", "agent": "agent-ab", "turn": 9, "prompt_tokens": 1083, "completion_tokens": 37}
+{"ts": 16.1663, "event": "tool_call", "agent": "agent-ab", "turn": 9, "tool": "done", "args": {"summary": "Updated alpha.py GREETING to \"hello\" and beta.py FAREWELL to \"goodbye\"."}}
+{"ts": 16.1664, "event": "agent_done_coord", "agent": "agent-ab"}
+{"ts": 16.1664, "event": "agent_done", "agent": "agent-ab", "status": "done", "turns": 9, "prompt_tokens": 7661, "completion_tokens": 496}
+{"ts": 17.1525, "event": "llm_usage", "agent": "agent-ba", "turn": 10, "prompt_tokens": 1117, "completion_tokens": 42}
+{"ts": 17.1526, "event": "tool_call", "agent": "agent-ba", "turn": 10, "tool": "done", "args": {"summary": "Updated beta.py COUNT from 1 to 2 and alpha.py VERSION from \"0.1\" to \"0.2\"."}}
+{"ts": 17.1526, "event": "agent_done_coord", "agent": "agent-ba"}
+{"ts": 17.1526, "event": "agent_done", "agent": "agent-ba", "status": "done", "turns": 10, "prompt_tokens": 8645, "completion_tokens": 570}
+{"ts": 17.3971, "event": "trial_end", "correct": true, "oracle_passed": 1, "oracle_total": 1, "wall_clock_s": 16.88, "prompt_tokens": 16306, "completion_tokens": 1066, "agent_statuses": {"agent-ab": "done", "agent-ba": "done"}, "oracle_output": ".                                                                        [100%]\n1 passed in 0.01s\n"}

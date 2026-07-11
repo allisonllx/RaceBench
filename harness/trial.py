@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import shutil
 import time
 from dataclasses import dataclass
@@ -70,11 +71,13 @@ async def run_trial(task: Task, cfg: TrialConfig,
 
     agents = [
         Agent(spec.id, spec.prompt, model_factory(spec), strategy, ws, logger,
-              max_turns=cfg.max_turns, registry=registry)
+              max_turns=cfg.max_turns, registry=registry,
+              isolation=task.isolation)
         for spec in agents_specs
     ]
 
     t0 = time.monotonic()
+    timed_out = False
     try:
         results = await asyncio.wait_for(
             asyncio.gather(*(a.run() for a in agents)),
@@ -83,6 +86,7 @@ async def run_trial(task: Task, cfg: TrialConfig,
     except asyncio.TimeoutError:
         logger.log("trial_timeout")
         results = []
+        timed_out = True
     wall = time.monotonic() - t0
 
     if task.isolation == "worktree":
@@ -96,15 +100,28 @@ async def run_trial(task: Task, cfg: TrialConfig,
     shutil.copytree(task.oracle_tests, oracle_dst)
     test_result = await ws.run_pytest("oracle_tests")
 
+    # On timeout, gather is cancelled so AgentResults are lost — recover
+    # token counters from the still-alive Agent objects (updated each turn).
+    if results:
+        prompt_tokens = sum(r.prompt_tokens for r in results)
+        completion_tokens = sum(r.completion_tokens for r in results)
+        agent_statuses = {r.agent_id: r.status for r in results}
+    else:
+        prompt_tokens = sum(a.prompt_tokens for a in agents)
+        completion_tokens = sum(a.completion_tokens for a in agents)
+        agent_statuses = {
+            a.id: ("timeout" if timed_out else "unknown") for a in agents
+        }
+
     result = TrialResult(
         trial_id=cfg.trial_id,
         correct=test_result.all_passed,
         oracle_passed=test_result.passed,
         oracle_total=test_result.total,
         wall_clock_s=wall,
-        prompt_tokens=sum(r.prompt_tokens for r in results),
-        completion_tokens=sum(r.completion_tokens for r in results),
-        agent_statuses={r.agent_id: r.status for r in results},
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        agent_statuses=agent_statuses,
     )
     logger.log("trial_end", correct=result.correct,
                oracle_passed=result.oracle_passed, oracle_total=result.oracle_total,
@@ -114,5 +131,8 @@ async def run_trial(task: Task, cfg: TrialConfig,
                agent_statuses=result.agent_statuses,
                oracle_output=test_result.output[-2000:])
     logger.close()
-    ws.cleanup()
+    if os.environ.get("RACEBENCH_KEEP_WORKSPACE") == "1":
+        print(f"  kept workspace at {ws.root}", flush=True)
+    else:
+        ws.cleanup()
     return result

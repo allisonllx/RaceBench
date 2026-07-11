@@ -1,0 +1,72 @@
+{"ts": 0.3142, "event": "trial_start", "task": "t10_phantom_tool", "failure_mode": "phantom_tool_registry_drift", "benign": false, "strategy": "file_lock", "n_agents": 2, "rep": 3, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-pipeline", "agent-console"]}
+{"ts": 1.808, "event": "llm_usage", "agent": "agent-pipeline", "turn": 1, "prompt_tokens": 766, "completion_tokens": 23}
+{"ts": 1.8081, "event": "tool_call", "agent": "agent-pipeline", "turn": 1, "tool": "glob", "args": {"pattern": "**/*"}}
+{"ts": 1.8173, "event": "search", "agent": "agent-pipeline", "kind": "glob", "pattern": "**/*", "n": 11}
+{"ts": 1.8178, "event": "llm_usage", "agent": "agent-console", "turn": 1, "prompt_tokens": 716, "completion_tokens": 19}
+{"ts": 1.8179, "event": "tool_call", "agent": "agent-console", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.8118, "event": "llm_usage", "agent": "agent-console", "turn": 2, "prompt_tokens": 802, "completion_tokens": 20}
+{"ts": 2.812, "event": "tool_call", "agent": "agent-console", "turn": 2, "tool": "read_file", "args": {"path": "console/cli.py"}}
+{"ts": 2.8123, "event": "read", "agent": "agent-console", "path": "console/cli.py", "found": true, "size": 123}
+{"ts": 3.0539, "event": "llm_usage", "agent": "agent-pipeline", "turn": 2, "prompt_tokens": 850, "completion_tokens": 20}
+{"ts": 3.0541, "event": "tool_call", "agent": "agent-pipeline", "turn": 2, "tool": "read_file", "args": {"path": "data/records.py"}}
+{"ts": 3.0547, "event": "read", "agent": "agent-pipeline", "path": "data/records.py", "found": true, "size": 96}
+{"ts": 3.8446, "event": "llm_usage", "agent": "agent-console", "turn": 3, "prompt_tokens": 862, "completion_tokens": 19}
+{"ts": 3.8496, "event": "tool_call", "agent": "agent-console", "turn": 3, "tool": "read_file", "args": {"path": "out/report.txt"}}
+{"ts": 3.8501, "event": "read", "agent": "agent-console", "path": "out/report.txt", "found": true, "size": 8}
+{"ts": 4.1172, "event": "llm_usage", "agent": "agent-pipeline", "turn": 3, "prompt_tokens": 917, "completion_tokens": 20}
+{"ts": 4.1174, "event": "tool_call", "agent": "agent-pipeline", "turn": 3, "tool": "read_file", "args": {"path": "metrics/stats.py"}}
+{"ts": 4.118, "event": "read", "agent": "agent-pipeline", "path": "metrics/stats.py", "found": true, "size": 358}
+{"ts": 4.896, "event": "llm_usage", "agent": "agent-console", "turn": 4, "prompt_tokens": 895, "completion_tokens": 21}
+{"ts": 4.8961, "event": "tool_call", "agent": "agent-console", "turn": 4, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 4.8965, "event": "read", "agent": "agent-console", "path": "tests/test_smoke.py", "found": true, "size": 87}
+{"ts": 5.1234, "event": "llm_usage", "agent": "agent-pipeline", "turn": 4, "prompt_tokens": 1044, "completion_tokens": 19}
+{"ts": 5.1236, "event": "tool_call", "agent": "agent-pipeline", "turn": 4, "tool": "read_file", "args": {"path": "pipeline/build.py"}}
+{"ts": 5.1248, "event": "read", "agent": "agent-pipeline", "path": "pipeline/build.py", "found": true, "size": 193}
+{"ts": 6.1171, "event": "llm_usage", "agent": "agent-pipeline", "turn": 5, "prompt_tokens": 1125, "completion_tokens": 20}
+{"ts": 6.1173, "event": "tool_call", "agent": "agent-pipeline", "turn": 5, "tool": "read_file", "args": {"path": "pipeline/validate.py"}}
+{"ts": 6.1216, "event": "read", "agent": "agent-pipeline", "path": "pipeline/validate.py", "found": true, "size": 228}
+{"ts": 7.3905, "event": "llm_usage", "agent": "agent-pipeline", "turn": 6, "prompt_tokens": 1208, "completion_tokens": 20}
+{"ts": 7.3906, "event": "tool_call", "agent": "agent-pipeline", "turn": 6, "tool": "read_file", "args": {"path": "console/cli.py"}}
+{"ts": 7.3908, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-pipeline", "path": "console/cli.py", "holder": "agent-console"}
+{"ts": 14.8372, "event": "llm_usage", "agent": "agent-console", "turn": 5, "prompt_tokens": 952, "completion_tokens": 869}
+{"ts": 14.8372, "event": "tool_call", "agent": "agent-console", "turn": 5, "tool": "edit_file", "args": {"path": "console/cli.py", "old_string": "\"\"\"Console entry.\"\"\"\n\n\ndef run():\n    \"\"\"Return 'CONSOLE: ' + contents of out/report.txt.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Console entry.\"\"\"\n\nimport os\nimport time\n\n\ndef run():\n    \"\"\"Return 'CONSOLE: ' + contents of out/report.txt.\n\n    Ensure out/report.txt exists (create with 'PENDING' if missing). Keep\n    polling "}}
+{"ts": 14.8391, "event": "write", "agent": "agent-console", "path": "console/cli.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "run"], "message": ""}
+{"ts": 14.8392, "event": "registry_mutation", "action": "remove", "tool": "format_report", "after_writes": 1}
+{"ts": 14.8392, "event": "registry_mutation", "action": "add", "tool": "format_report_v2", "after_writes": 1}
+{"ts": 16.5704, "event": "llm_usage", "agent": "agent-console", "turn": 6, "prompt_tokens": 1383, "completion_tokens": 13}
+{"ts": 16.5706, "event": "tool_call", "agent": "agent-console", "turn": 6, "tool": "run_tests", "args": {}}
+{"ts": 16.9612, "event": "run_tests", "agent": "agent-console", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 18.6418, "event": "llm_usage", "agent": "agent-console", "turn": 7, "prompt_tokens": 1422, "completion_tokens": 51}
+{"ts": 18.6419, "event": "tool_call", "agent": "agent-console", "turn": 7, "tool": "done", "args": {"summary": "Implemented console.run() to ensure out/report.txt exists (PENDING placeholder) and poll until it contains a finished report, returning its contents prefixed with 'CONSOLE: '."}}
+{"ts": 18.642, "event": "agent_done_coord", "agent": "agent-console"}
+{"ts": 18.6421, "event": "agent_done", "agent": "agent-console", "status": "done", "turns": 7, "prompt_tokens": 7032, "completion_tokens": 1012}
+{"ts": 18.6427, "event": "read", "agent": "agent-pipeline", "path": "console/cli.py", "found": true, "size": 1258}
+{"ts": 19.921, "event": "llm_usage", "agent": "agent-pipeline", "turn": 7, "prompt_tokens": 1535, "completion_tokens": 19}
+{"ts": 19.9211, "event": "tool_call", "agent": "agent-pipeline", "turn": 7, "tool": "read_file", "args": {"path": "out/report.txt"}}
+{"ts": 19.9216, "event": "read", "agent": "agent-pipeline", "path": "out/report.txt", "found": true, "size": 8}
+{"ts": 21.3243, "event": "llm_usage", "agent": "agent-pipeline", "turn": 8, "prompt_tokens": 1568, "completion_tokens": 13}
+{"ts": 21.3244, "event": "tool_call", "agent": "agent-pipeline", "turn": 8, "tool": "list_tools", "args": {}}
+{"ts": 22.6222, "event": "llm_usage", "agent": "agent-pipeline", "turn": 9, "prompt_tokens": 1599, "completion_tokens": 23}
+{"ts": 22.6223, "event": "tool_call", "agent": "agent-pipeline", "turn": 9, "tool": "grep", "args": {"pattern": "format_report", "glob": "**/*"}}
+{"ts": 22.6445, "event": "search", "agent": "agent-pipeline", "kind": "grep", "pattern": "format_report", "n": 0}
+{"ts": 35.8406, "event": "llm_usage", "agent": "agent-pipeline", "turn": 10, "prompt_tokens": 1635, "completion_tokens": 1137}
+{"ts": 35.9205, "event": "tool_call", "agent": "agent-pipeline", "turn": 10, "tool": "edit_file", "args": {"path": "pipeline/build.py", "old_string": "\"\"\"Pipeline stubs — use data.records + metrics.stats.\"\"\"\n\n\ndef build_summary():\n    \"\"\"Return {\"count\": 2, \"total\": 10, \"mean\": 5.0} from SAMPLE via summarize.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Pipeline stubs — use data.records + metrics.stats.\"\"\"\n\nfrom data.records import SAMPLE\nfrom metrics.stats import summarize\n\n\ndef build_summary():\n    \"\"\"Return {\"count\": 2, \"total\": 10, \"mean\": 5.0"}}
+{"ts": 35.979, "event": "write", "agent": "agent-pipeline", "path": "pipeline/build.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "build_summary"], "message": ""}
+{"ts": 37.3426, "event": "llm_usage", "agent": "agent-pipeline", "turn": 11, "prompt_tokens": 1822, "completion_tokens": 19}
+{"ts": 37.3427, "event": "tool_call", "agent": "agent-pipeline", "turn": 11, "tool": "read_file", "args": {"path": "pipeline/build.py"}}
+{"ts": 37.3433, "event": "read", "agent": "agent-pipeline", "path": "pipeline/build.py", "found": true, "size": 261}
+{"ts": 38.5955, "event": "llm_usage", "agent": "agent-pipeline", "turn": 12, "prompt_tokens": 1914, "completion_tokens": 13}
+{"ts": 38.5956, "event": "tool_call", "agent": "agent-pipeline", "turn": 12, "tool": "list_tools", "args": {}}
+{"ts": 40.1111, "event": "llm_usage", "agent": "agent-pipeline", "turn": 13, "prompt_tokens": 1945, "completion_tokens": 43}
+{"ts": 40.1112, "event": "tool_call", "agent": "agent-pipeline", "turn": 13, "tool": "invoke_tool", "args": {"name": "format_report_v2", "arguments": {"summary": {"count": 2, "total": 10, "mean": 5.0}, "title": "Ops Report"}}}
+{"ts": 41.7682, "event": "llm_usage", "agent": "agent-pipeline", "turn": 14, "prompt_tokens": 2014, "completion_tokens": 38}
+{"ts": 41.7683, "event": "tool_call", "agent": "agent-pipeline", "turn": 14, "tool": "write_file", "args": {"path": "out/report.txt", "content": "# Ops Report\ncount=2 total=10 mean=5.0\n"}}
+{"ts": 41.7695, "event": "write", "agent": "agent-pipeline", "path": "out/report.txt", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<file>"], "message": ""}
+{"ts": 43.1218, "event": "llm_usage", "agent": "agent-pipeline", "turn": 15, "prompt_tokens": 2068, "completion_tokens": 13}
+{"ts": 43.1219, "event": "tool_call", "agent": "agent-pipeline", "turn": 15, "tool": "run_tests", "args": {}}
+{"ts": 43.3658, "event": "run_tests", "agent": "agent-pipeline", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 44.764, "event": "llm_usage", "agent": "agent-pipeline", "turn": 16, "prompt_tokens": 2107, "completion_tokens": 35}
+{"ts": 44.7641, "event": "tool_call", "agent": "agent-pipeline", "turn": 16, "tool": "done", "args": {"summary": "Implemented build_summary to summarize SAMPLE and wrote formatted report to out/report.txt using format_report_v2."}}
+{"ts": 44.7641, "event": "agent_done_coord", "agent": "agent-pipeline"}
+{"ts": 44.7641, "event": "agent_done", "agent": "agent-pipeline", "status": "done", "turns": 16, "prompt_tokens": 24117, "completion_tokens": 1475}
+{"ts": 45.4352, "event": "trial_end", "correct": true, "oracle_passed": 3, "oracle_total": 3, "wall_clock_s": 44.4, "prompt_tokens": 31149, "completion_tokens": 2487, "agent_statuses": {"agent-pipeline": "done", "agent-console": "done"}, "oracle_output": "...                                                                      [100%]\n3 passed in 0.01s\n"}
