@@ -1,10 +1,10 @@
 """Run a single Level C external-runtime trial (no coordination strategy grid).
 
 Examples:
-  python -m runner.run_external --task t2_benign_overlap --adapter scripted
-  python -m runner.run_external --task t2_benign_overlap --adapter shell \\
+  python -m runner.run_external --task t02_benign_overlap --adapter scripted
+  python -m runner.run_external --task t02_benign_overlap --adapter shell \\
       --command 'python path/to/my_agent.py'
-  python -m runner.run_external --task t2_benign_overlap --adapter megaagent \\
+  python -m runner.run_external --task t02_benign_overlap --adapter megaagent \\
       --megaagent-root /path/to/MegaAgent
 """
 from __future__ import annotations

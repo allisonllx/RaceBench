@@ -38,7 +38,7 @@ Strategies (each ~100 lines, labeled "X-style" — our reimplementations, not
 the authors' systems): `naive` (floor), `file_lock`, `git_hash`
 (MegaAgent-style read-snapshot + 3-way merge + surfaced conflicts),
 `ast_scope` (same-file symbol claims via AST diff), `ast_dep` (same claims
-plus a workspace import/use dep graph so t4/t5/t7 cross-file races become
+plus a workspace import/use dep graph so t04/t05/t07 cross-file races become
 visible), and `notify` (CoAgent-lite: unblocked writes plus advisory
 notifications to readers whose read set the write intersects — without
 serialization pre-order or saga inverses). The AST idea is prior art — Grit,
@@ -54,26 +54,26 @@ existing axes.
 We started from the failure-mode taxonomy in arXiv:2606.17182 / CoAgent and
 asked what minimal repos would *isolate* each mode so a coordination column
 could be attributed rather than confounded with “the app is hard.” That
-produced **t1–t12**: small collision-seeded trees, each with a collision map,
+produced **t01–t12**: small collision-seeded trees, each with a collision map,
 hidden pytest oracle, and reference solution.
 
 | Mode | Task | Why it exists |
 |------|------|---------------|
-| Stale read / lost update | `t1_stale_clobber` | Whole-file rewrite race (hardened; v1 archived) |
-| **Benign overlap** | t2 | Correct coordination is *do nothing* (FP stalls) |
-| Write–write clobber | `t3_fetch_clobber` | Whole-`fetch` rewrite race (hardened; v1 archived) |
-| Causal cascade | t4 | 4-agent dependency chain |
-| Cross-file interface | t5 | Invisible to file-scoped locks / same-file AST |
-| Feature pair | t6 | CooperBench-style coupled features |
-| Antidependency / rw-canary | t7 | Read–write ordering hazard |
-| Lock livelock | t8 | Coordination thrash under contention |
-| Overhead confound | t9 | Disjoint packages — cost without benefit |
+| Stale read / lost update | `t01_stale_clobber` | Whole-file rewrite race (hardened; v1 archived) |
+| **Benign overlap** | t02 | Correct coordination is *do nothing* (FP stalls) |
+| Write–write clobber | `t03_fetch_clobber` | Whole-`fetch` rewrite race (hardened; v1 archived) |
+| Causal cascade | t04 | 4-agent dependency chain |
+| Cross-file interface | t05 | Invisible to file-scoped locks / same-file AST |
+| Feature pair | t06 | CooperBench-style coupled features |
+| Antidependency / rw-canary | t07 | Read–write ordering hazard |
+| Lock livelock | t08 | Coordination thrash under contention |
+| Overhead confound | t09 | Disjoint packages — cost without benefit |
 | Phantom tool / registry | t10 | Harness-extension: tool surface drifts |
 | Irreversible effects | t11 | Ordering of non-rewindable side effects |
 | Split-view worktrees | t12 | Isolation until end merge |
 
-t1–t12 are intentionally **probes**, not stand-ins for production codebases.
-The original compose-friendly `t1_stale_read` / `t3_ww_clobber` trees live under
+t01–t12 are intentionally **probes**, not stand-ins for production codebases.
+The original compose-friendly `t01_stale_read` / `t03_ww_clobber` trees live under
 `tasks/_archive/` for audit: live gpt-5-mini `edit_file` composed under naive
 (100% on those v1 cells), so we replaced them with hardened siblings that
 **require whole-file `write_file`** from the last read. Gate smoke
@@ -99,7 +99,7 @@ workspace and inside the token/USD budget, but they mean Conduit improves
 claiming full deployment fidelity. Collision maps may list `critical_paths`;
 metrics report `critical_paths_read_fraction` from the event log.
 
-The real-model grid (`results/grid-v1/`, gpt-5-mini) covers t1–t12 + `rw_*`;
+The real-model grid (`results/grid-v1/`, gpt-5-mini) covers t01–t12 + `rw_*`;
 offline scripted tests validate mechanics on every expansion.
 
 **Ruled out and why:** a full CRDT substrate (Yjs infrastructure exceeds the
@@ -118,16 +118,16 @@ trials (no API needed, committed under `results/smoke-*`):
   (oracle 3/6) — the textbook lost update, reproduced;
 - git_hash on identical writes: merged, 6/6, **zero silent losses**;
 - benign overlap: file_lock stalls (1 FP stall/trial), ast_scope / ast_dep
-  zero stalls; the FP classifier correctly labels t1's same-symbol stalls
+  zero stalls; the FP classifier correctly labels t01's same-symbol stalls
   as true positives;
-- t5 cross-file race: `ast_scope` stays blind (0 blocks); `ast_dep` stalls
+- t05 cross-file race: `ast_scope` stays blind (0 blocks); `ast_dep` stalls
   on the claimed def↔use edge and still completes after release.
 
 Real-model grid (gpt-5-mini, 15 tasks × 6 strategies × `{2,3,4}` agents as
 gated by each task’s `min_agents` / agent count × 5 reps; see
 `results/grid-v1/comparison_table*.md`): overall correctness is high across
 strategies (pooled by-strategy rates roughly **0.70–0.84**). On
-`t2_benign_overlap`, `file_lock` averages **1.0 FP stall/trial** while
+`t02_benign_overlap`, `file_lock` averages **1.0 FP stall/trial** while
 `ast_scope`, `ast_dep`, and `notify` average **0** — the classifier behaves as
 designed. Headline metric: **false-positive stall rate** — coordination events
 between agents whose applied writes changed disjoint symbol sets. No prior
@@ -137,13 +137,13 @@ but has never been independently measured.
 **Reading a strong `naive` column.** Pooled correctness under `naive` can still
 look competitive when many cells are benign / easily composed. That is *not*
 evidence the suite is “badly designed so naive never breaks.” The suite is
-deliberately mixed: benign / overhead probes (`t2`, `rw_c`, `t9`) are meant to
+deliberately mixed: benign / overhead probes (`t02`, `rw_c`, `t09`) are meant to
 pass under naive — their job is to expose false-positive stalls and cost, not
 lost updates. Hard races *can* break naive: scripted smoke reproduces
 whole-file lost updates, and after hardening, live gpt-5-mini also fails
-`t1_stale_clobber` / `t3_fetch_clobber` under naive (0/5) while file_lock
+`t01_stale_clobber` / `t03_fetch_clobber` under naive (0/5) while file_lock
 recovers (5/5); `rw_d_tag_antidependency` shows naive 1/5 vs notify 5/5. The
-archived v1 `t1`/`t3` probes under-triggered because models preferred anchored
+archived v1 `t01`/`t03` probes under-triggered because models preferred anchored
 `edit_file` against *current* disk — disjoint anchors compose under naive
 without anyone “seeing” the peer, and a failed anchor triggers re-read/retry.
 
@@ -181,7 +181,7 @@ capped; every trial runs in a throwaway git workspace.
 
 ## 5. Honesty & Trajectory
 
-**Suite in one line.** Probe taxonomy t1–t12 (see §2) plus Conduit `rw_*`
+**Suite in one line.** Probe taxonomy t01–t12 (see §2) plus Conduit `rw_*`
 added after we decided synthetic probes alone understate today’s multi-module
 repos — with the TestClient/SQLite limits above.
 
@@ -285,17 +285,17 @@ t12 numbers must not be cited in the comparison table.
 helper**, not a proposed production CRDT/OT. Preferring non-stub methods is
 a deliberate bias toward “keep working implementations when both sides
 touched the same symbol.” Strategies still do not coordinate across
-worktrees mid-trial. Shared-isolation tasks (t1–t11, `rw_*`) do not use
+worktrees mid-trial. Shared-isolation tasks (t01–t11, `rw_*`) do not use
 this path and were not invalidated by the fix.
 
 ### Other known limits
 
-(1) t1–t12 remain probes; Conduit improves layout/import realism but is not
+(1) t01–t12 remain probes; Conduit improves layout/import realism but is not
 Newman+Postgres+listening servers, and trials do not allow on-the-fly package
 install or port binding — see §2. (2) Strategy columns are mechanism-class
 reimplementations, not upstream systems (Level A vs Level C above).
 (3) Symbol granularity is top-level only (a class is one symbol), so
-`ast_scope` / `ast_dep` over-serialize within classes — visible in t6 and
+`ast_scope` / `ast_dep` over-serialize within classes — visible in t06 and
 reported, not hidden. (4) Scripted-agent results validate mechanics only;
 all headline claims come from real-model trials with the event logs
 committed. (5) The solo-calibration ceiling means results say little about
@@ -314,14 +314,14 @@ column is a post-hackathon addition if labeled honestly
 bypass the strategy (documented in the strategy guide); read-set visibility
 is 1.0 only for `read_file`. (11) High pooled `naive` correctness on early grid cells did **not** mean the
 suite failed to seed races — see §3 “Reading a strong `naive` column”. We
-archived compose-friendly v1 `t1`/`t3` and shipped hardened whole-file
+archived compose-friendly v1 `t01`/`t03` and shipped hardened whole-file
 siblings plus `rw_d` after an adversarial gate smoke
 (`results/adversarial-gate/`). (12) Cascade tasks require the full agent chain (`min_agents`; e.g.
-`rw_e_cascade` at n=3, `t4_cascade` at n=4). Truncating drops later consumers
+`rw_e_cascade` at n=3, `t04_cascade` at n=4). Truncating drops later consumers
 and makes the oracle unreachable regardless of strategy; those cells were
 archived, not cited.
 
-**Next:** finish the paid grid on t1–t12 + `rw_*` with valid t12 cells;
+**Next:** finish the paid grid on t01–t12 + `rw_*` with valid t12 cells;
 prototype **Level C** (external-system adapter inspired by Terminal Bench /
 Harbor) starting with a MegaAgent-shaped path if factorable, otherwise a
 documented black-box agent adapter with honest metric gaps; then a second
@@ -338,9 +338,9 @@ emits across-task `comparison_table_overall` and
 `results/grid-v1/_archive_t12_pre_worktree_fix/` and
 `results/grid-v1-calibration/_archive_t12_pre_worktree_fix/`. Archived
 truncated `rw_e_cascade` n=2 cells and prior calib:
-`results/_archive/rw_e_cascade/`. Archived truncated `t4_cascade` n=2 cells:
-`results/_archive/t4_cascade_n2/`. Archived compose-friendly v1 probes and
-their grid logs: `tasks/_archive/{t1_stale_read,t3_ww_clobber}/`,
-`results/_archive/t1_stale_read_v1/`, `results/_archive/t3_ww_clobber_v1/`.
+`results/_archive/rw_e_cascade/`. Archived truncated `t04_cascade` n=2 cells:
+`results/_archive/t04_cascade_n2/`. Archived compose-friendly v1 probes and
+their grid logs: `tasks/_archive/{t01_stale_read,t03_ww_clobber}/`,
+`results/_archive/t01_stale_read_v1/`, `results/_archive/t03_ww_clobber_v1/`.
 Adversarial gate smoke for hardened siblings + `rw_d`:
 `results/adversarial-gate/` and `results/adversarial-gate-calibration/`.*

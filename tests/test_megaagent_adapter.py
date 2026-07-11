@@ -14,7 +14,7 @@ from harness.workspace import Workspace
 
 
 def test_prompt_builder_includes_t2_subtasks(tmp_path):
-    task = load_task("t2_benign_overlap")
+    task = load_task("t02_benign_overlap")
     specs = task.agent_subset(2)
     ws = Workspace.create(task.repo, tmp_path / "ws", isolation="shared",
                           agent_ids=[s.id for s in specs])
@@ -29,7 +29,7 @@ def test_prompt_builder_includes_t2_subtasks(tmp_path):
     assert "agent-truncate" in initial
     assert "EXISTING" in initial or "existing" in initial.lower()
     assert "oracle_tests" in additional
-    assert "t2_benign_overlap" in initial
+    assert "t02_benign_overlap" in initial
     ws.cleanup()
 
 
@@ -99,7 +99,7 @@ async def test_megaagent_refuses_worktree(tmp_path):
 
 @pytest.mark.asyncio
 async def test_megaagent_missing_root_message(tmp_path):
-    task = load_task("t2_benign_overlap")
+    task = load_task("t02_benign_overlap")
     specs = task.agent_subset(2)
     ws = Workspace.create(
         task.repo, tmp_path / "ws", isolation="shared",

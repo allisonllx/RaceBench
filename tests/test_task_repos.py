@@ -60,7 +60,7 @@ def test_collect_pending_skips_truncated_cascade_cells(tmp_path):
     from runner.run_grid import collect_pending
 
     cfg = {
-        "tasks": ["rw_e_cascade", "t1_stale_clobber"],
+        "tasks": ["rw_e_cascade", "t01_stale_clobber"],
         "strategies": ["naive"],
         "agent_counts": [2, 3, 4],
         "reps": 1,
@@ -76,8 +76,8 @@ def test_collect_pending_skips_truncated_cascade_cells(tmp_path):
     assert ("rw_e_cascade", 3) in cells
     assert ("rw_e_cascade", 2) not in cells
     assert ("rw_e_cascade", 4) not in cells
-    assert ("t1_stale_clobber", 2) in cells
-    assert ("t1_stale_clobber", 3) not in cells
+    assert ("t01_stale_clobber", 2) in cells
+    assert ("t01_stale_clobber", 3) not in cells
 
 
 def test_calibration_allows_solo_despite_min_agents():

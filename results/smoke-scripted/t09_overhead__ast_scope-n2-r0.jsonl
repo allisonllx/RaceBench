@@ -1,0 +1,22 @@
+{"ts": 0.7006, "event": "trial_start", "task": "t09_overhead", "failure_mode": "overhead_masks_benefit", "benign": true, "strategy": "ast_scope", "n_agents": 2, "rep": 0, "model": "scripted-edit", "isolation": "shared", "agent_ids": ["agent-a", "agent-b"]}
+{"ts": 0.708, "event": "llm_usage", "agent": "agent-a", "turn": 1, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.7084, "event": "tool_call", "agent": "agent-a", "turn": 1, "tool": "write_file", "args": {"path": "mod_a/mathops.py", "content": "def double(x):\n    return 2 * x\n"}}
+{"ts": 0.7143, "event": "write", "agent": "agent-a", "path": "mod_a/mathops.py", "kind": "overwrite", "status": "applied", "waited_s": 0.006, "changed_symbols": ["double"], "message": ""}
+{"ts": 0.7144, "event": "llm_usage", "agent": "agent-b", "turn": 1, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.7145, "event": "tool_call", "agent": "agent-b", "turn": 1, "tool": "write_file", "args": {"path": "mod_b/mathops.py", "content": "def square(x):\n    return x * x\n"}}
+{"ts": 0.7153, "event": "write", "agent": "agent-b", "path": "mod_b/mathops.py", "kind": "overwrite", "status": "applied", "waited_s": 0.001, "changed_symbols": ["square"], "message": ""}
+{"ts": 0.7154, "event": "llm_usage", "agent": "agent-a", "turn": 2, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.7156, "event": "tool_call", "agent": "agent-a", "turn": 2, "tool": "write_file", "args": {"path": "mod_a/textops.py", "content": "def greet(name):\n    return f\"hello {name}\"\n"}}
+{"ts": 0.7301, "event": "write", "agent": "agent-a", "path": "mod_a/textops.py", "kind": "overwrite", "status": "applied", "waited_s": 0.015, "changed_symbols": ["greet"], "message": ""}
+{"ts": 0.7304, "event": "llm_usage", "agent": "agent-b", "turn": 2, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.7304, "event": "tool_call", "agent": "agent-b", "turn": 2, "tool": "write_file", "args": {"path": "mod_b/textops.py", "content": "def shout(name):\n    return f\"{name}!\".upper()\n"}}
+{"ts": 0.7322, "event": "write", "agent": "agent-b", "path": "mod_b/textops.py", "kind": "overwrite", "status": "applied", "waited_s": 0.002, "changed_symbols": ["shout"], "message": ""}
+{"ts": 0.7335, "event": "llm_usage", "agent": "agent-a", "turn": 3, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.7339, "event": "tool_call", "agent": "agent-a", "turn": 3, "tool": "done", "args": {"summary": "mod_a features"}}
+{"ts": 0.7342, "event": "agent_done_coord", "agent": "agent-a"}
+{"ts": 0.7343, "event": "agent_done", "agent": "agent-a", "status": "done", "turns": 3, "prompt_tokens": 600, "completion_tokens": 150}
+{"ts": 0.7343, "event": "llm_usage", "agent": "agent-b", "turn": 3, "prompt_tokens": 200, "completion_tokens": 50}
+{"ts": 0.7344, "event": "tool_call", "agent": "agent-b", "turn": 3, "tool": "done", "args": {"summary": "mod_b features"}}
+{"ts": 0.7344, "event": "agent_done_coord", "agent": "agent-b"}
+{"ts": 0.7344, "event": "agent_done", "agent": "agent-b", "status": "done", "turns": 3, "prompt_tokens": 600, "completion_tokens": 150}
+{"ts": 1.5609, "event": "trial_end", "correct": true, "oracle_passed": 2, "oracle_total": 2, "wall_clock_s": 0.03, "prompt_tokens": 1200, "completion_tokens": 300, "agent_statuses": {"agent-a": "done", "agent-b": "done"}, "oracle_output": "..                                                                       [100%]\n2 passed in 0.01s\n"}

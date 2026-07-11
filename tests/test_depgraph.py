@@ -8,7 +8,7 @@ from harness.task import load_task
 
 
 def test_t5_package_reexport_and_attr_use(tmp_path):
-    task = load_task("t5_cross_file")
+    task = load_task("t05_cross_file")
     # overlay a services file that calls models.make_user
     import shutil
     dst = tmp_path / "repo"
@@ -31,7 +31,7 @@ def test_t5_package_reexport_and_attr_use(tmp_path):
 
 
 def test_t5_create_user_resolves_via_submodule_scan(tmp_path):
-    task = load_task("t5_cross_file")
+    task = load_task("t05_cross_file")
     import shutil
     dst = tmp_path / "repo"
     shutil.copytree(task.repo, dst)
@@ -57,7 +57,7 @@ def test_t5_create_user_resolves_via_submodule_scan(tmp_path):
 
 
 def test_t9_disjoint_packages_no_cross_edges():
-    task = load_task("t9_overhead")
+    task = load_task("t09_overhead")
     g = build_depgraph(task.repo)
     # no edges from mod_a into mod_b or vice versa
     for (path, _sym), defs in g.forward.items():
@@ -68,7 +68,7 @@ def test_t9_disjoint_packages_no_cross_edges():
 
 
 def test_rebuild_updates_edges(tmp_path):
-    task = load_task("t5_cross_file")
+    task = load_task("t05_cross_file")
     import shutil
     dst = tmp_path / "repo"
     shutil.copytree(task.repo, dst)

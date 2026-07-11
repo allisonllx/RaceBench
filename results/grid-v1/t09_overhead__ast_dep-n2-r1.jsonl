@@ -1,0 +1,64 @@
+{"ts": 0.196, "event": "trial_start", "task": "t09_overhead", "failure_mode": "overhead_masks_benefit", "benign": true, "strategy": "ast_dep", "n_agents": 2, "rep": 1, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-a", "agent-b"]}
+{"ts": 1.6532, "event": "llm_usage", "agent": "agent-b", "turn": 1, "prompt_tokens": 621, "completion_tokens": 19}
+{"ts": 1.6534, "event": "tool_call", "agent": "agent-b", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 1.6623, "event": "llm_usage", "agent": "agent-a", "turn": 1, "prompt_tokens": 621, "completion_tokens": 19}
+{"ts": 1.6624, "event": "tool_call", "agent": "agent-a", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 3.0336, "event": "llm_usage", "agent": "agent-a", "turn": 2, "prompt_tokens": 693, "completion_tokens": 21}
+{"ts": 3.0339, "event": "tool_call", "agent": "agent-a", "turn": 2, "tool": "read_file", "args": {"path": "mod_a/mathops.py"}}
+{"ts": 3.0541, "event": "read", "agent": "agent-a", "path": "mod_a/mathops.py", "found": true, "size": 45}
+{"ts": 4.0783, "event": "llm_usage", "agent": "agent-a", "turn": 3, "prompt_tokens": 735, "completion_tokens": 21}
+{"ts": 4.0785, "event": "tool_call", "agent": "agent-a", "turn": 3, "tool": "read_file", "args": {"path": "mod_a/textops.py"}}
+{"ts": 4.0795, "event": "read", "agent": "agent-a", "path": "mod_a/textops.py", "found": true, "size": 47}
+{"ts": 4.1141, "event": "llm_usage", "agent": "agent-b", "turn": 2, "prompt_tokens": 693, "completion_tokens": 21}
+{"ts": 4.1142, "event": "tool_call", "agent": "agent-b", "turn": 2, "tool": "read_file", "args": {"path": "mod_b/mathops.py"}}
+{"ts": 4.1149, "event": "read", "agent": "agent-b", "path": "mod_b/mathops.py", "found": true, "size": 45}
+{"ts": 5.186, "event": "llm_usage", "agent": "agent-a", "turn": 4, "prompt_tokens": 777, "completion_tokens": 22}
+{"ts": 5.1861, "event": "tool_call", "agent": "agent-a", "turn": 4, "tool": "read_file", "args": {"path": "mod_a/__init__.py"}}
+{"ts": 5.1866, "event": "read", "agent": "agent-a", "path": "mod_a/__init__.py", "found": true, "size": 96}
+{"ts": 5.1868, "event": "llm_usage", "agent": "agent-b", "turn": 3, "prompt_tokens": 735, "completion_tokens": 21}
+{"ts": 5.1869, "event": "tool_call", "agent": "agent-b", "turn": 3, "tool": "read_file", "args": {"path": "mod_b/textops.py"}}
+{"ts": 5.187, "event": "read", "agent": "agent-b", "path": "mod_b/textops.py", "found": true, "size": 47}
+{"ts": 6.3133, "event": "llm_usage", "agent": "agent-b", "turn": 4, "prompt_tokens": 777, "completion_tokens": 22}
+{"ts": 6.315, "event": "tool_call", "agent": "agent-b", "turn": 4, "tool": "read_file", "args": {"path": "mod_b/__init__.py"}}
+{"ts": 6.3259, "event": "read", "agent": "agent-b", "path": "mod_b/__init__.py", "found": true, "size": 96}
+{"ts": 6.7484, "event": "llm_usage", "agent": "agent-a", "turn": 5, "prompt_tokens": 837, "completion_tokens": 27}
+{"ts": 6.7486, "event": "tool_call", "agent": "agent-a", "turn": 5, "tool": "read_file", "args": {"path": "mod_b/mathops.py"}}
+{"ts": 6.7495, "event": "read", "agent": "agent-a", "path": "mod_b/mathops.py", "found": true, "size": 45}
+{"ts": 8.0121, "event": "llm_usage", "agent": "agent-a", "turn": 6, "prompt_tokens": 879, "completion_tokens": 21}
+{"ts": 8.0122, "event": "tool_call", "agent": "agent-a", "turn": 6, "tool": "read_file", "args": {"path": "mod_b/textops.py"}}
+{"ts": 8.0128, "event": "read", "agent": "agent-a", "path": "mod_b/textops.py", "found": true, "size": 47}
+{"ts": 9.0805, "event": "llm_usage", "agent": "agent-a", "turn": 7, "prompt_tokens": 921, "completion_tokens": 21}
+{"ts": 9.0806, "event": "tool_call", "agent": "agent-a", "turn": 7, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 9.081, "event": "read", "agent": "agent-a", "path": "tests/test_smoke.py", "found": true, "size": 82}
+{"ts": 9.5914, "event": "llm_usage", "agent": "agent-b", "turn": 5, "prompt_tokens": 837, "completion_tokens": 187}
+{"ts": 9.5915, "event": "tool_call", "agent": "agent-b", "turn": 5, "tool": "edit_file", "args": {"path": "mod_b/mathops.py", "old_string": "def square(x):\n    raise NotImplementedError\n", "new_string": "def square(x):\n    return x * x\n"}}
+{"ts": 9.592, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-b", "reader": "agent-a", "path": "mod_b/mathops.py", "symbols": ["mod_b/mathops.py:square"]}
+{"ts": 9.5957, "event": "write", "agent": "agent-b", "path": "mod_b/mathops.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["square"], "message": ""}
+{"ts": 10.9873, "event": "llm_usage", "agent": "agent-b", "turn": 6, "prompt_tokens": 906, "completion_tokens": 59}
+{"ts": 10.9874, "event": "tool_call", "agent": "agent-b", "turn": 6, "tool": "edit_file", "args": {"path": "mod_b/textops.py", "old_string": "def shout(name):\n    raise NotImplementedError\n", "new_string": "def shout(name):\n    return f\"{name}!\".upper()\n"}}
+{"ts": 10.9884, "event": "coord", "strategy": "ast_dep", "action": "read_write_intersection", "writer": "agent-b", "reader": "agent-a", "path": "mod_b/textops.py", "symbols": ["mod_b/textops.py:shout"]}
+{"ts": 10.9937, "event": "write", "agent": "agent-b", "path": "mod_b/textops.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["shout"], "message": ""}
+{"ts": 12.0847, "event": "llm_usage", "agent": "agent-b", "turn": 7, "prompt_tokens": 981, "completion_tokens": 21}
+{"ts": 12.0848, "event": "tool_call", "agent": "agent-b", "turn": 7, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 12.0861, "event": "read", "agent": "agent-b", "path": "tests/test_smoke.py", "found": true, "size": 82}
+{"ts": 12.0869, "event": "llm_usage", "agent": "agent-a", "turn": 8, "prompt_tokens": 980, "completion_tokens": 188}
+{"ts": 12.0872, "event": "tool_call", "agent": "agent-a", "turn": 8, "tool": "edit_file", "args": {"path": "mod_a/mathops.py", "old_string": "def double(x):\n    raise NotImplementedError\n", "new_string": "def double(x):\n    return 2 * x\n"}}
+{"ts": 12.0972, "event": "write", "agent": "agent-a", "path": "mod_a/mathops.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["double"], "message": ""}
+{"ts": 13.0574, "event": "llm_usage", "agent": "agent-b", "turn": 8, "prompt_tokens": 1040, "completion_tokens": 13}
+{"ts": 13.0576, "event": "tool_call", "agent": "agent-b", "turn": 8, "tool": "run_tests", "args": {}}
+{"ts": 13.3797, "event": "run_tests", "agent": "agent-b", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 13.4119, "event": "llm_usage", "agent": "agent-a", "turn": 9, "prompt_tokens": 1050, "completion_tokens": 57}
+{"ts": 13.4119, "event": "tool_call", "agent": "agent-a", "turn": 9, "tool": "edit_file", "args": {"path": "mod_a/textops.py", "old_string": "def greet(name):\n    raise NotImplementedError\n", "new_string": "def greet(name):\n    return f\"hello {name}\"\n"}}
+{"ts": 13.4161, "event": "write", "agent": "agent-a", "path": "mod_a/textops.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["greet"], "message": ""}
+{"ts": 14.4456, "event": "llm_usage", "agent": "agent-a", "turn": 10, "prompt_tokens": 1123, "completion_tokens": 13}
+{"ts": 14.4456, "event": "tool_call", "agent": "agent-a", "turn": 10, "tool": "run_tests", "args": {}}
+{"ts": 14.6898, "event": "run_tests", "agent": "agent-a", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 14.9782, "event": "llm_usage", "agent": "agent-b", "turn": 9, "prompt_tokens": 1079, "completion_tokens": 40}
+{"ts": 14.9783, "event": "tool_call", "agent": "agent-b", "turn": 9, "tool": "done", "args": {"summary": "Implemented mod_b.square and mod_b.shout; exports in mod_b/__init__.py already correct. All tests pass."}}
+{"ts": 14.9783, "event": "agent_done_coord", "agent": "agent-b"}
+{"ts": 14.9783, "event": "agent_done", "agent": "agent-b", "status": "done", "turns": 9, "prompt_tokens": 7669, "completion_tokens": 403}
+{"ts": 16.1038, "event": "llm_usage", "agent": "agent-a", "turn": 11, "prompt_tokens": 1162, "completion_tokens": 43}
+{"ts": 16.1039, "event": "tool_call", "agent": "agent-a", "turn": 11, "tool": "done", "args": {"summary": "Implemented mod_a.double and mod_a.greet to return 2*x and 'hello {name}' respectively; ran tests (1 passed)."}}
+{"ts": 16.104, "event": "agent_done_coord", "agent": "agent-a"}
+{"ts": 16.104, "event": "agent_done", "agent": "agent-a", "status": "done", "turns": 11, "prompt_tokens": 9778, "completion_tokens": 453}
+{"ts": 16.3774, "event": "trial_end", "correct": true, "oracle_passed": 2, "oracle_total": 2, "wall_clock_s": 15.87, "prompt_tokens": 17447, "completion_tokens": 856, "agent_statuses": {"agent-a": "done", "agent-b": "done"}, "oracle_output": "..                                                                       [100%]\n2 passed in 0.01s\n"}

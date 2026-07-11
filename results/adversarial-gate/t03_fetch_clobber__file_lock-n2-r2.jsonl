@@ -1,0 +1,42 @@
+{"ts": 0.1019, "event": "trial_start", "task": "t03_fetch_clobber", "failure_mode": "write_write_clobber", "benign": false, "strategy": "file_lock", "n_agents": 2, "rep": 2, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 1.5926, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 697, "completion_tokens": 19}
+{"ts": 1.5929, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 1.7549, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 670, "completion_tokens": 19}
+{"ts": 1.755, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.6793, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 736, "completion_tokens": 18}
+{"ts": 2.6793, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 2.6797, "event": "read", "agent": "agent-retries", "path": "api.py", "found": true, "size": 551}
+{"ts": 2.7811, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 709, "completion_tokens": 18}
+{"ts": 2.7813, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 2.7816, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-timeout", "path": "api.py", "holder": "agent-retries"}
+{"ts": 9.4919, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 881, "completion_tokens": 410}
+{"ts": 9.492, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "read_file", "args": {"path": "tests/test_api.py"}}
+{"ts": 9.4926, "event": "read", "agent": "agent-retries", "path": "tests/test_api.py", "found": true, "size": 146}
+{"ts": 20.62, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 952, "completion_tokens": 737}
+{"ts": 20.6202, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "write_file", "args": {"path": "api.py", "content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents "}}
+{"ts": 20.6216, "event": "write", "agent": "agent-retries", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 21.7366, "event": "llm_usage", "agent": "agent-retries", "turn": 5, "prompt_tokens": 1315, "completion_tokens": 13}
+{"ts": 21.7367, "event": "tool_call", "agent": "agent-retries", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 21.9449, "event": "run_tests", "agent": "agent-retries", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 23.6074, "event": "llm_usage", "agent": "agent-retries", "turn": 6, "prompt_tokens": 1354, "completion_tokens": 32}
+{"ts": 23.6076, "event": "tool_call", "agent": "agent-retries", "turn": 6, "tool": "done", "args": {"summary": "Implement fetch with retries parameter and retry logic, re-raising TransportError after retries."}}
+{"ts": 23.6077, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 23.6079, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 6, "prompt_tokens": 5935, "completion_tokens": 1229}
+{"ts": 23.6086, "event": "read", "agent": "agent-timeout", "path": "api.py", "found": true, "size": 1346}
+{"ts": 26.2034, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 1025, "completion_tokens": 90}
+{"ts": 26.2034, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "read_file", "args": {"path": "tests/test_api.py"}}
+{"ts": 26.2036, "event": "read", "agent": "agent-timeout", "path": "tests/test_api.py", "found": true, "size": 146}
+{"ts": 28.9144, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 1096, "completion_tokens": 90}
+{"ts": 28.9146, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "read_file", "args": {"path": "conftest.py"}}
+{"ts": 28.9165, "event": "read", "agent": "agent-timeout", "path": "conftest.py", "found": true, "size": 92}
+{"ts": 39.292, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 1150, "completion_tokens": 761}
+{"ts": 39.2921, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "write_file", "args": {"path": "api.py", "content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents "}}
+{"ts": 39.2931, "event": "write", "agent": "agent-timeout", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 40.6128, "event": "llm_usage", "agent": "agent-timeout", "turn": 6, "prompt_tokens": 1537, "completion_tokens": 13}
+{"ts": 40.613, "event": "tool_call", "agent": "agent-timeout", "turn": 6, "tool": "run_tests", "args": {}}
+{"ts": 40.7963, "event": "run_tests", "agent": "agent-timeout", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 42.2193, "event": "llm_usage", "agent": "agent-timeout", "turn": 7, "prompt_tokens": 1576, "completion_tokens": 35}
+{"ts": 42.2194, "event": "tool_call", "agent": "agent-timeout", "turn": 7, "tool": "done", "args": {"summary": "Replace fetch to accept timeout=10 and call transport(url, timeout=timeout), preserving retry behavior."}}
+{"ts": 42.2194, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 42.2194, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 7, "prompt_tokens": 7763, "completion_tokens": 1026}
+{"ts": 42.4051, "event": "trial_end", "correct": true, "oracle_passed": 5, "oracle_total": 5, "wall_clock_s": 42.1, "prompt_tokens": 13698, "completion_tokens": 2255, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": ".....                                                                    [100%]\n5 passed in 0.01s\n"}

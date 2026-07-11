@@ -1,0 +1,55 @@
+{"ts": 0.1242, "event": "trial_start", "task": "t03_fetch_clobber", "failure_mode": "write_write_clobber", "benign": false, "strategy": "notify", "n_agents": 2, "rep": 4, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 1.5574, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 670, "completion_tokens": 19}
+{"ts": 1.5576, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 1.5677, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 697, "completion_tokens": 30}
+{"ts": 1.5679, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "grep", "args": {"pattern": "def fetch", "glob": "**/*.py"}}
+{"ts": 1.5698, "event": "search", "agent": "agent-retries", "kind": "grep", "pattern": "def fetch", "n": 1}
+{"ts": 2.602, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 741, "completion_tokens": 18}
+{"ts": 2.6021, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 2.6025, "event": "read", "agent": "agent-retries", "path": "api.py", "found": true, "size": 551}
+{"ts": 2.6046, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 709, "completion_tokens": 18}
+{"ts": 2.6046, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 2.6048, "event": "read", "agent": "agent-timeout", "path": "api.py", "found": true, "size": 551}
+{"ts": 6.1103, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 854, "completion_tokens": 154}
+{"ts": 6.1104, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "read_file", "args": {"path": "tests/test_api.py"}}
+{"ts": 6.1108, "event": "read", "agent": "agent-timeout", "path": "tests/test_api.py", "found": true, "size": 146}
+{"ts": 13.5242, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 925, "completion_tokens": 524}
+{"ts": 13.5245, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "write_file", "args": {"path": "api.py", "content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents "}}
+{"ts": 13.5271, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-timeout", "reader": "agent-retries", "path": "api.py", "symbols": ["fetch"]}
+{"ts": 13.5272, "event": "write", "agent": "agent-timeout", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 14.2503, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 886, "completion_tokens": 797}
+{"ts": 14.2504, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "write_file", "args": {"path": "api.py", "content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents "}}
+{"ts": 14.2511, "event": "coord", "strategy": "notify", "action": "notified", "writer": "agent-retries", "reader": "agent-timeout", "path": "api.py", "symbols": ["fetch"]}
+{"ts": 14.2512, "event": "write", "agent": "agent-retries", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 14.2512, "event": "notification_delivered", "agent": "agent-retries", "turn": 4, "note": "[coordination notice] Another agent just modified api.py (changed: fetch). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 14.7111, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 1139, "completion_tokens": 13}
+{"ts": 14.7112, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 14.9012, "event": "run_tests", "agent": "agent-timeout", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 14.9014, "event": "notification_delivered", "agent": "agent-timeout", "turn": 6, "note": "[coordination notice] Another agent just modified api.py (changed: fetch). If anything you are doing depends on that file, re-read it and adjust your plan; if not, just continue."}
+{"ts": 18.9529, "event": "llm_usage", "agent": "agent-timeout", "turn": 6, "prompt_tokens": 1222, "completion_tokens": 216}
+{"ts": 18.953, "event": "tool_call", "agent": "agent-timeout", "turn": 6, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 18.9539, "event": "read", "agent": "agent-timeout", "path": "api.py", "found": true, "size": 1045}
+{"ts": 23.3361, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 1225, "completion_tokens": 88}
+{"ts": 23.3363, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 23.3373, "event": "read", "agent": "agent-retries", "path": "api.py", "found": true, "size": 1045}
+{"ts": 25.2465, "event": "llm_usage", "agent": "agent-retries", "turn": 5, "prompt_tokens": 1476, "completion_tokens": 83}
+{"ts": 25.2466, "event": "tool_call", "agent": "agent-retries", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 25.4119, "event": "run_tests", "agent": "agent-retries", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 27.086, "event": "llm_usage", "agent": "agent-retries", "turn": 6, "prompt_tokens": 1515, "completion_tokens": 38}
+{"ts": 27.0861, "event": "tool_call", "agent": "agent-retries", "turn": 6, "tool": "done", "args": {"summary": "Replace fetch to accept retries keyword, retry transport up to retries times on TransportError, re-raising last error."}}
+{"ts": 27.0861, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 27.0861, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 6, "prompt_tokens": 6540, "completion_tokens": 1054}
+{"ts": 39.1726, "event": "llm_usage", "agent": "agent-timeout", "turn": 7, "prompt_tokens": 1473, "completion_tokens": 1079}
+{"ts": 39.1726, "event": "tool_call", "agent": "agent-timeout", "turn": 7, "tool": "write_file", "args": {"path": "api.py", "content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents "}}
+{"ts": 39.1748, "event": "write", "agent": "agent-timeout", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 40.3815, "event": "llm_usage", "agent": "agent-timeout", "turn": 8, "prompt_tokens": 1794, "completion_tokens": 13}
+{"ts": 40.3816, "event": "tool_call", "agent": "agent-timeout", "turn": 8, "tool": "run_tests", "args": {}}
+{"ts": 40.6257, "event": "run_tests", "agent": "agent-timeout", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 42.0794, "event": "llm_usage", "agent": "agent-timeout", "turn": 9, "prompt_tokens": 1833, "completion_tokens": 18}
+{"ts": 42.0795, "event": "tool_call", "agent": "agent-timeout", "turn": 9, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 42.0798, "event": "read", "agent": "agent-timeout", "path": "api.py", "found": true, "size": 1166}
+{"ts": 50.1119, "event": "llm_usage", "agent": "agent-timeout", "turn": 10, "prompt_tokens": 2109, "completion_tokens": 571}
+{"ts": 50.112, "event": "tool_call", "agent": "agent-timeout", "turn": 10, "tool": "done", "args": {"summary": "Rewrote the entire fetch function in api.py to accept keyword-only timeout=10 and forward it to transport(url, timeout=timeout), preserving TransportError and retries behavior; tests pass."}}
+{"ts": 50.112, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 50.112, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 10, "prompt_tokens": 12728, "completion_tokens": 2625}
+{"ts": 50.284, "event": "trial_end", "correct": true, "oracle_passed": 5, "oracle_total": 5, "wall_clock_s": 49.96, "prompt_tokens": 19268, "completion_tokens": 3679, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": ".....                                                                    [100%]\n5 passed in 0.01s\n"}

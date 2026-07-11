@@ -1,0 +1,23 @@
+name: t07_rw_canary
+failure_mode: antidependency_silent_invalidation
+benign: false
+description: >
+  Agent A renames a public status constant; agent B implements a report filter
+  that embeds the status value. If B acts on a stale read, the final system
+  silently filters the wrong status — no crash, wrong state.
+agents:
+  - id: agent-schema
+    prompt: >
+      In schema/constants.py, rename STATUS_ACTIVE from the string "active" to
+      "enabled". Update schema/__init__.py and exporters/status_export.py so
+      they export/use the new value (no backward-compatible alias for the old
+      string "active" may remain in those files). Only change files under
+      schema/ and exporters/.
+  - id: agent-handlers
+    prompt: >
+      In handlers/report.py, implement filter_active(records) exactly per its
+      docstring: return only records whose "status" field equals the active
+      status constant from schema.constants (read schema/ to see the current
+      value). Also implement summarize_active(records) to return
+      {"active_count": N} for the filtered list. Only change files under
+      handlers/.

@@ -3,7 +3,7 @@
 Validates the Level C path (workspace + instructions + merge + oracle) without
 an LLM or the in-process Agent/Strategy loop. Supported tasks:
 
-- t2_benign_overlap (shared isolation)
+- t02_benign_overlap (shared isolation)
 - t12_split_view (worktree isolation)
 """
 from __future__ import annotations
@@ -77,7 +77,7 @@ def _apply_t12(ctx: ExternalContext) -> None:
 
 
 _HANDLERS = {
-    "t2_benign_overlap": _apply_t2,
+    "t02_benign_overlap": _apply_t2,
     "t12_split_view": _apply_t12,
 }
 

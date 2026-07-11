@@ -142,13 +142,13 @@ from harness.scripts import get_script
 from harness.task import load_task
 
 async def test_my_strategy_on_t2(tmp_path):
-    task = load_task("t2_benign_overlap")
+    task = load_task("t02_benign_overlap")
     cfg = TrialConfig(strategy="my_strategy", n_agents=2, rep=0,
                       model_name="scripted", max_turns=12)
     log = tmp_path / "trial.jsonl"
 
     def factory(spec):
-        return ScriptedModel(script=get_script("t2_benign_overlap", spec.id, "edit"))
+        return ScriptedModel(script=get_script("t02_benign_overlap", spec.id, "edit"))
 
     result = await run_trial(task, cfg, factory, log)
     assert result.correct

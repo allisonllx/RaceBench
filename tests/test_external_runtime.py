@@ -14,7 +14,7 @@ from harness.trial import TrialConfig
 
 @pytest.mark.asyncio
 async def test_scripted_external_t2_passes_oracle(tmp_path):
-    task = load_task("t2_benign_overlap")
+    task = load_task("t02_benign_overlap")
     runtime = get_runtime("scripted")
     cfg = TrialConfig(
         strategy=external_strategy_id(runtime.name),
@@ -69,7 +69,7 @@ async def test_scripted_external_t12_worktree_passes_oracle(tmp_path):
 @pytest.mark.asyncio
 async def test_shell_external_t2_passes_oracle(tmp_path):
     """Shell adapter runs a small Python snippet that applies t2 edits."""
-    task = load_task("t2_benign_overlap")
+    task = load_task("t02_benign_overlap")
     # Inline script: read paths.json and apply both replacements on shared root.
     script = tmp_path / "edit_t2.py"
     script.write_text(
@@ -97,7 +97,7 @@ target.write_text(text)
         workdir=tmp_path / "ws",
         trial_timeout_s=60.0,
     )
-    log = tmp_path / "t2_shell.jsonl"
+    log = tmp_path / "t02_shell.jsonl"
     result = await run_external_trial(task, cfg, runtime, log)
     assert result.correct, (
         f"oracle {result.oracle_passed}/{result.oracle_total} "

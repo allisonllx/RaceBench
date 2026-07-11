@@ -32,7 +32,7 @@ original authors' systems.
 4. `ast_scope` — symbol-level write claims via Python AST diff (Grit/Phantom/Weave-style,
    see prior art below): two agents editing disjoint functions in the same file never stall.
 5. `ast_dep` — `ast_scope` plus a workspace import/use dependency graph: stalls when a
-   write races a claimed cross-file definition or use-site (sees t4/t5/t7; keeps t2 silent).
+   write races a claimed cross-file definition or use-site (sees t04/t05/t07; keeps t02 silent).
 6. `notify` — CoAgent-lite advisory notifications: writes land immediately; agents whose
    read set intersects a landed write get a notice injected into context and self-judge.
 
@@ -69,15 +69,15 @@ pytest oracle, and reference solution.
 
 | Task | Failure mode | Agents | Notes |
 |---|---|---|---|
-| `t1_stale_clobber` | stale read / lost update (whole-file rewrite) | 2 | hardened; v1 in `tasks/_archive/` |
-| `t2_benign_overlap` | disjoint functions, same file (FP probe) | 2 | `benign: true` |
-| `t3_fetch_clobber` | write-write on the same function (whole-fetch rewrite) | 2 | hardened; v1 in `tasks/_archive/` |
-| `t4_cascade` | causal cascade across a dependency chain | 4 | multi-module |
-| `t5_cross_file` | cross-file symbol dependency | 2 | multi-module |
-| `t6_feature_pair` | CooperBench-style feature pair | 2 | multi-module |
-| `t7_rw_canary` | antidependency / silent invalidation | 2 | |
-| `t8_livelock` | lock wait-cycle / livelock stress | 2 | opposite edit order |
-| `t9_overhead` | overhead-masks-benefit (disjoint pkgs) | 2 | `benign: true` |
+| `t01_stale_clobber` | stale read / lost update (whole-file rewrite) | 2 | hardened; v1 in `tasks/_archive/` |
+| `t02_benign_overlap` | disjoint functions, same file (FP probe) | 2 | `benign: true` |
+| `t03_fetch_clobber` | write-write on the same function (whole-fetch rewrite) | 2 | hardened; v1 in `tasks/_archive/` |
+| `t04_cascade` | causal cascade across a dependency chain | 4 | multi-module |
+| `t05_cross_file` | cross-file symbol dependency | 2 | multi-module |
+| `t06_feature_pair` | CooperBench-style feature pair | 2 | multi-module |
+| `t07_rw_canary` | antidependency / silent invalidation | 2 | |
+| `t08_livelock` | lock wait-cycle / livelock stress | 2 | opposite edit order |
+| `t09_overhead` | overhead-masks-benefit (disjoint pkgs) | 2 | `benign: true` |
 | `t10_phantom_tool` | tool-registry drift | 2 | needs `list_tools` |
 | `t11_irreversible` | external-effect reordering | 2 | `.effects.jsonl` order |
 | `t12_split_view` | worktree divergence | 2 | `isolation: worktree` |

@@ -20,19 +20,19 @@ without filtering — they are a different experiment axis.
 ## Quick start
 
 ```bash
-# Offline scripted adapter (no API key) — t2 and t12
-python -m runner.run_external --task t2_benign_overlap --adapter scripted \
+# Offline scripted adapter (no API key) — t02 and t12
+python -m runner.run_external --task t02_benign_overlap --adapter scripted \
   --out results/ext-smoke
 
 python -m runner.run_external --task t12_split_view --adapter scripted \
   --out results/ext-smoke
 
 # Your own process
-python -m runner.run_external --task t2_benign_overlap --adapter shell \
+python -m runner.run_external --task t02_benign_overlap --adapter shell \
   --command 'python my_multi_agent.py' --out results/ext-smoke
 
 # MegaAgent vendor bridge (clone + API key in their config.py)
-python -m runner.run_external --task t2_benign_overlap --adapter megaagent \
+python -m runner.run_external --task t02_benign_overlap --adapter megaagent \
   --megaagent-root /path/to/MegaAgent --out results/ext-megaagent
 ```
 
@@ -90,7 +90,7 @@ filenames stay unique.
 
 | Name | Role |
 |------|------|
-| `scripted` | Applies known-good edits for `t2_benign_overlap` and `t12_split_view` |
+| `scripted` | Applies known-good edits for `t02_benign_overlap` and `t12_split_view` |
 | `shell` | Runs `--command` with the env vars above; exit 0 = ok |
 | `megaagent` | Vendor bridge to [Xtra-Computing/MegaAgent](https://github.com/Xtra-Computing/MegaAgent) |
 
@@ -114,7 +114,7 @@ git clone https://github.com/Xtra-Computing/MegaAgent.git
 export MEGAAGENT_ROOT=$PWD/MegaAgent
 # edit $MEGAAGENT_ROOT/config.py api_key
 
-python -m runner.run_external --task t2_benign_overlap --adapter megaagent \
+python -m runner.run_external --task t02_benign_overlap --adapter megaagent \
   --megaagent-root "$MEGAAGENT_ROOT" --out results/ext-megaagent
 ```
 

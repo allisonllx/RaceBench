@@ -1,0 +1,17 @@
+name: t09_overhead
+failure_mode: overhead_masks_benefit
+benign: true
+description: >
+  Two agents edit completely disjoint packages. Any coordination stall or
+  notification is pure overhead — CodeCRDT's confound as a first-class cell.
+agents:
+  - id: agent-a
+    prompt: >
+      Only change files under mod_a/. Implement double(x) in mod_a/mathops.py
+      to return 2*x, and greet(name) in mod_a/textops.py to return
+      f"hello {name}". Update mod_a/__init__.py exports if needed.
+  - id: agent-b
+    prompt: >
+      Only change files under mod_b/. Implement square(x) in mod_b/mathops.py
+      to return x*x, and shout(name) in mod_b/textops.py to return
+      f"{name}!".upper(). Update mod_b/__init__.py exports if needed.

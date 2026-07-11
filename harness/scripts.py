@@ -17,7 +17,7 @@ from __future__ import annotations
 from pathlib import Path
 
 T1_INITIAL = (Path(__file__).resolve().parent.parent
-              / "tasks/t1_stale_clobber/repo/config.py").read_text(encoding="utf-8")
+              / "tasks/t01_stale_clobber/repo/config.py").read_text(encoding="utf-8")
 
 T1_TIMEOUT_DEFAULT = '    "port": 8080,\n    "timeout": 30.0,\n}'
 T1_RETRIES_DEFAULT = '    "host": "localhost",\n    "retries": 3,'
@@ -51,7 +51,7 @@ def _t1_full_file(with_timeout: bool, with_retries: bool) -> str:
 # ---------------------------------------------------------------- t3 fragments
 
 T3_INITIAL = (Path(__file__).resolve().parent.parent
-              / "tasks/t3_fetch_clobber/repo/api.py").read_text(encoding="utf-8")
+              / "tasks/t03_fetch_clobber/repo/api.py").read_text(encoding="utf-8")
 
 T3_TIMEOUT_ONLY = '''"""A tiny client over a pluggable transport (no real network involved).
 
@@ -98,7 +98,7 @@ def fetch(url, transport, retries=3):
 '''
 
 T3_BOTH = (Path(__file__).resolve().parent.parent
-           / "tasks/t3_fetch_clobber/reference/api.py").read_text(encoding="utf-8")
+           / "tasks/t03_fetch_clobber/reference/api.py").read_text(encoding="utf-8")
 
 
 # ---------------------------------------------------------------- t2 fragments
@@ -133,8 +133,8 @@ T2_TRUNCATE_NEW = (
 # ---------------------------------------------------------------- script table
 
 SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
-    # t1_stale_clobber — composing anchored edits (correct under every strategy)
-    ("t1_stale_clobber", "agent-timeout", "edit"): [
+    # t01_stale_clobber — composing anchored edits (correct under every strategy)
+    ("t01_stale_clobber", "agent-timeout", "edit"): [
         ("read_file", {"path": "config.py"}),
         ("edit_file", {"path": "config.py",
                        "old_string": '    "port": 8080,\n}',
@@ -145,7 +145,7 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         ("run_tests", {}),
         ("done", {"summary": "added timeout key + validation"}),
     ],
-    ("t1_stale_clobber", "agent-retries", "edit"): [
+    ("t01_stale_clobber", "agent-retries", "edit"): [
         ("read_file", {"path": "config.py"}),
         ("edit_file", {"path": "config.py",
                        "old_string": '    "host": "localhost",',
@@ -157,53 +157,53 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         ("done", {"summary": "added retries key + validation"}),
     ],
     # t1 — stale whole-file rewrites (lost update under naive)
-    ("t1_stale_clobber", "agent-timeout", "clobber"): [
+    ("t01_stale_clobber", "agent-timeout", "clobber"): [
         ("read_file", {"path": "config.py"}),
         ("write_file", {"path": "config.py",
                         "content": _t1_full_file(with_timeout=True, with_retries=False)}),
         ("done", {"summary": "rewrote config.py with timeout support"}),
     ],
-    ("t1_stale_clobber", "agent-retries", "clobber"): [
+    ("t01_stale_clobber", "agent-retries", "clobber"): [
         ("read_file", {"path": "config.py"}),
         ("write_file", {"path": "config.py",
                         "content": _t1_full_file(with_timeout=False, with_retries=True)}),
         ("done", {"summary": "rewrote config.py with retries support"}),
     ],
-    # t3_fetch_clobber — stale whole-file rewrites (lost update under naive).
+    # t03_fetch_clobber — stale whole-file rewrites (lost update under naive).
     # (No concurrent "edit" scripts: both agents must rewrite the same fetch
     # region; composing under live models is the grid measurement.)
-    ("t3_fetch_clobber", "agent-timeout", "clobber"): [
+    ("t03_fetch_clobber", "agent-timeout", "clobber"): [
         ("read_file", {"path": "api.py"}),
         ("write_file", {"path": "api.py", "content": T3_TIMEOUT_ONLY}),
         ("done", {"summary": "rewrote api.py with timeout-only fetch"}),
     ],
-    ("t3_fetch_clobber", "agent-retries", "clobber"): [
+    ("t03_fetch_clobber", "agent-retries", "clobber"): [
         ("read_file", {"path": "api.py"}),
         ("write_file", {"path": "api.py", "content": T3_RETRIES_ONLY}),
         ("done", {"summary": "rewrote api.py with retries-only fetch"}),
     ],
     # t2 — disjoint-function edits (any stall is a false positive)
-    ("t2_benign_overlap", "agent-slugify", "edit"): [
+    ("t02_benign_overlap", "agent-slugify", "edit"): [
         ("read_file", {"path": "stringutils.py"}),
         ("edit_file", {"path": "stringutils.py",
                        "old_string": T2_SLUGIFY_OLD, "new_string": T2_SLUGIFY_NEW}),
         ("done", {"summary": "implemented slugify"}),
     ],
-    ("t2_benign_overlap", "agent-truncate", "edit"): [
+    ("t02_benign_overlap", "agent-truncate", "edit"): [
         ("read_file", {"path": "stringutils.py"}),
         ("edit_file", {"path": "stringutils.py",
                        "old_string": T2_TRUNCATE_OLD, "new_string": T2_TRUNCATE_NEW}),
         ("done", {"summary": "implemented truncate"}),
     ],
     # t7 — schema rename + handler that reads live constant
-    ("t7_rw_canary", "agent-schema", "edit"): [
+    ("t07_rw_canary", "agent-schema", "edit"): [
         ("read_file", {"path": "schema/constants.py"}),
         ("edit_file", {"path": "schema/constants.py",
                        "old_string": 'STATUS_ACTIVE = "active"',
                        "new_string": 'STATUS_ACTIVE = "enabled"'}),
         ("done", {"summary": "renamed STATUS_ACTIVE to enabled"}),
     ],
-    ("t7_rw_canary", "agent-handlers", "edit"): [
+    ("t07_rw_canary", "agent-handlers", "edit"): [
         ("read_file", {"path": "schema/constants.py"}),
         ("read_file", {"path": "handlers/report.py"}),
         ("write_file", {"path": "handlers/report.py", "content": (
@@ -216,7 +216,7 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         ("done", {"summary": "handlers use live STATUS_ACTIVE"}),
     ],
     # t8 — opposite-order edits (file_lock stress)
-    ("t8_livelock", "agent-ab", "edit"): [
+    ("t08_livelock", "agent-ab", "edit"): [
         ("edit_file", {"path": "alpha.py",
                        "old_string": 'GREETING = "hi"',
                        "new_string": 'GREETING = "hello"'}),
@@ -225,7 +225,7 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
                        "new_string": 'FAREWELL = "goodbye"'}),
         ("done", {"summary": "alpha then beta"}),
     ],
-    ("t8_livelock", "agent-ba", "edit"): [
+    ("t08_livelock", "agent-ba", "edit"): [
         ("edit_file", {"path": "beta.py",
                        "old_string": "COUNT = 1",
                        "new_string": "COUNT = 2"}),
@@ -235,14 +235,14 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         ("done", {"summary": "beta then alpha"}),
     ],
     # t9 — provably disjoint packages (any stall is overhead)
-    ("t9_overhead", "agent-a", "edit"): [
+    ("t09_overhead", "agent-a", "edit"): [
         ("write_file", {"path": "mod_a/mathops.py",
                         "content": "def double(x):\n    return 2 * x\n"}),
         ("write_file", {"path": "mod_a/textops.py",
                         "content": 'def greet(name):\n    return f"hello {name}"\n'}),
         ("done", {"summary": "mod_a features"}),
     ],
-    ("t9_overhead", "agent-b", "edit"): [
+    ("t09_overhead", "agent-b", "edit"): [
         ("write_file", {"path": "mod_b/mathops.py",
                         "content": "def square(x):\n    return x * x\n"}),
         ("write_file", {"path": "mod_b/textops.py",
@@ -250,7 +250,7 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         ("done", {"summary": "mod_b features"}),
     ],
     # t5 — models rename + services implement (correct final state)
-    ("t5_cross_file", "agent-models", "edit"): [
+    ("t05_cross_file", "agent-models", "edit"): [
         ("write_file", {"path": "models/user.py", "content": (
             '"""User factory functions."""\n'
             "from models.validators import looks_like_email\n\n\n"
@@ -267,7 +267,7 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         )}),
         ("done", {"summary": "renamed make_user to create_user"}),
     ],
-    ("t5_cross_file", "agent-services", "edit"): [
+    ("t05_cross_file", "agent-services", "edit"): [
         ("write_file", {"path": "services/registration.py", "content": (
             '"""Registration service."""\n'
             "import models\n"
@@ -287,7 +287,7 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         ("done", {"summary": "services use create_user"}),
     ],
     # t5 race — models holds claims during run_tests so services can block under ast_dep
-    ("t5_cross_file", "agent-models", "race"): [
+    ("t05_cross_file", "agent-models", "race"): [
         ("write_file", {"path": "models/user.py", "content": (
             '"""User factory functions."""\n'
             "from models.validators import looks_like_email\n\n\n"
@@ -303,7 +303,7 @@ SCRIPTS: dict[tuple[str, str, str], list[tuple[str, dict]]] = {
         )}),
         ("done", {"summary": "models rename with hold"}),
     ],
-    ("t5_cross_file", "agent-services", "race"): [
+    ("t05_cross_file", "agent-services", "race"): [
         # Delay so agent-models can claim create_user before this write.
         ("run_tests", {}),
         ("write_file", {"path": "services/registration.py", "content": (

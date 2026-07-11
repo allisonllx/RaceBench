@@ -1,0 +1,19 @@
+name: t08_livelock
+failure_mode: livelock_deadlock
+benign: false
+description: >
+  Two agents must edit alpha.py and beta.py in opposite orders, stressing
+  file_lock wait-cycles / lock_timeout. Oracle only cares that both edits land.
+agents:
+  - id: agent-ab
+    prompt: >
+      You MUST edit files in this exact order: first alpha.py, then beta.py.
+      In alpha.py, change GREETING from "hi" to "hello". In beta.py, change
+      FAREWELL from "bye" to "goodbye". Do not reverse the order. Call done
+      when both edits are applied.
+  - id: agent-ba
+    prompt: >
+      You MUST edit files in this exact order: first beta.py, then alpha.py.
+      In beta.py, change COUNT from 1 to 2. In alpha.py, change VERSION from
+      "0.1" to "0.2". Do not reverse the order. Call done when both edits are
+      applied.

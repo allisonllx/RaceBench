@@ -38,14 +38,14 @@ async def run_scripted(task_name, strategy, variant, tmp_path, rep=0):
 # ---------------------------------------------------------------- t1 stale clobber
 
 async def test_naive_clobber_loses_update(tmp_path):
-    result, _ = await run_scripted("t1_stale_clobber", "naive", "clobber", tmp_path)
+    result, _ = await run_scripted("t01_stale_clobber", "naive", "clobber", tmp_path)
     assert not result.correct, \
         "naive + stale whole-file writes should lose one agent's key"
     assert 0 < result.oracle_passed < result.oracle_total
 
 
 async def test_git_hash_clobber_never_silently_loses(tmp_path):
-    result, log = await run_scripted("t1_stale_clobber", "git_hash", "clobber", tmp_path)
+    result, log = await run_scripted("t01_stale_clobber", "git_hash", "clobber", tmp_path)
     events = read_events(log)
     conflicts = [e for e in events if e["event"] == "coord"
                  and e.get("action") == "merge_conflict"]
@@ -59,21 +59,21 @@ async def test_git_hash_clobber_never_silently_loses(tmp_path):
 
 @pytest.mark.parametrize("strategy", ["naive", "file_lock", "git_hash", "ast_scope"])
 async def test_composing_edits_correct_everywhere(strategy, tmp_path):
-    result, _ = await run_scripted("t1_stale_clobber", strategy, "edit", tmp_path)
+    result, _ = await run_scripted("t01_stale_clobber", strategy, "edit", tmp_path)
     assert result.correct, f"anchored edits should succeed under {strategy}"
 
 
 # ---------------------------------------------------------------- t3 fetch clobber
 
 async def test_t3_naive_clobber_loses_update(tmp_path):
-    result, _ = await run_scripted("t3_fetch_clobber", "naive", "clobber", tmp_path)
+    result, _ = await run_scripted("t03_fetch_clobber", "naive", "clobber", tmp_path)
     assert not result.correct, \
         "naive + stale whole-file fetch rewrites should drop timeout or retries"
     assert 0 < result.oracle_passed < result.oracle_total
 
 
 async def test_t3_git_hash_clobber_never_silently_loses(tmp_path):
-    result, log = await run_scripted("t3_fetch_clobber", "git_hash", "clobber", tmp_path)
+    result, log = await run_scripted("t03_fetch_clobber", "git_hash", "clobber", tmp_path)
     events = read_events(log)
     conflicts = [e for e in events if e["event"] == "coord"
                  and e.get("action") == "merge_conflict"]
@@ -85,7 +85,7 @@ async def test_t3_git_hash_clobber_never_silently_loses(tmp_path):
 # ---------------------------------------------------------------- t2 benign overlap
 
 async def test_file_lock_stalls_on_benign_overlap(tmp_path):
-    result, log = await run_scripted("t2_benign_overlap", "file_lock", "edit", tmp_path)
+    result, log = await run_scripted("t02_benign_overlap", "file_lock", "edit", tmp_path)
     assert result.correct
     metrics = trial_metrics(log)
     assert metrics["stall_events"] >= 1, "file lock should stall on shared file"
@@ -94,7 +94,7 @@ async def test_file_lock_stalls_on_benign_overlap(tmp_path):
 
 
 async def test_ast_scope_silent_on_benign_overlap(tmp_path):
-    result, log = await run_scripted("t2_benign_overlap", "ast_scope", "edit", tmp_path)
+    result, log = await run_scripted("t02_benign_overlap", "ast_scope", "edit", tmp_path)
     assert result.correct
     metrics = trial_metrics(log)
     assert metrics["stall_events"] == 0, \
@@ -102,12 +102,12 @@ async def test_ast_scope_silent_on_benign_overlap(tmp_path):
 
 
 async def test_naive_benign_overlap_correct(tmp_path):
-    result, _ = await run_scripted("t2_benign_overlap", "naive", "edit", tmp_path)
+    result, _ = await run_scripted("t02_benign_overlap", "naive", "edit", tmp_path)
     assert result.correct, "disjoint anchored edits compose even uncoordinated"
 
 
 async def test_notify_never_stalls_but_notifies(tmp_path):
-    result, log = await run_scripted("t2_benign_overlap", "notify", "edit", tmp_path)
+    result, log = await run_scripted("t02_benign_overlap", "notify", "edit", tmp_path)
     assert result.correct
     metrics = trial_metrics(log)
     assert metrics["stall_events"] == 0, "notify must never block a write"
@@ -122,9 +122,9 @@ async def test_notify_never_stalls_but_notifies(tmp_path):
 # ---------------------------------------------------------------- metrics sanity
 
 async def test_metrics_row_shape(tmp_path):
-    _, log = await run_scripted("t1_stale_clobber", "naive", "edit", tmp_path)
+    _, log = await run_scripted("t01_stale_clobber", "naive", "edit", tmp_path)
     m = trial_metrics(log)
-    assert m["task"] == "t1_stale_clobber"
+    assert m["task"] == "t01_stale_clobber"
     assert m["strategy"] == "naive"
     assert m["total_tokens"] > 0
     assert m["prompt_tokens"] > 0
@@ -136,14 +136,14 @@ async def test_metrics_row_shape(tmp_path):
 # ---------------------------------------------------------------- t9 overhead (disjoint)
 
 async def test_t9_naive_correct_no_stalls(tmp_path):
-    result, log = await run_scripted("t9_overhead", "naive", "edit", tmp_path)
+    result, log = await run_scripted("t09_overhead", "naive", "edit", tmp_path)
     assert result.correct
     metrics = trial_metrics(log)
     assert metrics["stall_events"] == 0
 
 
 async def test_t9_file_lock_fp_stalls_are_overhead(tmp_path):
-    result, log = await run_scripted("t9_overhead", "file_lock", "edit", tmp_path)
+    result, log = await run_scripted("t09_overhead", "file_lock", "edit", tmp_path)
     assert result.correct
     metrics = trial_metrics(log)
     # disjoint packages — any stall is false-positive overhead
@@ -153,12 +153,12 @@ async def test_t9_file_lock_fp_stalls_are_overhead(tmp_path):
 # ---------------------------------------------------------------- t7 / t8 scripted
 
 async def test_t7_composing_edits_correct(tmp_path):
-    result, _ = await run_scripted("t7_rw_canary", "naive", "edit", tmp_path)
+    result, _ = await run_scripted("t07_rw_canary", "naive", "edit", tmp_path)
     assert result.correct
 
 
 async def test_t8_composing_edits_correct_under_naive(tmp_path):
-    result, _ = await run_scripted("t8_livelock", "naive", "edit", tmp_path)
+    result, _ = await run_scripted("t08_livelock", "naive", "edit", tmp_path)
     assert result.correct
 
 
@@ -173,7 +173,7 @@ async def test_ast_dep_blocks_cross_file_claim_deterministic(tmp_path):
     from harness.task import load_task
     from harness.workspace import Workspace
 
-    task = load_task("t5_cross_file")
+    task = load_task("t05_cross_file")
     dest = tmp_path / "ws"
     ws = Workspace.create(task.repo, dest)
     log_path = tmp_path / "e.jsonl"
@@ -214,7 +214,7 @@ async def test_ast_dep_blocks_cross_file_claim_deterministic(tmp_path):
 
 
 async def test_ast_scope_blind_on_t5_race(tmp_path):
-    result, log = await run_scripted("t5_cross_file", "ast_scope", "race", tmp_path)
+    result, log = await run_scripted("t05_cross_file", "ast_scope", "race", tmp_path)
     events = read_events(log)
     blocked = [e for e in events if e["event"] == "coord" and e.get("action") == "blocked"]
     assert not blocked, "ast_scope is same-file only — t5 race must not stall"
@@ -222,12 +222,12 @@ async def test_ast_scope_blind_on_t5_race(tmp_path):
 
 
 async def test_ast_dep_t5_edit_correct(tmp_path):
-    result, _ = await run_scripted("t5_cross_file", "ast_dep", "edit", tmp_path)
+    result, _ = await run_scripted("t05_cross_file", "ast_dep", "edit", tmp_path)
     assert result.correct
 
 
 async def test_ast_dep_silent_on_benign_overlap(tmp_path):
-    result, log = await run_scripted("t2_benign_overlap", "ast_dep", "edit", tmp_path)
+    result, log = await run_scripted("t02_benign_overlap", "ast_dep", "edit", tmp_path)
     assert result.correct
     metrics = trial_metrics(log)
     assert metrics["stall_events"] == 0, \

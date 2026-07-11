@@ -17,7 +17,7 @@ def _write_log(path: Path, events: list[dict]) -> Path:
 def test_metrics_backfills_tokens_when_trial_end_wiped(tmp_path):
     """Legacy bug: trial_timeout left trial_end prompt/completion at 0."""
     log = _write_log(tmp_path / "timeout.jsonl", [
-        {"ts": 0, "event": "trial_start", "task": "t1_stale_read",
+        {"ts": 0, "event": "trial_start", "task": "t01_stale_read",
          "failure_mode": "stale_read", "benign": False, "strategy": "file_lock",
          "n_agents": 2, "rep": 0, "model": "gpt-5-mini",
          "agent_ids": ["a", "b"]},
@@ -41,7 +41,7 @@ def test_metrics_backfills_tokens_when_trial_end_wiped(tmp_path):
 
 def test_metrics_prefers_trial_end_when_present(tmp_path):
     log = _write_log(tmp_path / "ok.jsonl", [
-        {"ts": 0, "event": "trial_start", "task": "t1_stale_read",
+        {"ts": 0, "event": "trial_start", "task": "t01_stale_read",
          "failure_mode": "stale_read", "benign": False, "strategy": "naive",
          "n_agents": 2, "rep": 0, "model": "gpt-5-mini",
          "agent_ids": ["a", "b"]},
