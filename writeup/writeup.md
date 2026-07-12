@@ -192,10 +192,26 @@ MegaAgent-*style* (mechanism class), not a run of MegaAgent's repository.
 Level C (Terminal Bench / Harbor inspired) scores **system + oracle**
 (correctness, wall clock). It does not produce comparable FP-stall or read-set
 metrics unless the adapter emits RaceBench events. We shipped a MegaAgent vendor
-bridge (`adapters/megaagent/`). An initial t02 trial timed out at 900s with zero
-file writes after CEO recruitment: upstream uses ChromaDB, a heavy control loop,
-and HTTP calls without timeouts. We document that as an integration limit, not
-as evidence that MegaAgent "failed" the task.
+bridge (`adapters/megaagent/`). Early trials hit integration limits: t02 timed
+out at 900s with zero file writes after CEO recruitment (ChromaDB download, heavy
+control loop, HTTP calls without upstream timeouts); t04 ran ~887s and ~2M input
+tokens but the CEO ignored the RaceBench brief and recruited a Gobang demo team,
+leaving the cascade repo untouched. We document those as adapter and alignment
+limits, not as evidence that MegaAgent "failed" the oracle.
+
+**MegaAgent orchestration vs RaceBench task shape.** MegaAgent's headline claim is
+dynamic org design: one CEO prompt recruits agents, decomposes work, and scales
+the team without a predefined SOP. RaceBench deliberately does the opposite. Every
+task names fixed `agent-*` roles, fixed subtask briefs, a seeded repo, and a hidden
+oracle. That keeps collision maps, calibration gates, and Level A strategy columns
+deterministic and replayable. It also means Level C on RaceBench cannot fairly
+score dynamic role allocation, adaptive upscaling/downscaling of agent count, or
+open-ended task decomposition. We are testing whether an external multi-agent
+*runtime* can edit our repo under contention and pass our oracle, not whether it
+can invent the plan from a one-line goal. Skipping MegaAgent's CEO recruit step
+(to stop Gobang-style drift) would further narrow the claim to "runtime + tools,"
+not the full paper system. We state that explicitly rather than treating Level C
+cells as comparable to Level A `git_hash` mechanism columns.
 
 ### Incident: t12 worktree merge (fixed)
 
@@ -223,14 +239,19 @@ The AST union is a **benchmark merge helper**, not a production CRDT/OT integrat
 
 1. t01-t12 are probes; Conduit adds structure but not Newman/Postgres/live servers.
 2. Strategy columns are mechanism-class reimplementations (Level A), not upstream products (Level C).
-3. Symbol granularity is top-level only; `ast_scope` / `ast_dep` over-serialize within classes (visible on t06).
-4. Scripted trials validate mechanics; headline claims use real-model JSONL logs.
-5. Solo-calibration ceiling: little signal on tasks models cannot do alone.
-6. `ast_dep` import resolver is best-effort, not a type checker.
-7. Trial-timeout paths previously zeroed `trial_end` tokens; we recover from live agents and backfill from `llm_usage`.
-8. Lite CRDT column deferred: overlaps `git_hash` on compose; would need honest labeling (`always_merge`).
-9. `grep` / `glob` / `list_files` bypass the strategy; read-set visibility is 1.0 only for `read_file`.
-10. Cascade tasks need full agent chains (`rw_e` at n=3, `t04` at n=4); truncated cells archived.
+3. **Predefined roles and agent counts.** Tasks fix who does what (`agent-datasource`,
+   `agent-pipeline`, …) and gate concurrency with `min_agents`. We do not measure
+   dynamic role allocation or adaptive team sizing (systems that add or drop workers
+   from task complexity). That is a deliberate benchmark limit: without fixed briefs
+   and oracle targets, attribution across strategies and reps would not be stable.
+4. Symbol granularity is top-level only; `ast_scope` / `ast_dep` over-serialize within classes (visible on t06).
+5. Scripted trials validate mechanics; headline claims use real-model JSONL logs.
+6. Solo-calibration ceiling: little signal on tasks models cannot do alone.
+7. `ast_dep` import resolver is best-effort, not a type checker.
+8. Trial-timeout paths previously zeroed `trial_end` tokens; we recover from live agents and backfill from `llm_usage`.
+9. Lite CRDT column deferred: overlaps `git_hash` on compose; would need honest labeling (`always_merge`).
+10. `grep` / `glob` / `list_files` bypass the strategy; read-set visibility is 1.0 only for `read_file`.
+11. Cascade tasks need full agent chains (`rw_e` at n=3, `t04` at n=4); truncated cells archived.
 
 ### Next steps
 

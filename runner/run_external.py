@@ -39,7 +39,12 @@ def main() -> None:
         default=None,
         help="path to Xtra-Computing/MegaAgent clone (or set MEGAAGENT_ROOT)",
     )
-    p.add_argument("--n-agents", type=int, default=2)
+    p.add_argument(
+        "--n-agents",
+        type=int,
+        default=None,
+        help="agent count (default: all agents defined in task.yaml)",
+    )
     p.add_argument("--rep", type=int, default=0)
     p.add_argument("--out", type=Path, default=Path("results/ext-smoke"))
     p.add_argument("--workdir", type=Path, default=Path(".trial_workspaces"))
@@ -57,10 +62,22 @@ def main() -> None:
     runtime = get_runtime(args.adapter, **kwargs)
 
     task = load_task(args.task)
+    n_agents = args.n_agents if args.n_agents is not None else len(task.agents)
+    if n_agents < task.min_agents:
+        p.error(
+            f"task {task.name} requires at least {task.min_agents} agents "
+            f"(got --n-agents {n_agents}; omit flag to use all {len(task.agents)})"
+        )
+    if n_agents > len(task.agents):
+        p.error(
+            f"task {task.name} defines {len(task.agents)} agents, "
+            f"requested {n_agents}"
+        )
+
     strategy = external_strategy_id(runtime.name)
     cfg = TrialConfig(
         strategy=strategy,
-        n_agents=args.n_agents,
+        n_agents=n_agents,
         rep=args.rep,
         model_name=f"external:{runtime.name}",
         trial_timeout_s=args.timeout,
