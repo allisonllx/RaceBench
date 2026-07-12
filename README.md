@@ -2,9 +2,9 @@
 
 **A neutral, reproducible benchmark for multi-agent coding coordination strategies.**
 
-Every published coordination mechanism for parallel LLM coding agents — CRDT merging
-(CodeCRDT), git-hash optimistic concurrency (MegaAgent), notification-based advisory
-control (CoAgent) — is evaluated by its own authors, on its own task suite, with its own
+Every published coordination mechanism for parallel LLM coding agents (CRDT merging
+via CodeCRDT, git-hash optimistic concurrency via MegaAgent, notification-based advisory
+control via CoAgent) is evaluated by its own authors, on its own task suite, with its own
 metrics. Nobody has published the boring comparison table. RaceBench is that table:
 a fixed suite of collision-seeded coding tasks, run under interchangeable coordination
 strategies, with per-mechanism cost accounting.
@@ -19,49 +19,83 @@ strategies, with per-mechanism cost accounting.
 | **False-positive stall rate** | coordination triggered on provably-disjoint edits (nobody reports this today) |
 | Read-set visibility | fraction of agent reads the coordination layer can observe |
 
-## Strategies
+The headline comparison table (Levels A and B below) holds agent tools, tasks, and
+event logging fixed and swaps only the coordination mechanism.
+
+## Extensibility
+
+RaceBench has three plug-in levels. **A and B** are the apples-to-apples axis used
+for the strategy grid. **C** is a separate experiment: score a whole external
+multi-agent product on the same tasks and oracles.
+
+| Level | What you plug in | Status | Guide |
+|---|---|---|---|
+| **A: Strategy** | `_coordinate_read` / `_coordinate_write` under our agent loop | Shipped | [`docs/adding-a-strategy.md`](docs/adding-a-strategy.md) |
+| **B: Task** | `tasks/<name>/` repo, collision map, hidden oracle | Shipped | `tasks/` layout below |
+| **C: External runtime** | Third-party multi-agent system edits the workspace; we score | Shipped (bridge) | [`docs/adding-an-external-runtime.md`](docs/adding-an-external-runtime.md) |
+
+Level C is Terminal-Bench / Harbor-inspired: RaceBench owns the **environment and
+verifier**; you bring the agent system. It reports correctness and wall clock only
+unless your adapter emits RaceBench `read` / `write` / `coord` events. Do **not** mix
+Level C cells into the Level A strategy table without filtering; they are a different axis.
+
+Tasks fix named `agent-*` roles and subtask briefs so collision maps, calibration
+gates, and cross-strategy cells stay deterministic. That means we do **not** measure
+dynamic role allocation or adaptive team sizing (e.g. MegaAgent-style CEO recruitment
+from a one-line goal). Level C tests whether an external **runtime** can edit our repo
+and pass the oracle, not open-ended task decomposition. See `writeup/writeup.md` §5
+for MegaAgent bridge limits and honesty notes.
+
+### Level A: Built-in strategies
 
 All strategies implement the same interface (`harness/strategies/base.py`) and are
-labeled "X-style" — they are our faithful-but-minimal reimplementations, not the
-original authors' systems.
+labeled "X-style": faithful-but-minimal reimplementations, not the original authors'
+systems.
 
-1. `naive` — direct writes, last write wins. The floor.
-2. `file_lock` — file-level lock on first touch, held until the agent finishes.
-3. `git_hash` — MegaAgent-style optimistic concurrency: record content at read, 3-way
+1. `naive`: direct writes, last write wins. The floor.
+2. `file_lock`: file-level lock on first touch, held until the agent finishes.
+3. `git_hash`: MegaAgent-style optimistic concurrency: record content at read, 3-way
    merge on write, surface conflicts back to the agent.
-4. `ast_scope` — symbol-level write claims via Python AST diff (Grit/Phantom/Weave-style,
+4. `ast_scope`: symbol-level write claims via Python AST diff (Grit/Phantom/Weave-style,
    see prior art below): two agents editing disjoint functions in the same file never stall.
-5. `ast_dep` — `ast_scope` plus a workspace import/use dependency graph: stalls when a
+5. `ast_dep`: `ast_scope` plus a workspace import/use dependency graph: stalls when a
    write races a claimed cross-file definition or use-site (sees t04/t05/t07; keeps t02 silent).
-6. `notify` — CoAgent-lite advisory notifications: writes land immediately; agents whose
+6. `notify`: CoAgent-lite advisory notifications: writes land immediately; agents whose
    read set intersects a landed write get a notice injected into context and self-judge.
 
-### Adding your strategy
+**Adding your strategy (Level A).** Implement two methods, register with `@register`,
+import in `harness/strategies/__init__.py`, add the name to `strategies:` in a runner
+config, and smoke-test with `runner/config.smoke.yaml` (scripted agents, no API key).
+Full checklist: [`docs/adding-a-strategy.md`](docs/adding-a-strategy.md).
 
-The benchmark is built to compare **your** coordination mechanism on the same
-tasks and metrics. Implement two methods (`_coordinate_read`, `_coordinate_write`),
-register with `@register`, import the module in `harness/strategies/__init__.py`,
-and add the name to `strategies:` in a runner config. Offline smoke test with
-`runner/config.smoke.yaml` (scripted agents, no API key).
-
-Full checklist, template, event-schema notes, and testing patterns:
-[`docs/adding-a-strategy.md`](docs/adding-a-strategy.md).
-
-### External systems (Level C)
-
-To score a **third-party multi-agent product** (bring-your-own runtime) against
-RaceBench tasks and oracles — without going through our Agent/Strategy loop —
-see [`docs/adding-an-external-runtime.md`](docs/adding-an-external-runtime.md)
-(`python -m runner.run_external`). Built-ins: `scripted`, `shell`, and a
-**MegaAgent vendor bridge** (`--adapter megaagent`, shared isolation only).
-Correctness and wall clock only unless the adapter emits RaceBench events.
-
-Ruled out for the hackathon window (with reasons, see `writeup/`): full CRDT substrate,
+**Out of scope for the hackathon window** (reasons in `writeup/`): full CRDT substrate,
 CoAgent's full MTPO with serialization pre-order and saga inverses, 8+ agent scale;
 lock-on-write-only `file_lock` and `git_hash`+worktree hybrids (redundant with
 `ast_scope` / task-level `isolation: worktree`).
 
-## Tasks
+### Level C: External runtimes
+
+```bash
+# Offline scripted adapter (no API key)
+python -m runner.run_external --task t02_benign_overlap --adapter scripted \
+  --out results/ext-smoke
+
+# Your own process
+python -m runner.run_external --task t02_benign_overlap --adapter shell \
+  --command 'python my_multi_agent.py' --out results/ext-smoke
+
+# MegaAgent vendor bridge (clone + API key in their config.py)
+pip install -e '.[megaagent]'
+python -m runner.run_external --task t02_benign_overlap --adapter megaagent \
+  --megaagent-root /path/to/MegaAgent --out results/ext-megaagent
+```
+
+Built-in adapters: `scripted`, `shell`, and a **MegaAgent vendor bridge**
+(`adapters/megaagent/`, shared isolation only). Before each trial the harness writes
+`.racebench_instructions/` (task metadata, paths, per-agent briefs). Full API and
+metrics table: [`docs/adding-an-external-runtime.md`](docs/adding-an-external-runtime.md).
+
+## Tasks (Level B)
 
 Twelve purpose-built mini-repos in `tasks/` (probe suite) plus a **FastAPI
 Conduit external-validity track** (`rw_*`). Each has a collision map, hidden
@@ -87,7 +121,7 @@ pytest oracle, and reference solution.
 | `rw_e_cascade` | 3-agent causal cascade | 3 | Conduit Article.summary |
 
 The Conduit base lives in `tasks/_conduit_base/` (shared source). Host deps
-include `fastapi`, `httpx`, and `pydantic` — reinstall with
+include `fastapi`, `httpx`, and `pydantic`; reinstall with
 `pip install -e ".[dev]"` after pull. Oracles use FastAPI `TestClient` (no
 live server / Newman / Postgres).
 
@@ -130,19 +164,20 @@ harness/     agent loop, coordination layer, strategies/, event log
 tasks/       one dir per task: task.yaml, repo/, oracle_tests/, collision_map.yaml
 runner/      grid configs, orchestrator, cost guardrails
 analysis/    metrics computation, plots, report notebook
-docs/        contributor guides (e.g. adding-a-strategy.md)
+adapters/    Level C vendor bridges (e.g. megaagent/)
+docs/        contributor guides (adding-a-strategy, adding-an-external-runtime)
 results/     committed JSONL event logs (the reproducibility artifact)
 writeup/     five-pillar write-up + demo video script
 ```
 
 ## Prior art and attribution
 
-- CodeCRDT — arXiv:2510.18893 (CRDT coordination; motivates the confound metrics)
-- CoAgent / MTPO — arXiv:2606.15376 (notification-based advisory control)
-- MegaAgent — arXiv:2408.09955 (git-hash + mutex; basis of `git_hash`)
-- Verified Detection of Concurrency Anomalies — arXiv:2606.17182 (failure-mode taxonomy)
-- CooperBench — arXiv:2601.13295 (collaborative coding tasks; complementary axis —
+- CodeCRDT: arXiv:2510.18893 (CRDT coordination; motivates the confound metrics)
+- CoAgent / MTPO: arXiv:2606.15376 (notification-based advisory control)
+- MegaAgent: arXiv:2408.09955 (git-hash + mutex; basis of `git_hash`)
+- Verified Detection of Concurrency Anomalies: arXiv:2606.17182 (failure-mode taxonomy)
+- CooperBench: arXiv:2601.13295 (collaborative coding tasks; complementary axis:
   it varies communication, we vary the coordination mechanism)
-- Specification Gap — arXiv:2603.24284, and the tools Grit, Phantom, Weave
+- Specification Gap: arXiv:2603.24284, and the tools Grit, Phantom, Weave
   (prior art for AST-level conflict detection; `ast_scope` is our neutral
   reimplementation for measurement, not a novel mechanism)
