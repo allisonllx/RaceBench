@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from harness.external import ExternalRuntime
+from harness.external_runtimes.cursor import CursorExternalRuntime
 from harness.external_runtimes.megaagent import MegaAgentRuntime
 from harness.external_runtimes.scripted import ScriptedExternalRuntime
 from harness.external_runtimes.shell import ShellExternalRuntime
@@ -10,6 +11,7 @@ _RUNTIMES: dict[str, type] = {
     "scripted": ScriptedExternalRuntime,
     "shell": ShellExternalRuntime,
     "megaagent": MegaAgentRuntime,
+    "cursor": CursorExternalRuntime,
 }
 
 

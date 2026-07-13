@@ -192,7 +192,7 @@ every trial uses a throwaway git workspace.
 |-------|---------------|--------|
 | **A: Strategy** | `_coordinate_read` / `_coordinate_write` under our agent loop | Shipped |
 | **B: Task** | `tasks/<name>/` repo, oracle, collision map | Shipped |
-| **C: External system** | Third-party multi-agent product; RaceBench owns workspace + oracle | Shipped (bridge skeleton) |
+| **C: External system** | Third-party multi-agent product; RaceBench owns workspace + oracle | Shipped (C1 bridges) |
 
 Levels A/B produce the apples-to-apples comparison table: same agent tools,
 same event log, same metrics; only the mechanism changes. `git_hash` is
@@ -200,27 +200,46 @@ MegaAgent-*style* (mechanism class), not a run of MegaAgent's repository.
 
 Level C (Terminal Bench / Harbor inspired) scores **system + oracle**
 (correctness, wall clock). It does not produce comparable FP-stall or read-set
-metrics unless the adapter emits RaceBench events. We shipped a MegaAgent vendor
-bridge (`adapters/megaagent/`). Early trials hit integration limits: t02 timed
-out at 900s with zero file writes after CEO recruitment (ChromaDB download, heavy
-control loop, HTTP calls without upstream timeouts); t04 ran ~887s and ~2M input
-tokens but the CEO ignored the RaceBench brief and recruited a Gobang demo team,
-leaving the cascade repo untouched. We document those as adapter and alignment
-limits, not as evidence that MegaAgent "failed" the oracle.
+metrics unless the adapter emits RaceBench events. We split Level C into two
+honestly labeled sub-modes:
+
+| Mode | Shape | Status |
+|------|-------|--------|
+| **C1: Harness-swap** | Fixed RaceBench roles + briefs; vendor *worker* loops edit the workspace | Shipped (`scripted`, `shell`, MegaAgent bridge, Cursor SDK) |
+| **C2: Single-goal emergent** | One seed prompt; product decides whether/how to parallelize | Deliberately unbuilt (see below) |
+
+**C1** keeps the same collision maps and oracles as Level A so a difference can
+still be attributed to "this product's agent loop under a known split," not to
+invented decomposition. On shared isolation, N vendor agents share one cwd
+(unmediated concurrent writers). On worktree tasks, each agent gets its own cwd
+from `paths.json` and the harness merges. C1 does **not** claim to measure a
+product's full orchestrator (Cursor multitask, MegaAgent CEO recruitment, etc.).
+
+We shipped a MegaAgent vendor bridge (`adapters/megaagent/`) and a Cursor C1
+adapter (`--adapter cursor`). MegaAgent early trials hit integration limits: t02
+timed out at 900s with zero file writes after CEO recruitment; t04 ran ~887s and
+~2M input tokens but the CEO ignored the RaceBench brief and recruited a Gobang
+demo team. We document those as adapter and alignment limits, not as evidence
+that MegaAgent "failed" the oracle. We do not patch MegaAgent upstream.
+
+**C2 is deliberately unbuilt.** A seed prompt without a forced split mostly
+measures whether a product's autonomous planner chooses to parallelize at all,
+closer to general SWE-bench-style capability than to coordination-mechanism
+comparison. A fair C2 would need to *induce* a split (or treat "did it
+parallelize?" as a first-class outcome separate from correctness) so a
+no-parallelize trial is a valid data point, not a failed one. That is a
+different, larger benchmark design than C1, and out of scope for this window.
 
 **MegaAgent orchestration vs RaceBench task shape.** MegaAgent's headline claim is
 dynamic org design: one CEO prompt recruits agents, decomposes work, and scales
 the team without a predefined SOP. RaceBench deliberately does the opposite. Every
 task names fixed `agent-*` roles, fixed subtask briefs, a seeded repo, and a hidden
 oracle. That keeps collision maps, calibration gates, and Level A strategy columns
-deterministic and replayable. It also means Level C on RaceBench cannot fairly
-score dynamic role allocation, adaptive upscaling/downscaling of agent count, or
-open-ended task decomposition. We are testing whether an external multi-agent
-*runtime* can edit our repo under contention and pass our oracle, not whether it
-can invent the plan from a one-line goal. Skipping MegaAgent's CEO recruit step
-(to stop Gobang-style drift) would further narrow the claim to "runtime + tools,"
-not the full paper system. We state that explicitly rather than treating Level C
-cells as comparable to Level A `git_hash` mechanism columns.
+deterministic and replayable. Level C1 on RaceBench therefore cannot fairly score
+dynamic role allocation or open-ended task decomposition; it tests whether an
+external multi-agent *runtime* can edit our repo under contention and pass our
+oracle. We state that explicitly rather than treating Level C cells as comparable
+to Level A `git_hash` mechanism columns.
 
 ### Incident: t12 worktree merge (fixed)
 
@@ -267,31 +286,27 @@ The AST union is a **benchmark merge helper**, not a production CRDT/OT integrat
 The Level A/B grid for gpt-5-mini is **shipped** in `results/grid-v1/`. What
 remains is optional extension work, not a blocker for the core comparison table.
 
-1. **Level C adapter hardening.** The MegaAgent vendor bridge runs but is not
-   production-ready: t02 timed out at 900s with no file writes; t04 burned ~2M
-   input tokens on a Gobang demo instead of the cascade repo. Concrete fixes:
-   request timeouts on upstream HTTP, stream `log.txt` to the runner terminal,
-   fail-fast when the CEO recruits off-brief agents, and optionally deterministic
-   recruit from RaceBench briefs (narrower claim, less Gobang drift). Same hygiene
-   applies to any future shell adapter.
+1. **Cursor C1 exploratory cells.** The Cursor SDK adapter (`--adapter cursor`)
+   runs one local `Agent.prompt` per fixed RaceBench brief. Live smoke on t02 /
+   t12 is useful credibility ("real product worker loops"), but cells stay off
+   the Level A comparison table and must be labeled C1 (not product orchestration).
 
-2. **Second model family.** Every committed grid cell uses gpt-5-mini. Re-running
-   the same 480-trial matrix on a stronger or cheaper model (e.g. gpt-4.1,
-   Claude, or a local open-weight model) would test whether coordination rankings
-   and FP-stall gaps hold across capability tiers. Config is a one-line model
-   change plus a new `run_id`; budget scales linearly with token use.
+2. **Claude Code C1 adapter.** Same harness-swap pattern as Cursor: N headless
+   `claude -p` (or equivalent) processes, one brief each, cwd from `paths.json`.
+   Same-pattern follow-on; not required for the core contribution.
 
-3. **Cascade at 8+ agents.** We capped concurrency at four agents for cost and
-   because `t04` and `rw_e` already stress chains at n=4 and n=3. An 8-agent
-   cascade task would probe lock thrash and notification fan-out at higher
-   parallelism, but needs new task design, calibration, and roughly 2x token
-   spend per cell. Deferred from the hackathon window; listed here as a natural
-   follow-on if budget allows.
+3. **C2 (named, unbuilt).** See above. Do not ship a half-built single-goal track
+   as a headline result; the confound is already documented.
 
-4. **Lite CRDT column.** Still deferred: overlaps `git_hash` on compose-heavy
-   tasks and would need honest `always_merge` labeling. Low priority until a
-   task suite slice isolates CRDT-specific wins without CodeCRDT-style volume
-   inflation.
+4. **Second model family.** Every committed grid cell uses gpt-5-mini. Re-running
+   the same 480-trial matrix on a stronger or cheaper model would test whether
+   coordination rankings and FP-stall gaps hold across capability tiers.
+
+5. **Cascade at 8+ agents.** Deferred for cost; `t04` / `rw_e` already stress
+   chains at n=4 and n=3.
+
+6. **Lite CRDT column.** Still deferred: overlaps `git_hash` on compose-heavy
+   tasks and would need honest `always_merge` labeling.
 
 ---
 

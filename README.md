@@ -39,12 +39,13 @@ verifier**; you bring the agent system. It reports correctness and wall clock on
 unless your adapter emits RaceBench `read` / `write` / `coord` events. Do **not** mix
 Level C cells into the Level A strategy table without filtering; they are a different axis.
 
-Tasks fix named `agent-*` roles and subtask briefs so collision maps, calibration
-gates, and cross-strategy cells stay deterministic. That means we do **not** measure
-dynamic role allocation or adaptive team sizing (e.g. MegaAgent-style CEO recruitment
-from a one-line goal). Level C tests whether an external **runtime** can edit our repo
-and pass the oracle, not open-ended task decomposition. See `writeup/writeup.md` §5
-for MegaAgent bridge limits and honesty notes.
+**C1 (harness-swap)** forces fixed RaceBench roles and briefs onto a vendor worker
+loop (what `scripted`, `shell`, `megaagent`, and `cursor` do today). **C2
+(single-goal emergent)** would give one seed prompt and let the product choose
+whether to parallelize; that mode is deliberately unbuilt (see `writeup/writeup.md`
+§5). Tasks fix named `agent-*` roles so collision maps stay deterministic; C1
+therefore measures contested edits under a known split, not open-ended
+decomposition or product orchestration.
 
 ### Level A: Built-in strategies
 
@@ -88,12 +89,18 @@ python -m runner.run_external --task t02_benign_overlap --adapter shell \
 pip install -e '.[megaagent]'
 python -m runner.run_external --task t02_benign_overlap --adapter megaagent \
   --megaagent-root /path/to/MegaAgent --out results/ext-megaagent
+
+# Cursor C1 (CURSOR_API_KEY; one Agent.prompt per fixed brief)
+pip install -e '.[cursor]'
+python -m runner.run_external --task t02_benign_overlap --adapter cursor \
+  --out results/ext-cursor
 ```
 
-Built-in adapters: `scripted`, `shell`, and a **MegaAgent vendor bridge**
-(`adapters/megaagent/`, shared isolation only). Before each trial the harness writes
-`.racebench_instructions/` (task metadata, paths, per-agent briefs). Full API and
-metrics table: [`docs/adding-an-external-runtime.md`](docs/adding-an-external-runtime.md).
+Built-in adapters: `scripted`, `shell`, **MegaAgent** (`adapters/megaagent/`,
+shared isolation only), and **Cursor** (C1 via `cursor-sdk`, shared + worktree).
+Before each trial the harness writes `.racebench_instructions/` (task metadata,
+paths, per-agent briefs). Full API and metrics table:
+[`docs/adding-an-external-runtime.md`](docs/adding-an-external-runtime.md).
 
 ## Tasks (Level B)
 

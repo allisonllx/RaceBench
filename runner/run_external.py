@@ -6,6 +6,7 @@ Examples:
       --command 'python path/to/my_agent.py'
   python -m runner.run_external --task t02_benign_overlap --adapter megaagent \\
       --megaagent-root /path/to/MegaAgent
+  python -m runner.run_external --task t02_benign_overlap --adapter cursor
 """
 from __future__ import annotations
 
@@ -40,6 +41,11 @@ def main() -> None:
         help="path to Xtra-Computing/MegaAgent clone (or set MEGAAGENT_ROOT)",
     )
     p.add_argument(
+        "--cursor-model",
+        default="composer-2.5",
+        help="Cursor SDK model id for --adapter cursor (default: composer-2.5)",
+    )
+    p.add_argument(
         "--n-agents",
         type=int,
         default=None,
@@ -59,6 +65,8 @@ def main() -> None:
         kwargs["command"] = args.command
     if args.adapter == "megaagent" and args.megaagent_root is not None:
         kwargs["megaagent_root"] = args.megaagent_root
+    if args.adapter == "cursor":
+        kwargs["model"] = args.cursor_model
     runtime = get_runtime(args.adapter, **kwargs)
 
     task = load_task(args.task)
