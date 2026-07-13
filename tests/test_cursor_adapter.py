@@ -11,10 +11,23 @@ from harness.external import ExternalContext, write_instruction_pack
 from harness.external_runtimes.cursor import (
     INSTALL_HINT,
     CursorExternalRuntime,
+    _usage_tokens,
     missing_cursor_deps,
 )
 from harness.task import load_task
 from harness.workspace import Workspace
+
+
+def test_usage_tokens_from_run_result():
+    class Usage:
+        input_tokens = 12
+        output_tokens = 3
+
+    class Result:
+        usage = Usage()
+
+    assert _usage_tokens(Result()) == (12, 3)
+    assert _usage_tokens(object()) == (0, 0)
 
 
 def _make_ctx(tmp_path: Path, task_name: str, n_agents: int | None = None):
@@ -86,6 +99,8 @@ async def test_cursor_parallel_prompts_shared_cwd(tmp_path, monkeypatch):
                 kw["agent_id"],
                 "done",
                 "",
+                100 if kw["agent_id"] == "agent-slugify" else 50,
+                20 if kw["agent_id"] == "agent-slugify" else 10,
             ),
         ) as run_one,
     ):
@@ -96,6 +111,8 @@ async def test_cursor_parallel_prompts_shared_cwd(tmp_path, monkeypatch):
         "agent-slugify": "done",
         "agent-truncate": "done",
     }
+    assert out.prompt_tokens == 150
+    assert out.completion_tokens == 30
     assert run_one.call_count == 2
     kw_by_id = {c.kwargs["agent_id"]: c.kwargs for c in run_one.call_args_list}
     assert set(kw_by_id) == {"agent-slugify", "agent-truncate"}
@@ -122,7 +139,7 @@ async def test_cursor_worktree_distinct_cwds(tmp_path, monkeypatch):
         ),
         patch(
             "harness.external_runtimes.cursor._run_one_agent",
-            side_effect=lambda **kw: (kw["agent_id"], "done", ""),
+            side_effect=lambda **kw: (kw["agent_id"], "done", "", 0, 0),
         ) as run_one,
     ):
         out = await CursorExternalRuntime().run(ctx)
@@ -146,7 +163,7 @@ async def test_cursor_timeout_marks_agents(tmp_path, monkeypatch):
         import time
 
         time.sleep(2.0)
-        return ("x", "done", "")
+        return ("x", "done", "", 0, 0)
 
     with (
         patch(

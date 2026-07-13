@@ -43,6 +43,16 @@ def _agent_brief(instruction_dir: Path, agent_id: str) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _usage_tokens(result: Any) -> tuple[int, int]:
+    """Extract (input, output) tokens from RunResult.usage if present."""
+    usage = getattr(result, "usage", None)
+    if usage is None:
+        return 0, 0
+    inp = int(getattr(usage, "input_tokens", 0) or 0)
+    out = int(getattr(usage, "output_tokens", 0) or 0)
+    return inp, out
+
+
 def _run_one_agent(
     *,
     agent_id: str,
@@ -50,8 +60,8 @@ def _run_one_agent(
     cwd: str,
     api_key: str,
     model: str,
-) -> tuple[str, str, str]:
-    """Sync SDK call (run in a worker thread). Returns (agent_id, status, message)."""
+) -> tuple[str, str, str, int, int]:
+    """Sync SDK call. Returns (agent_id, status, message, prompt_tokens, completion_tokens)."""
     from cursor_sdk import Agent, AgentOptions, CursorAgentError, LocalAgentOptions
 
     try:
@@ -68,21 +78,36 @@ def _run_one_agent(
             agent_id,
             "error",
             f"startup failed: {getattr(err, 'message', str(err))}",
+            0,
+            0,
         )
     except Exception as err:  # noqa: BLE001 — surface SDK surprises to the harness
-        return agent_id, "error", f"{type(err).__name__}: {err}"
+        return agent_id, "error", f"{type(err).__name__}: {err}", 0, 0
 
+    prompt_tok, completion_tok = _usage_tokens(result)
     status = getattr(result, "status", None)
     if status is None:
         status = "finished" if result else "error"
     status_s = str(status).lower()
     if status_s in {"finished", "done", "completed", "success"}:
-        return agent_id, "done", ""
+        return agent_id, "done", "", prompt_tok, completion_tok
     if status_s in {"error", "failed"}:
-        return agent_id, "error", f"run status={status_s}"
+        return agent_id, "error", f"run status={status_s}", prompt_tok, completion_tok
     if status_s in {"cancelled", "canceled", "timeout"}:
-        return agent_id, "timeout", f"run status={status_s}"
-    return agent_id, "error", f"unexpected status={status_s!r}"
+        return (
+            agent_id,
+            "timeout",
+            f"run status={status_s}",
+            prompt_tok,
+            completion_tok,
+        )
+    return (
+        agent_id,
+        "error",
+        f"unexpected status={status_s!r}",
+        prompt_tok,
+        completion_tok,
+    )
 
 
 @dataclass
@@ -153,7 +178,9 @@ class CursorExternalRuntime:
             agent_ids=[j[0] for j in jobs],
         )
 
-        async def _one(agent_id: str, prompt: str, cwd: str) -> tuple[str, str, str]:
+        async def _one(
+            agent_id: str, prompt: str, cwd: str
+        ) -> tuple[str, str, str, int, int]:
             return await asyncio.to_thread(
                 _run_one_agent,
                 agent_id=agent_id,
@@ -181,13 +208,17 @@ class CursorExternalRuntime:
 
         statuses: dict[str, str] = {}
         messages: list[str] = []
+        prompt_tokens = 0
+        completion_tokens = 0
         for item, (aid, _, _) in zip(results, jobs, strict=True):
             if isinstance(item, BaseException):
                 statuses[aid] = "error"
                 messages.append(f"{aid}: {type(item).__name__}: {item}")
                 continue
-            agent_id, status, msg = item
+            agent_id, status, msg, ptok, ctok = item
             statuses[agent_id] = status
+            prompt_tokens += int(ptok or 0)
+            completion_tokens += int(ctok or 0)
             if msg:
                 messages.append(f"{agent_id}: {msg}")
 
@@ -199,10 +230,14 @@ class CursorExternalRuntime:
             "external_cursor_end",
             ok=ok,
             agent_statuses=statuses,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
             message="; ".join(messages)[:1000],
         )
         return ExternalOutcome(
             ok=ok,
             agent_statuses=statuses,
             message="; ".join(messages) if messages else ("ok" if ok else "agent errors"),
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
         )
