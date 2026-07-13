@@ -1,5 +1,9 @@
 """Run a single Level C external-runtime trial (no coordination strategy grid).
 
+Resume: if the output JSONL already contains a ``trial_end`` event, the trial
+is treated as done and not re-run. Incomplete logs (file exists but no
+``trial_end``) are replaced.
+
 Examples:
   python -m runner.run_external --task t02_benign_overlap --adapter scripted
   python -m runner.run_external --task t02_benign_overlap --adapter shell \\
@@ -14,6 +18,7 @@ import argparse
 import asyncio
 from pathlib import Path
 
+from harness.events import has_trial_end, read_trial_end
 from harness.external import external_strategy_id, run_external_trial
 from harness.external_runtimes import get_runtime, list_runtimes
 from harness.task import load_task
@@ -55,6 +60,11 @@ def main() -> None:
     p.add_argument("--out", type=Path, default=Path("results/ext-smoke"))
     p.add_argument("--workdir", type=Path, default=Path(".trial_workspaces"))
     p.add_argument("--timeout", type=float, default=900.0)
+    p.add_argument(
+        "--force",
+        action="store_true",
+        help="re-run even if the output log already has trial_end",
+    )
     args = p.parse_args()
 
     if args.adapter == "shell" and not args.command.strip():
@@ -93,6 +103,21 @@ def main() -> None:
     )
     args.out.mkdir(parents=True, exist_ok=True)
     log_path = args.out / f"{task.name}__{cfg.trial_id}.jsonl"
+
+    if not args.force and has_trial_end(log_path):
+        end = read_trial_end(log_path) or {}
+        correct = bool(end.get("correct"))
+        print(
+            f"{task.name} adapter={runtime.name} skipped (trial_end present) "
+            f"correct={correct} "
+            f"oracle={end.get('oracle_passed', '?')}/{end.get('oracle_total', '?')} "
+            f"log={log_path}"
+        )
+        raise SystemExit(0 if correct else 1)
+
+    # Incomplete prior attempt: replace so EventLogger does not append.
+    if log_path.exists():
+        log_path.unlink()
 
     result = asyncio.run(run_external_trial(task, cfg, runtime, log_path))
     print(

@@ -35,6 +35,10 @@ capability (SWE-bench-like). See `writeup/writeup.md` §5.
 
 ## Quick start
 
+Resume: if the output JSONL already has a `trial_end` event, `run_external`
+skips the trial. Incomplete logs (file exists, no `trial_end`) are replaced.
+Pass `--force` to re-run a completed cell.
+
 ```bash
 # Offline scripted adapter (no API key): t02 and t12
 python -m runner.run_external --task t02_benign_overlap --adapter scripted \
