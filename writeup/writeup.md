@@ -1,10 +1,10 @@
 # RaceBench: a neutral benchmark for multi-agent coding coordination
 
 > Structured by the five judging pillars. Length is above the usual ~1k-word
-> target while we document incidents and reasoning. Numbers marked [TBD] are
-> filled from `results/grid-v1/comparison_table.md` after the grid completes.
-> Cost (USD) is derived at report time from committed `trial_end` token counts;
-> old JSONL logs do not need re-running.
+> target while we document incidents and reasoning. Headline numbers below come
+> from committed `results/grid-v1/` logs (`comparison_table*.md`, `trials.csv`).
+> Cost (USD) is derived at report time from `trial_end` token counts; old JSONL
+> logs do not need re-running.
 
 ## 1. Problem
 
@@ -104,8 +104,8 @@ by 82-189% code-volume inflation); CoAgent's full MTPO (saga inverses beyond our
 effect loggers); 8+ agents (cost). CooperBench (arXiv:2601.13295) covers the
 *communication* axis; we hold communication at zero and vary the *mechanism*.
 
-The real-model grid (`results/grid-v1/`, gpt-5-mini) covers t01-t12 + `rw_*`.
-Offline scripted tests validate mechanics on every expansion.
+The real-model grid (`results/grid-v1/`, gpt-5-mini) covers t01-t12 + four
+`rw_*` Conduit tasks. Offline scripted tests validate mechanics on every expansion.
 
 ## 3. Evidence
 
@@ -121,15 +121,24 @@ Committed under `results/smoke-*`:
 - t05 cross-file race: `ast_scope` blind (0 blocks); `ast_dep` stalls on the
   claimed def-use edge and completes after release.
 
-### Real-model grid
+### Real-model grid (complete)
 
-gpt-5-mini; 15 tasks x 6 strategies x {2,3,4} agents as gated by each task's
-`min_agents` x 5 reps (see `results/grid-v1/comparison_table*.md`). Pooled
-by-strategy correctness is roughly **0.70-0.84**.
+gpt-5-mini; **480 trials** committed under `results/grid-v1/`: 16 tasks x 6
+strategies x 5 reps, with agent count gated by each task's `min_agents` (14
+tasks at n=2, `rw_e_cascade` at n=3, `t04_cascade` at n=4). Regenerate tables
+with `python -m analysis.make_report results/grid-v1`.
+
+**Spend and pass rate.** ~**$13.56** and ~**37.7M tokens** total (under the $25 /
+40M-token guardrail). Pooled oracle pass rate **74.4%** (357/480). At n=2,
+by-strategy correctness ranges **0.64** (`ast_dep`) to **0.94** (`file_lock`).
 
 **Headline finding on t02.** `file_lock` averages **1.0 FP stall/trial** while
-`ast_scope`, `ast_dep`, and `notify` average **0**. The classifier behaves as
-designed.
+`ast_scope`, `ast_dep`, and `notify` average **0**. All six strategies pass the
+oracle on t02 (5/5 each); the signal is stall cost, not correctness. The
+classifier behaves as designed.
+
+**t12 after the worktree fix.** Post-fix cells are in the main grid (pre-fix logs
+archived). All six strategies **5/5** on `t12_split_view` at n=2.
 
 **Headline metric:** **false-positive stall rate**: coordination events between
 agents whose applied writes changed disjoint symbol sets. No prior paper reports
@@ -168,8 +177,8 @@ Cost is a first-class constraint. The runner enforces **$25 / 40M-token** with
 idempotent resume (existing logs are skipped). Every trial logs tokens on
 `trial_end`; `python -m analysis.make_report` derives USD from committed price
 tables (`run_meta.json` or `runner/config.example.yaml`: gpt-5-mini at $0.25/M
-input, $2/M output). **Committed spend to date: $5.24** (~13.6M tokens across
-207 trials; full grid projected under $25).
+input, $2/M output). **Grid-v1 spend: ~$13.56** (~37.7M tokens across **480**
+trials), under the $25 / 40M-token budget cap.
 
 Calibration gates the grid: one solo agent per task, naive strategy, >80% pass
 required before concurrency cells. Lock waits are bounded; timeouts are logged;
@@ -255,8 +264,34 @@ The AST union is a **benchmark merge helper**, not a production CRDT/OT integrat
 
 ### Next steps
 
-Finish the paid grid on t01-t12 + `rw_*` with valid t12 cells; harden Level C
-adapters (timeouts, streaming logs); second model family; cascade at 8 agents.
+The Level A/B grid for gpt-5-mini is **shipped** in `results/grid-v1/`. What
+remains is optional extension work, not a blocker for the core comparison table.
+
+1. **Level C adapter hardening.** The MegaAgent vendor bridge runs but is not
+   production-ready: t02 timed out at 900s with no file writes; t04 burned ~2M
+   input tokens on a Gobang demo instead of the cascade repo. Concrete fixes:
+   request timeouts on upstream HTTP, stream `log.txt` to the runner terminal,
+   fail-fast when the CEO recruits off-brief agents, and optionally deterministic
+   recruit from RaceBench briefs (narrower claim, less Gobang drift). Same hygiene
+   applies to any future shell adapter.
+
+2. **Second model family.** Every committed grid cell uses gpt-5-mini. Re-running
+   the same 480-trial matrix on a stronger or cheaper model (e.g. gpt-4.1,
+   Claude, or a local open-weight model) would test whether coordination rankings
+   and FP-stall gaps hold across capability tiers. Config is a one-line model
+   change plus a new `run_id`; budget scales linearly with token use.
+
+3. **Cascade at 8+ agents.** We capped concurrency at four agents for cost and
+   because `t04` and `rw_e` already stress chains at n=4 and n=3. An 8-agent
+   cascade task would probe lock thrash and notification fan-out at higher
+   parallelism, but needs new task design, calibration, and roughly 2x token
+   spend per cell. Deferred from the hackathon window; listed here as a natural
+   follow-on if budget allows.
+
+4. **Lite CRDT column.** Still deferred: overlaps `git_hash` on compose-heavy
+   tasks and would need honest `always_merge` labeling. Low priority until a
+   task suite slice isolates CRDT-specific wins without CodeCRDT-style volume
+   inflation.
 
 ---
 
