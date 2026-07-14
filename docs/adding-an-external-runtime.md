@@ -1,12 +1,18 @@
 # Adding an external runtime (Level C)
 
+Use this guide when you want RaceBench to prepare the task workspace, hand fixed
+agent briefs to another system, and run the hidden oracle afterward. This is a
+black-box runtime check. It is not an apples-to-apples strategy comparison unless
+the runtime implements the mediation protocol in
+[`external-coordination-protocol.md`](external-coordination-protocol.md).
+
 RaceBench has three plug-in levels:
 
 | Level | What plugs in | Status |
 |-------|---------------|--------|
 | **A: Strategy** | Coordination under *our* agent loop | Shipped; see [adding-a-strategy.md](adding-a-strategy.md) |
 | **B: Task** | `tasks/<name>/` repo + oracle + collision map | Shipped |
-| **C: External system** | Someone else's multi-agent product edits the workspace; RaceBench scores | **This doc** |
+| **C: External runtime** | Someone else's multi-agent product edits the workspace; RaceBench scores | **This doc** |
 
 Level C is Terminal-Bench / Harbor-inspired: the benchmark owns the **environment
 and verifier**; you bring the agent system. It measures **system + oracle**
@@ -96,7 +102,8 @@ Shell adapter env vars:
 | `RACEBENCH_TASK` | task name |
 | `RACEBENCH_TIMEOUT_S` | timeout hint |
 
-For `isolation: worktree`, edit each agent's tree from `paths.json` → `agents.<id>`.
+For `isolation: worktree`, edit each agent's tree from `paths.json` under
+`agents.<id>`.
 The harness merges into `main` before the oracle (same as Level A t12).
 
 ## Implementing a runtime

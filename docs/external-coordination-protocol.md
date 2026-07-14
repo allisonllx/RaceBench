@@ -1,5 +1,9 @@
 # External coordination protocol
 
+This document exists to prevent one common misread: a Level C adapter is not
+automatically a comparable coordination strategy. It becomes comparable only
+when RaceBench can mediate the external system's reads and write intents.
+
 RaceBench has two different extension stories:
 
 | Level | What is comparable? | What RaceBench can claim |
@@ -7,7 +11,7 @@ RaceBench has two different extension stories:
 | **A: Instrumented strategy** | Coordination mechanism | Apples-to-apples strategy metrics: correctness, tokens, stalls, false-positive stalls, read-set visibility |
 | **C: Black-box runtime** | Whole external agent system | Oracle correctness and wall clock on the same tasks |
 
-Level C is useful, but it is not an "external strategy" column by default. When
+Level C is useful, but it is not a comparable strategy column by default. When
 Cursor, MegaAgent, Claude Code, Devin, or a shell command edits the workspace
 directly, RaceBench cannot mediate every read and write. Shared-isolation C1 is
 therefore closest to Level A `naive` plus a foreign worker loop, model, and edit

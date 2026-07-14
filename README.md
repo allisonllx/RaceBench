@@ -9,6 +9,20 @@ metrics. Nobody has published the boring comparison table. RaceBench is that tab
 a fixed suite of collision-seeded coding tasks, run under interchangeable coordination
 strategies, with per-mechanism cost accounting.
 
+## Start here
+
+If you are new to the repo, use this path:
+
+1. Open the static explorer: [`results/grid-v1/report.html`](results/grid-v1/report.html)
+2. Read the practical summary: [`docs/coordination-decision-guide.md`](docs/coordination-decision-guide.md)
+3. Read the benchmark claim and limits: [`writeup/writeup.md`](writeup/writeup.md)
+4. Run validation locally:
+
+```bash
+python -m analysis.validate_logs results/grid-v1 --expect-trials 480
+python -m analysis.make_report results/grid-v1
+```
+
 ## Judge-facing artifacts
 
 - Static explorer: [`results/grid-v1/report.html`](results/grid-v1/report.html)
@@ -32,8 +46,8 @@ event logging fixed and swaps only the coordination mechanism.
 ## Extensibility
 
 RaceBench has three plug-in levels. **A and B** are the apples-to-apples axis used
-for the strategy grid. **C** is a separate experiment: score a whole external
-multi-agent product on the same tasks and oracles.
+for the strategy grid. **C** is separate: it scores a whole external multi-agent
+product on the same tasks and oracles.
 
 | Level | What you plug in | Status | Guide |
 |---|---|---|---|
@@ -41,10 +55,11 @@ multi-agent product on the same tasks and oracles.
 | **B: Task** | `tasks/<name>/` repo, collision map, hidden oracle | Shipped | `tasks/` layout below |
 | **C: External runtime** | Third-party multi-agent system edits the workspace; we score | Shipped (bridge) | [`docs/adding-an-external-runtime.md`](docs/adding-an-external-runtime.md) |
 
-Level C is Terminal-Bench / Harbor-inspired: RaceBench owns the **environment and
-verifier**; you bring the agent system. It reports correctness and wall clock only
-unless your adapter emits RaceBench `read` / `write` / `coord` events. Do **not** mix
-Level C cells into the Level A strategy table without filtering; they are a different axis.
+Level C is Terminal-Bench / Harbor-inspired. RaceBench owns the **environment and
+verifier**; you bring the agent system. Level C reports correctness and wall
+clock only unless your adapter emits RaceBench `read` / `write` / `coord` events.
+Do **not** mix Level C cells into the Level A strategy table without filtering.
+They answer a different question.
 
 **C1 (harness-swap)** forces fixed RaceBench roles and briefs onto a vendor worker
 loop (what `scripted`, `shell`, `megaagent`, and `cursor` do today). **C2
@@ -175,10 +190,12 @@ python -m runner.run_grid --config runner/config.example.yaml
 
 # validate replay logs, then regenerate tables, CI intervals, plots, and report.html
 python -m analysis.validate_logs results/grid-v1 --expect-trials 480
-python -m analysis.make_report results/<run_id>
+python -m analysis.make_report results/grid-v1
 # optional: pass the runner config that holds prices:
 # python -m analysis.make_report results/<run_id> --prices-config runner/config.example.yaml
 ```
+
+If you do not activate the virtualenv, replace `python` with `.venv/bin/python`.
 
 ## Repo layout
 

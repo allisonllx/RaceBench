@@ -4,6 +4,10 @@ This guide turns the `results/grid-v1/` evidence into practical advice for
 building multi-agent coding systems. It is not a universal ranking; RaceBench
 shows that coordination value is selective.
 
+If you only need the takeaway: use Level A results to compare coordination
+mechanisms, use Level C results only as black-box runtime checks, and keep
+`naive` in the table because some concurrent work should not coordinate.
+
 ## Use coarse locks when correctness beats parallelism
 
 `file_lock` is the safest shipped baseline on many hard clobber and ordering

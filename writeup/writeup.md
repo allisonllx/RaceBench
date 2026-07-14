@@ -5,6 +5,10 @@
 > from committed `results/grid-v1/` logs (`comparison_table*.md`, `trials.csv`).
 > Cost (USD) is derived at report time from `trial_end` token counts; old JSONL
 > logs do not need re-running.
+>
+> Reader map: Sections 1-4 make the core benchmark claim. Section 5 is the
+> honesty section: it explains why Level A is the strategy comparison, why Level
+> C is only black-box runtime scoring, and where the benchmark breaks.
 
 ## 1. Problem
 

@@ -5,6 +5,10 @@ is the only path between agents and the shared workspace for `read_file` /
 `edit_file` / `write_file`. Every trial logs a JSONL event stream; the same
 metrics pipeline runs regardless of strategy.
 
+Use this guide for Level A strategy columns. If you want to score an external
+product such as Cursor, MegaAgent, or a shell script, use
+[`adding-an-external-runtime.md`](adding-an-external-runtime.md) instead.
+
 ## Quick checklist
 
 1. Create `harness/strategies/<your_strategy>.py`
@@ -64,15 +68,15 @@ One `Strategy` instance is shared by all agents in a trial.
 | `_release(agent_id)` | optional | Drop claims/locks when an agent calls `done` |
 | `drain_notifications(agent_id)` | optional | Messages injected before the agent's next LLM turn |
 
-Public `read()` / `write()` wrappers on the base class handle event logging — call
+Public `read()` / `write()` wrappers on the base class handle event logging. Call
 the `_coordinate_*` hooks from your logic, not the disk directly (except via helpers).
 
 ### Mutations
 
 Agents emit two mutation kinds (see `Mutation` in `base.py`):
 
-- **`overwrite`** — full file replace (`write_file` tool)
-- **`replace`** — single anchored string swap (`edit_file` tool); fails with
+- **`overwrite`**: full file replace (`write_file` tool)
+- **`replace`**: single anchored string swap (`edit_file` tool); fails with
   `edit_failed` if `old_string` is not in current content
 
 Use `_apply_to_current(relpath, mutation, agent_id=...)` for atomic apply against
@@ -123,9 +127,9 @@ everyone; `agent_id` still works but is optional for disk access.
 
 | Agent tool | Goes through strategy? |
 |------------|------------------------|
-| `read_file` | **yes** — `strategy.read()` |
-| `edit_file` / `write_file` | **yes** — `strategy.write()` |
-| `glob` / `grep` / `list_files` | **no** — workspace directly |
+| `read_file` | **yes**: `strategy.read()` |
+| `edit_file` / `write_file` | **yes**: `strategy.write()` |
+| `glob` / `grep` / `list_files` | **no**: workspace directly |
 | `run_tests` / registry tools | **no** |
 
 Read-set visibility in metrics is 1.0 for `read_file` by construction. Discovery
@@ -133,7 +137,7 @@ via grep/glob is not intercepted (documented limitation).
 
 ## Testing
 
-**Offline scripted trials** — no API key:
+**Offline scripted trials**: no API key:
 
 ```python
 from harness.trial import TrialConfig, run_trial
@@ -154,10 +158,10 @@ async def test_my_strategy_on_t2(tmp_path):
     assert result.correct
 ```
 
-**Direct strategy unit test** — drive read/write without an LLM (see
+**Direct strategy unit test**: drive read/write without an LLM (see
 `tests/test_trials_scripted.py::test_ast_dep_blocks_cross_file_claim_deterministic`).
 
-**Full grid slice** — copy `runner/config.smoke.yaml`, swap in your strategy,
+**Full grid slice**: copy `runner/config.smoke.yaml`, swap in your strategy,
 run `python -m runner.run_grid --config ...`, then
 `python -m analysis.make_report results/<run_id>`.
 
@@ -166,8 +170,8 @@ run `python -m runner.run_grid --config ...`, then
 | Change | Where |
 |--------|-------|
 | New strategy | `harness/strategies/` (this doc) |
-| New task | `tasks/<name>/` — `task.yaml`, `repo/`, `oracle_tests/`, `collision_map.yaml` |
-| External multi-agent system | Level C — [adding-an-external-runtime.md](adding-an-external-runtime.md) |
+| New task | `tasks/<name>/`: `task.yaml`, `repo/`, `oracle_tests/`, `collision_map.yaml` |
+| External multi-agent system | Level C: [adding-an-external-runtime.md](adding-an-external-runtime.md) |
 | Different LLM | Implement `ModelClient` in `harness/models.py`; wire `make_model_factory` in `runner/run_grid.py` |
 | Agent tools / loop | `harness/agent.py`, `harness/tools.py` (not pluggable via config today) |
 
