@@ -9,6 +9,13 @@ metrics. Nobody has published the boring comparison table. RaceBench is that tab
 a fixed suite of collision-seeded coding tasks, run under interchangeable coordination
 strategies, with per-mechanism cost accounting.
 
+## Judge-facing artifacts
+
+- Static explorer: [`results/grid-v1/report.html`](results/grid-v1/report.html)
+  (regenerate with `python -m analysis.make_report results/grid-v1`)
+- Practical takeaways: [`docs/coordination-decision-guide.md`](docs/coordination-decision-guide.md)
+- External-runtime boundary: [`docs/external-coordination-protocol.md`](docs/external-coordination-protocol.md)
+
 ## What it measures
 
 | Metric | Why it matters |
@@ -46,6 +53,14 @@ whether to parallelize; that mode is deliberately unbuilt (see `writeup/writeup.
 §5). Tasks fix named `agent-*` roles so collision maps stay deterministic; C1
 therefore measures contested edits under a known split, not open-ended
 decomposition or product orchestration.
+
+**Purpose of C1.** RaceBench assigns the agents; the vendor does not orchestrate.
+Shared-isolation C1 is closest to Level A `naive` plus a foreign tool/loop/model
+stack. Use it as an external check that our collisions survive contact with a
+real product worker (hard tasks matter; t02-style easy cells do not). Comparing
+Level A `naive` to Cursor C1 is **harness vs harness**, not a strategy column.
+Early one-pass smokes (`results/ext-cursor/`) are documented in `writeup/writeup.md`
+§5. Details there also cover why strategy rankings stay in Level A.
 
 ### Level A: Built-in strategies
 
@@ -158,7 +173,8 @@ python -m runner.run_grid --config runner/config.example.yaml
 # optional: override concurrent trials (config default: parallel: 4)
 # python -m runner.run_grid --config runner/config.example.yaml --parallel 8
 
-# report + plots from event logs (USD derived from token counts + price table)
+# validate replay logs, then regenerate tables, CI intervals, plots, and report.html
+python -m analysis.validate_logs results/grid-v1 --expect-trials 480
 python -m analysis.make_report results/<run_id>
 # optional: pass the runner config that holds prices:
 # python -m analysis.make_report results/<run_id> --prices-config runner/config.example.yaml

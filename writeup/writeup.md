@@ -126,11 +126,15 @@ Committed under `results/smoke-*`:
 gpt-5-mini; **480 trials** committed under `results/grid-v1/`: 16 tasks x 6
 strategies x 5 reps, with agent count gated by each task's `min_agents` (14
 tasks at n=2, `rw_e_cascade` at n=3, `t04_cascade` at n=4). Regenerate tables
-with `python -m analysis.make_report results/grid-v1`.
+and the static explorer with `python -m analysis.make_report results/grid-v1`;
+validate log integrity with
+`python -m analysis.validate_logs results/grid-v1 --expect-trials 480`.
 
 **Spend and pass rate.** ~**$13.56** and ~**37.7M tokens** total (under the $25 /
 40M-token guardrail). Pooled oracle pass rate **74.4%** (357/480). At n=2,
 by-strategy correctness ranges **0.64** (`ast_dep`) to **0.94** (`file_lock`).
+The report command now also emits bootstrap confidence-interval tables and
+`results/grid-v1/report.html` for quick inspection.
 
 **Headline finding on t02.** `file_lock` averages **1.0 FP stall/trial** while
 `ast_scope`, `ast_dep`, and `notify` average **0**. All six strategies pass the
@@ -215,6 +219,55 @@ invented decomposition. On shared isolation, N vendor agents share one cwd
 from `paths.json` and the harness merges. C1 does **not** claim to measure a
 product's full orchestrator (Cursor multitask, MegaAgent CEO recruitment, etc.).
 
+**Purpose of C1 (why run it at all).** RaceBench does the split; the vendor does
+not orchestrate. Shared-isolation C1 is therefore closest to Level A `naive`
+plus a foreign worker stack (different tools, loop, and often model). That is
+still useful as an **external-validity check on the uncoordinated floor**, not as
+a coordination column:
+
+- If a hard race (e.g. hardened t01/t03) that fails under Level A `naive` also
+  fails under Cursor C1, the collision is not an artifact of our toy tool API.
+- If Cursor C1 passes where `naive` fails, the interesting claim is capability /
+  edit granularity / re-read habit, not "Cursor coordinated the agents."
+- Strategy rankings, FP stalls, and read-set metrics stay in Level A. To vary
+  the model with full visibility, swap the model under Level A; do not bolt
+  RaceBench strategies onto native Cursor tools.
+
+C1 cells are exploratory and stay off the Level A comparison table. Prefer hard
+tasks for Cursor/MegaAgent smokes; easy cells where `naive` already passes 100%
+add little signal.
+
+**Preliminary Cursor C1 smoke (`results/ext-cursor/`, n=1 per cell, rep=0).**
+One composer-2.5 pass across 16 tasks: **15/16** oracle-correct. The sole miss is
+**t03_fetch_clobber** (3/5; `fetch()` signature missing `timeout` / kwargs not
+accepted). Notable vs Level A `naive` on the same tasks (gpt-5-mini, 5 reps):
+
+| Task | Level A `naive` | Cursor C1 (1 pass) |
+|------|-----------------|---------------------|
+| `t01_stale_clobber` | 0/5 | pass (6/6) |
+| `t03_fetch_clobber` | 0/5 | fail (3/5) |
+| `rw_e_cascade` | 0/5 | pass (3/3) |
+| `t04_cascade` | 4/5 | pass (7/7) |
+
+Prompt tokens per Cursor cell are typically **~10–50×** higher than a single Level
+A trial (e.g. t02 ~93k vs ~14k; t11 ~1.08M vs ~30k), with wall clock often
+longer too. That is consistent with a heavier tool loop (more reads/edits per
+agent), not with RaceBench injecting coordination.
+
+**How to read this.** Comparing Level A `naive` to Cursor C1 is **harness vs
+harness** (our instrumented tools + gpt-5-mini vs Cursor's local agent loop +
+composer), not a new row in the strategy table. A strong Cursor pass on a cell
+where our `naive` never passes does **not** mean coordination is unnecessary in
+production; it may mean the foreign worker is better at avoiding or recovering
+from the seeded race on one try. A Cursor fail on t03 while still beating our
+`naive` rate on the same task shows the collision can still bite a stronger stack.
+
+We treat these as **exploratory external validity**, not headline evidence. The
+core contribution remains Level A/B: same harness, vary mechanism. If stronger
+agent stacks keep clearing hardened cells in one pass, that argues for **harder
+or harness-agnostic collision seeds** in a future suite revision, not for folding
+C1 into the strategy comparison.
+
 We shipped a MegaAgent vendor bridge (`adapters/megaagent/`) and a Cursor C1
 adapter (`--adapter cursor`). MegaAgent early trials hit integration limits: t02
 timed out at 900s with zero file writes after CEO recruitment; t04 ran ~887s and
@@ -285,11 +338,13 @@ The AST union is a **benchmark merge helper**, not a production CRDT/OT integrat
 
 The Level A/B grid for gpt-5-mini is **shipped** in `results/grid-v1/`. What
 remains is optional extension work, not a blocker for the core comparison table.
+The submission artifact now includes a static explorer, log validator, practical
+decision guide, and an external-coordination protocol documenting why Level C is
+black-box runtime scoring unless a product exposes mediation hooks.
 
-1. **Cursor C1 exploratory cells.** The Cursor SDK adapter (`--adapter cursor`)
-   runs one local `Agent.prompt` per fixed RaceBench brief. Live smoke on t02 /
-   t12 is useful credibility ("real product worker loops"), but cells stay off
-   the Level A comparison table and must be labeled C1 (not product orchestration).
+1. **Cursor C1 exploratory cells.** Shipped (`results/ext-cursor/`, 15/16 on one
+   pass); document as harness-vs-harness smoke, not strategy ranking. Optional:
+   more reps on t01/t03/rw_e only if budget allows.
 
 2. **Claude Code C1 adapter.** Same harness-swap pattern as Cursor: N headless
    `claude -p` (or equivalent) processes, one brief each, cwd from `paths.json`.
@@ -308,12 +363,23 @@ remains is optional extension work, not a blocker for the core comparison table.
 6. **Lite CRDT column.** Still deferred: overlaps `git_hash` on compose-heavy
    tasks and would need honest `always_merge` labeling.
 
+7. **Suite hardness vs stronger stacks.** Preliminary Cursor C1 passes on cells
+   where Level A `naive` scores 0/5 (e.g. t01, rw_e) suggest the probe suite may
+   under-challenge capable foreign worker loops; future tasks could target
+   harness-agnostic collisions or higher concurrency if we want C1 to separate stacks.
+8. **Level C adapter hardening.** The MegaAgent vendor bridge runs but is not
+   production-ready: t02 timed out at 900s with no file writes; t04 burned ~2M
+   input tokens on a Gobang demo instead of the cascade repo. Concrete fixes:
+   request timeouts on upstream HTTP, stream `log.txt` to the runner terminal,
+   fail-fast when the CEO recruits off-brief agents, and optionally deterministic
+   recruit from RaceBench briefs (narrower claim, less Gobang drift). Same hygiene
+   applies to any future shell adapter.
+
 ---
 
 *Appendix: metric definitions in `analysis/metrics.py`; collision maps in
-`tasks/*/collision_map.yaml`; replay tables via
-`python -m analysis.make_report results/<run_id>` (also emits
-`comparison_table_overall` and `comparison_table_by_strategy`). Archives:
+`tasks/*/collision_map.yaml`; replay tables, CI intervals, plots, and
+`report.html` via `python -m analysis.make_report results/<run_id>`. Archives:
 invalid t12 (`results/grid-v1/_archive_t12_pre_worktree_fix/`, calibration twin);
 truncated `rw_e` / `t04` n=2 (`results/_archive/`); v1 t01/t03 probes
 (`tasks/_archive/`, `results/_archive/t01_stale_read_v1/`,
