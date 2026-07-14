@@ -141,11 +141,14 @@ def trial_metrics(log_path: Path, prices: dict | None = None) -> dict | None:
         prompt_tokens, completion_tokens = usage_prompt, usage_completion
 
     model = start.get("model", "")
+    mode = start.get("mode", "strategy")
     return {
         "task": start["task"],
         "failure_mode": start.get("failure_mode", ""),
         "benign": benign,
         "strategy": start["strategy"],
+        "mode": mode,
+        "adapter": start.get("adapter", ""),
         "n_agents": start["n_agents"],
         "rep": start.get("rep", 0),
         "model": model,
@@ -187,6 +190,13 @@ def run_dataframe(run_dir: Path, prices: dict | None = None) -> pd.DataFrame:
             row["log"] = log.name
             rows.append(row)
     return pd.DataFrame(rows)
+
+
+def level_a_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    """Return instrumented strategy trials, excluding Level C external runs."""
+    if df.empty or "mode" not in df.columns:
+        return df.copy()
+    return df[df["mode"] != "external"].copy()
 
 
 def _round_agg(agg: pd.DataFrame) -> pd.DataFrame:

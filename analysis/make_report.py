@@ -4,6 +4,8 @@ Writes:
   - comparison_table — per (task, strategy, n_agents)
   - comparison_table_overall — across tasks, per (strategy, n_agents)
   - comparison_table_by_strategy — across tasks and n, per strategy
+  - comparison_table*_ci — bootstrap confidence intervals for key metrics
+  - report.html — static results explorer
 
 Usage:
     python -m analysis.make_report results/<run_id>
@@ -20,10 +22,13 @@ from pathlib import Path
 
 import pandas as pd
 
+from analysis.confidence import confidence_tables
+from analysis.html_report import write_html_report
 from analysis.metrics import (
     aggregate,
     aggregate_by_strategy,
     aggregate_overall,
+    level_a_dataframe,
     run_dataframe,
 )
 from analysis.plots import make_all_plots
@@ -72,9 +77,13 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     df.to_csv(out_dir / "trials.csv", index=False)
-    agg = aggregate(df)
-    overall = aggregate_overall(df)
-    by_strategy = aggregate_by_strategy(df)
+    level_a = level_a_dataframe(df)
+    external = df[df["mode"] == "external"].copy() if "mode" in df else pd.DataFrame()
+
+    agg = aggregate(level_a)
+    overall = aggregate_overall(level_a)
+    by_strategy = aggregate_by_strategy(level_a)
+    ci = confidence_tables(level_a)
 
     print("=== per task × strategy × n_agents ===")
     print(_write_table(agg, out_dir, "comparison_table"))
@@ -82,14 +91,32 @@ def main(argv: list[str] | None = None) -> int:
     print(_write_table(overall, out_dir, "comparison_table_overall"))
     print("\n=== overall (all tasks, all n) × strategy ===")
     print(_write_table(by_strategy, out_dir, "comparison_table_by_strategy"))
+    print("\n=== bootstrap confidence intervals ===")
+    for stem, table in ci.items():
+        print(f"{stem} -> {out_dir}/{stem}.csv|.md")
+        _write_table(table, out_dir, stem)
 
     total_usd = df["estimated_usd"].sum()
     total_tokens = df["total_tokens"].sum()
-    figures = make_all_plots(agg, overall=overall, by_strategy=by_strategy)
+    figures = (
+        make_all_plots(agg, overall=overall, by_strategy=by_strategy)
+        if not agg.empty else []
+    )
+    html = write_html_report(
+        out_dir=out_dir,
+        trials=df,
+        level_a_trials=level_a,
+        external_trials=external,
+        aggregate=agg,
+        overall=overall,
+        by_strategy=by_strategy,
+        by_strategy_ci=ci.get("comparison_table_by_strategy_ci"),
+    )
     print(f"\nper-trial rows: {len(df)}  ->  {out_dir}/trials.csv")
     print(f"per-task table -> {out_dir}/comparison_table.csv|.md")
     print(f"overall table  -> {out_dir}/comparison_table_overall.csv|.md")
     print(f"by-strategy    -> {out_dir}/comparison_table_by_strategy.csv|.md")
+    print(f"static explorer -> {html}")
     print(f"run cost (priced trials): ${total_usd:.2f}  ({int(total_tokens):,} tokens)")
     for f in figures:
         print(f"figure -> {f}")

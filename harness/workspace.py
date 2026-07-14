@@ -16,6 +16,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -434,7 +435,7 @@ class Workspace:
 
         def _run() -> subprocess.CompletedProcess:
             return subprocess.run(
-                ["python", "-m", "pytest", target, "-q", "--tb=line",
+                [sys.executable, "-m", "pytest", target, "-q", "--tb=line",
                  "-p", "no:cacheprovider"],
                 cwd=cwd, capture_output=True, text=True, timeout=timeout_s,
             )

@@ -30,6 +30,16 @@ writers). On worktree tasks, each agent gets its own cwd from `paths.json` and t
 harness merges. C1 does **not** measure product orchestration (Cursor multitask,
 MegaAgent CEO recruitment, Claude Code subagent dispatch).
 
+**Purpose.** C1 is an external-validity check on the **uncoordinated** floor
+(closest to Level A `naive` + foreign tools/loop/model), not a new coordination
+mechanism. Prefer hard tasks for smokes; keep cells off the Level A strategy table.
+Strategy rankings with full visibility belong in Level A (including a second-model
+rerun). Product-owned parallelization is C2 (unbuilt). See `writeup/writeup.md` §5.
+
+If an external product wants to appear as a true strategy column, it must expose
+a mediation boundary around every read and write intent. See
+[`external-coordination-protocol.md`](external-coordination-protocol.md).
+
 C2 is unbuilt on purpose: without an induced split it mostly measures single-agent
 capability (SWE-bench-like). See `writeup/writeup.md` §5.
 
@@ -196,6 +206,7 @@ Level A `git_hash` remains the apples-to-apples **mechanism-class** column.
 ## Related
 
 - Level A strategies: [adding-a-strategy.md](adding-a-strategy.md)
+- External strategy boundary: [external-coordination-protocol.md](external-coordination-protocol.md)
 - Scoring helpers: `harness/trial.py` (`merge_and_score`, `finish_trial`)
 - External API: `harness/external.py`
 - MegaAgent bridge: `adapters/megaagent/`

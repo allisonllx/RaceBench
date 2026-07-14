@@ -1,7 +1,13 @@
 """Comparison plots from the aggregated metric table."""
 from __future__ import annotations
 
+import os
+import tempfile
 from pathlib import Path
+
+_CACHE_DIR = Path(tempfile.gettempdir()) / "racebench-cache"
+os.environ.setdefault("XDG_CACHE_HOME", str(_CACHE_DIR))
+os.environ.setdefault("MPLCONFIGDIR", str(_CACHE_DIR / "matplotlib"))
 
 import matplotlib
 

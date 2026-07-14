@@ -13,7 +13,9 @@ from __future__ import annotations
 
 import asyncio
 import os
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 
 from harness.external import ExternalContext, ExternalOutcome
 
@@ -36,6 +38,9 @@ class ShellExternalRuntime:
         env["RACEBENCH_ROOT"] = str(ctx.workspace.root)
         env["RACEBENCH_TASK"] = ctx.task.name
         env["RACEBENCH_TIMEOUT_S"] = str(int(ctx.timeout_s))
+        env["PATH"] = (
+            f"{Path(sys.executable).parent}{os.pathsep}{env.get('PATH', '')}"
+        )
 
         ctx.log.log("external_shell_start", command=self.command)
         proc = await asyncio.create_subprocess_shell(
