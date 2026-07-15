@@ -2,12 +2,11 @@
 
 **A neutral, reproducible benchmark for multi-agent coding coordination strategies.**
 
-Every published coordination mechanism for parallel LLM coding agents (CRDT merging
-via CodeCRDT, git-hash optimistic concurrency via MegaAgent, notification-based advisory
-control via CoAgent) is evaluated by its own authors, on its own task suite, with its own
-metrics. Nobody has published the boring comparison table. RaceBench is that table:
-a fixed suite of collision-seeded coding tasks, run under interchangeable coordination
-strategies, with per-mechanism cost accounting.
+Parallel LLM coding agents are a shipping product category, but every proposed
+coordination mechanism is still evaluated by its own authors, on its own task
+suite, with its own metrics. Nobody has published the neutral comparison table.
+RaceBench is that table: a fixed suite of collision-seeded coding tasks, run
+under interchangeable coordination strategies, with per-mechanism cost accounting.
 
 ## Start here
 
@@ -62,18 +61,19 @@ Do **not** mix Level C cells into the Level A strategy table without filtering.
 They answer a different question.
 
 **C1 (harness-swap)** forces fixed RaceBench roles and briefs onto a vendor worker
-loop (what `scripted`, `shell`, `megaagent`, and `cursor` do today). **C2
+loop (what `megaagent` and `cursor` do today). **C2
 (single-goal emergent)** would give one seed prompt and let the product choose
 whether to parallelize; that mode is deliberately unbuilt (see `writeup/writeup.md`
-§5). Tasks fix named `agent-*` roles so collision maps stay deterministic; C1
-therefore measures contested edits under a known split, not open-ended
+§5). Note that tasks fix named `agent-*` roles so collision maps stay deterministic; C1 therefore measures contested edits under a known split, not open-ended
 decomposition or product orchestration.
 
-**Purpose of C1.** RaceBench assigns the agents; the vendor does not orchestrate.
-Shared-isolation C1 is closest to Level A `naive` plus a foreign tool/loop/model
-stack. Use it as an external check that our collisions survive contact with a
-real product worker (hard tasks matter; t02-style easy cells do not). Comparing
-Level A `naive` to Cursor C1 is **harness vs harness**, not a strategy column.
+**Purpose of C1.** RaceBench fixes who does what; the vendor runs each brief with
+its own tools and does not use our coordination layer. That is closest to Level A
+`naive`, but with a real product worker stack (e.g. Cursor + composer) instead of
+our harness. C1 answers a narrow question: on the same tasks and splits, do
+seeded races still show up when a shipping agent edits the repo, or were failures
+mostly due to our toy tool API? Treat those numbers as **harness vs
+harness**, not as a strategy ranking.
 Early one-pass smokes (`results/ext-cursor/`) are documented in `writeup/writeup.md`
 §5. Details there also cover why strategy rankings stay in Level A.
 
@@ -90,7 +90,7 @@ systems.
 4. `ast_scope`: symbol-level write claims via Python AST diff (Grit/Phantom/Weave-style,
    see prior art below): two agents editing disjoint functions in the same file never stall.
 5. `ast_dep`: `ast_scope` plus a workspace import/use dependency graph: stalls when a
-   write races a claimed cross-file definition or use-site (sees t04/t05/t07; keeps t02 silent).
+   write races a claimed cross-file definition or use-site.
 6. `notify`: CoAgent-lite advisory notifications: writes land immediately; agents whose
    read set intersects a landed write get a notice injected into context and self-judge.
 
