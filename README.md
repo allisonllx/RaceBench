@@ -1,33 +1,30 @@
-# RaceBench
-
-**A neutral, reproducible benchmark for multi-agent coding coordination strategies.**
-
-Parallel LLM coding agents are a shipping product category, but every proposed
-coordination mechanism is still evaluated by its own authors, on its own task
-suite, with its own metrics. Nobody has published the neutral comparison table.
-RaceBench is that table: a fixed suite of collision-seeded coding tasks, run
-under interchangeable coordination strategies, with per-mechanism cost accounting.
+<div align="center">
+  <h1>RaceBench</h1>
+  <p><strong>A neutral, reproducible benchmark for multi-agent coding coordination strategies.</strong></p>
+  <p>
+    Parallel LLM coding agents are a shipping product category, but every proposed
+    coordination mechanism is still evaluated by its own authors, on its own task
+    suite, with its own metrics. Nobody has published the neutral comparison table.
+    RaceBench is that table: a fixed suite of collision-seeded coding tasks, run
+    under interchangeable coordination strategies, with per-mechanism cost accounting.
+  </p>
+</div>
 
 ## Start here
 
 If you are new to the repo, use this path:
 
 1. Open the static explorer: [`results/grid-v1/report.html`](results/grid-v1/report.html)
-2. Read the practical summary: [`docs/coordination-decision-guide.md`](docs/coordination-decision-guide.md)
-3. Read the benchmark claim and limits: [`writeup/writeup.md`](writeup/writeup.md)
-4. Run validation locally:
+   (regenerate with `python -m analysis.make_report results/grid-v1`)
+2. Read the practical takeaways: [`docs/coordination-decision-guide.md`](docs/coordination-decision-guide.md)
+3. Read the external-runtime boundary: [`docs/external-coordination-protocol.md`](docs/external-coordination-protocol.md)
+4. Read the benchmark claim and limits: [`writeup/writeup.md`](writeup/writeup.md)
+5. Run validation locally:
 
 ```bash
 python -m analysis.validate_logs results/grid-v1 --expect-trials 480
 python -m analysis.make_report results/grid-v1
 ```
-
-## Judge-facing artifacts
-
-- Static explorer: [`results/grid-v1/report.html`](results/grid-v1/report.html)
-  (regenerate with `python -m analysis.make_report results/grid-v1`)
-- Practical takeaways: [`docs/coordination-decision-guide.md`](docs/coordination-decision-guide.md)
-- External-runtime boundary: [`docs/external-coordination-protocol.md`](docs/external-coordination-protocol.md)
 
 ## What it measures
 
