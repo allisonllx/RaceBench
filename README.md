@@ -5,10 +5,14 @@
     Parallel LLM coding agents are a shipping product category, but every proposed
     coordination mechanism is still evaluated by its own authors, on its own task
     suite, with its own metrics. Nobody has published the neutral comparison table.
+  </p>
+  <p>
     RaceBench is that table: a fixed suite of collision-seeded coding tasks, run
     under interchangeable coordination strategies, with per-mechanism cost accounting.
   </p>
 </div>
+
+---
 
 ## Start here
 
