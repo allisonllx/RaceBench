@@ -142,6 +142,8 @@ def test_html_report_contains_labels_and_sections(tmp_path):
     assert "strategyChart" in html
     assert "donutChart" in html
     assert "heatmapChart" in html
+    assert "heatmapMeta" in html
+    assert "heatColorForScore" in html
     assert "metricSelect" in html
     assert "Clear filters" in html
     assert "Task x Strategy Grid" in html

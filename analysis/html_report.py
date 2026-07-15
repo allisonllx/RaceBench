@@ -270,8 +270,8 @@ def write_html_report(
       </div>`;
     }
 
-    function heatColor(rate) {
-      const value = Math.max(0, Math.min(1, rate));
+    function heatColorForScore(score) {
+      const value = Math.max(0, Math.min(1, score));
       if (value >= 0.95) return "#15803d";
       if (value >= 0.8) return "#84a21f";
       if (value >= 0.6) return "#b7791f";
@@ -279,15 +279,30 @@ def write_html_report(
       if (value >= 0.2) return "#ea580c";
       return "#b91c1c";
     }
+    function heatScore(row, metric, values) {
+      const value = metricValue(row, metric);
+      if (metric === "correct_rate") return toNumber(row.correct_rate);
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      if (max === min) return 1;
+      const normalized = (value - min) / (max - min);
+      return metricConfig[metric].higherBetter ? normalized : 1 - normalized;
+    }
     function renderHeatmap(rows) {
       const target = document.getElementById("heatmapChart");
+      const meta = document.getElementById("heatmapMeta");
+      const metric = filters.metric.value;
+      const config = metricConfig[metric];
       const agg = summarize(rows, ["task", "strategy", "n_agents"]);
       const tasks = uniq(agg.map(row => row.task));
       const strategies = uniq(agg.map(row => row.strategy));
       if (!agg.length) {
+        meta.textContent = "No cells for this view.";
         target.innerHTML = '<div class="empty">No heatmap cells for this view.</div>';
         return;
       }
+      const metricValues = agg.map(row => metricValue(row, metric));
+      meta.textContent = `${config.label}; ${config.higherBetter ? "higher" : "lower"} is better. Click a cell to filter.`;
       const byCell = new Map(agg.map(row => [`${row.task}|||${row.strategy}`, row]));
       const header = `<tr><th class="task-head">task</th>${strategies.map(strategy => `<th>${esc(strategy)}</th>`).join("")}</tr>`;
       const body = tasks.map((task, rowIndex) => `<tr>
@@ -295,10 +310,11 @@ def write_html_report(
         ${strategies.map((strategy, colIndex) => {
           const row = byCell.get(`${task}|||${strategy}`);
           if (!row) return '<td><button type="button" class="heat-button empty" tabindex="-1">n/a</button></td>';
-          const rate = toNumber(row.correct_rate);
-          const title = `${task} / ${strategy}: ${fmt(rate * 100, 0)}% correct across ${row.trials} trial(s)`;
+          const score = heatScore(row, metric, metricValues);
+          const label = metricLabel(row, metric);
+          const title = `${task} / ${strategy}: ${label} ${config.label.toLowerCase()} across ${row.trials} trial(s)`;
           return `<td><button type="button" class="heat-button" data-task="${attr(task)}" data-strategy="${attr(strategy)}"
-            title="${attr(title)}" style="background:${heatColor(rate)};--delay:${(rowIndex + colIndex) * 18}ms">${fmt(rate * 100, 0)}%</button></td>`;
+            title="${attr(title)}" style="background:${heatColorForScore(score)};--delay:${(rowIndex + colIndex) * 18}ms">${esc(label)}</button></td>`;
         }).join("")}
       </tr>`).join("");
       target.innerHTML = `<div class="heatmap-wrap"><table class="heatmap"><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
@@ -682,7 +698,7 @@ def write_html_report(
       <article class="chart-card wide">
         <div class="chart-head">
           <span class="chart-title">Task x Strategy Heatmap</span>
-          <span class="chart-meta">Click a cell to filter.</span>
+          <span class="chart-meta" id="heatmapMeta">Click a cell to filter.</span>
         </div>
         <div id="heatmapChart"></div>
       </article>
