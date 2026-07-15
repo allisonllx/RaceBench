@@ -65,7 +65,8 @@ def write_html_report(
     payload = json.dumps(all_data, ensure_ascii=False)
 
     card_html = "\n".join(
-        f'<div class="card"><span>{escape(label)}</span><strong>{escape(value)}</strong></div>'
+        f'<div class="metric"><span class="metric-label">{escape(label)}</span>'
+        f'<strong class="metric-value">{escape(value)}</strong></div>'
         for label, value in cards.items()
     )
     external_note = (
@@ -272,12 +273,15 @@ def write_html_report(
 
     function heatColorForScore(score) {
       const value = Math.max(0, Math.min(1, score));
-      if (value >= 0.95) return "#15803d";
-      if (value >= 0.8) return "#84a21f";
-      if (value >= 0.6) return "#b7791f";
-      if (value >= 0.4) return "#e7a93a";
-      if (value >= 0.2) return "#ea580c";
-      return "#b91c1c";
+      if (value >= 0.95) return "#0f766e";
+      if (value >= 0.8) return "#2a9d8f";
+      if (value >= 0.6) return "#d4a017";
+      if (value >= 0.4) return "#e07a2f";
+      if (value >= 0.2) return "#d94b3b";
+      return "#b42318";
+    }
+    function heatTextColor(score) {
+      return score >= 0.55 && score < 0.85 ? "#1c1917" : "#fff";
     }
     function heatScore(row, metric, values) {
       const value = metricValue(row, metric);
@@ -314,7 +318,7 @@ def write_html_report(
           const label = metricLabel(row, metric);
           const title = `${task} / ${strategy}: ${label} ${config.label.toLowerCase()} across ${row.trials} trial(s)`;
           return `<td><button type="button" class="heat-button" data-task="${attr(task)}" data-strategy="${attr(strategy)}"
-            title="${attr(title)}" style="background:${heatColorForScore(score)};--delay:${(rowIndex + colIndex) * 18}ms">${esc(label)}</button></td>`;
+            title="${attr(title)}" style="background:${heatColorForScore(score)};color:${heatTextColor(score)};--delay:${(rowIndex + colIndex) * 18}ms">${esc(label)}</button></td>`;
         }).join("")}
       </tr>`).join("");
       target.innerHTML = `<div class="heatmap-wrap"><table class="heatmap"><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
@@ -393,119 +397,338 @@ def write_html_report(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RaceBench Results Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {{
       color-scheme: light;
-      --bg: #f7f8fb;
-      --ink: #172033;
-      --muted: #5e6a7d;
-      --line: #d8dee9;
+      --bg: #e8eaef;
+      --bg-soft: #f3f4f7;
+      --ink: #12151c;
+      --ink-soft: #3a4252;
+      --muted: #6a7385;
+      --line: #d0d5de;
+      --line-strong: #b6bdc9;
       --panel: #ffffff;
-      --accent: #2864d8;
-      --good: #0f7b4f;
-      --warn: #9a5b00;
-      --bad: #b33939;
-      --chart-a: #2864d8;
-      --chart-b: #6b5bd6;
+      --accent: #0f766e;
+      --accent-ink: #0b5f59;
+      --accent-soft: #d9f3ef;
+      --good: #047857;
+      --warn: #b45309;
+      --bad: #be123c;
+      --chart: #0f766e;
+      --header: #10141b;
+      --header-ink: #f4f5f7;
+      --header-muted: #9aa3b2;
+      --radius: 6px;
+      --shadow: 0 1px 0 rgb(16 20 27 / 4%), 0 8px 24px rgb(16 20 27 / 5%);
+      --font-sans: "Outfit", "Avenir Next", "Segoe UI", sans-serif;
+      --font-mono: "IBM Plex Mono", "SFMono-Regular", ui-monospace, monospace;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
     }}
     * {{ box-sizing: border-box; }}
+    html {{ scroll-behavior: smooth; }}
     body {{
       margin: 0;
-      font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font: 14.5px/1.5 var(--font-sans);
       color: var(--ink);
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 1px 1px, rgb(16 20 27 / 7%) 1px, transparent 0) 0 0 / 22px 22px,
+        linear-gradient(180deg, #eceef3 0%, var(--bg) 40%, #e4e7ed 100%);
+      min-height: 100vh;
     }}
+    code, .mono {{ font-family: var(--font-mono); font-size: 0.92em; }}
     header {{
-      padding: 28px 32px 20px;
-      border-bottom: 1px solid var(--line);
-      background: var(--panel);
+      position: relative;
+      overflow: hidden;
+      padding: 36px 32px 30px;
+      color: var(--header-ink);
+      background:
+        linear-gradient(135deg, rgb(15 118 110 / 18%) 0%, transparent 42%),
+        linear-gradient(180deg, #161b24 0%, var(--header) 100%);
+      border-bottom: 1px solid rgb(255 255 255 / 8%);
+      animation: riseIn 700ms var(--ease) both;
     }}
-    main {{ max-width: 1280px; margin: 0 auto; padding: 24px 24px 48px; }}
-    h1 {{ margin: 0 0 8px; font-size: 28px; letter-spacing: 0; }}
-    h2 {{ margin: 28px 0 12px; font-size: 18px; letter-spacing: 0; }}
-    p {{ margin: 0; color: var(--muted); }}
-    .pills {{ display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }}
-    .pill {{
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 5px 10px;
-      background: #f9fafc;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 12px;
+    header::before {{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent 47px,
+          rgb(255 255 255 / 3.5%) 47px,
+          rgb(255 255 255 / 3.5%) 48px
+        );
+      pointer-events: none;
+      mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
     }}
-    .pill.good {{ color: var(--good); border-color: #b7dccd; background: #eefaf5; }}
-    .pill.warn {{ color: var(--warn); border-color: #ead09b; background: #fff8e8; }}
-    .cards {{
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    .header-inner {{
+      position: relative;
+      max-width: 1180px;
+      margin: 0 auto;
+    }}
+    .brand-row {{
+      display: flex;
+      align-items: center;
       gap: 12px;
-      margin: 20px 0;
+      margin-bottom: 18px;
     }}
-    .card {{
+    .mark {{
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      background: linear-gradient(145deg, #14b8a6, #0f766e 55%, #115e59);
+      box-shadow: inset 0 0 0 1px rgb(255 255 255 / 18%);
+      position: relative;
+    }}
+    .mark::after {{
+      content: "";
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      top: 12px;
+      height: 2px;
+      background: rgb(255 255 255 / 85%);
+      box-shadow: 0 -4px 0 rgb(255 255 255 / 55%), 0 4px 0 rgb(255 255 255 / 55%);
+    }}
+    .brand {{
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #5eead4;
+    }}
+    h1 {{
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      font-weight: 700;
+    }}
+    .lede {{
+      margin: 0;
+      max-width: 52rem;
+      color: var(--header-muted);
+      font-size: 15px;
+    }}
+    .lede code {{
+      color: #d1d5db;
+      background: rgb(255 255 255 / 6%);
+      border: 1px solid rgb(255 255 255 / 8%);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }}
+    .tags {{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }}
+    .tag {{
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid rgb(255 255 255 / 12%);
+      border-radius: 4px;
+      padding: 5px 10px;
+      background: rgb(255 255 255 / 4%);
+      color: #c5ccd8;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }}
+    .tag::before {{
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 1px;
+      background: currentColor;
+      opacity: 0.85;
+    }}
+    .tag.good {{ color: #5eead4; }}
+    .tag.warn {{ color: #fbbf24; }}
+    main {{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 24px 64px;
+      animation: riseIn 800ms var(--ease) both;
+      animation-delay: 80ms;
+    }}
+    .section-label {{
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 34px 0 12px;
+    }}
+    .section-label:first-of-type {{ margin-top: 8px; }}
+    h2 {{
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      font-weight: 600;
+    }}
+    .section-kicker {{
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }}
+    .metrics {{
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 0;
+      margin: 0 0 18px;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 14px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
     }}
-    .card span {{ display: block; color: var(--muted); font-size: 12px; }}
-    .card strong {{ display: block; margin-top: 4px; font-size: 22px; }}
+    .metric {{
+      padding: 16px 18px;
+      border-right: 1px solid var(--line);
+      animation: fadeUp 620ms var(--ease) both;
+    }}
+    .metric:last-child {{ border-right: 0; }}
+    .metric:nth-child(1) {{ animation-delay: 40ms; }}
+    .metric:nth-child(2) {{ animation-delay: 90ms; }}
+    .metric:nth-child(3) {{ animation-delay: 140ms; }}
+    .metric:nth-child(4) {{ animation-delay: 190ms; }}
+    .metric:nth-child(5) {{ animation-delay: 240ms; }}
+    .metric:nth-child(6) {{ animation-delay: 290ms; }}
+    .metric-label {{
+      display: block;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }}
+    .metric-value {{
+      display: block;
+      margin-top: 8px;
+      font-size: 26px;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }}
+    .note {{
+      margin: 0 0 18px;
+      padding: 14px 16px;
+      border-left: 3px solid var(--accent);
+      background: var(--bg-soft);
+      color: var(--ink-soft);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }}
+    .note strong {{ color: var(--ink); }}
     .filters {{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 12px;
+      align-items: end;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: var(--radius);
       padding: 14px;
-      margin: 18px 0;
+      margin: 0 0 8px;
+      box-shadow: var(--shadow);
     }}
-    label {{ display: grid; gap: 5px; color: var(--muted); font-size: 12px; font-weight: 700; }}
+    label {{
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }}
     select, input {{
       border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 8px 9px;
-      font: inherit;
-      background: #fff;
+      border-radius: 5px;
+      padding: 9px 10px;
+      font: 500 13px/1.3 var(--font-sans);
+      background: var(--bg-soft);
       color: var(--ink);
       min-width: 0;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }}
+    select:hover, input:hover {{ border-color: var(--line-strong); }}
+    select:focus, input:focus {{
+      outline: none;
+      border-color: var(--accent);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgb(15 118 110 / 16%);
     }}
     button {{
       border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 8px 10px;
-      font: inherit;
-      font-weight: 700;
+      border-radius: 5px;
+      padding: 9px 12px;
+      font: 600 13px/1.2 var(--font-sans);
       color: var(--ink);
       background: #fff;
       cursor: pointer;
+      transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease;
     }}
-    button:hover {{ border-color: var(--accent); color: var(--accent); }}
-    .clear-btn {{ align-self: end; min-height: 38px; }}
+    button:hover {{
+      border-color: var(--accent);
+      color: var(--accent-ink);
+      background: var(--accent-soft);
+    }}
+    button:active {{ transform: translateY(1px); }}
+    .clear-btn {{
+      min-height: 38px;
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }}
+    .clear-btn:hover {{
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }}
     .dashboard {{
       display: grid;
-      grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+      grid-template-columns: minmax(0, 1.3fr) minmax(250px, 0.7fr);
       gap: 14px;
-      margin: 12px 0 22px;
+      margin: 0 0 10px;
     }}
     .chart-card {{
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 14px;
+      border-radius: var(--radius);
+      padding: 16px;
       min-width: 0;
+      box-shadow: var(--shadow);
+      animation: fadeUp 700ms var(--ease) both;
     }}
-    .chart-card.wide {{ grid-column: 1 / -1; }}
+    .chart-card.wide {{ grid-column: 1 / -1; animation-delay: 120ms; }}
     .chart-head {{
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
     }}
-    .chart-title {{ font-weight: 800; }}
-    .chart-meta {{ color: var(--muted); font-size: 12px; }}
-    .bar-list {{ display: grid; gap: 8px; }}
+    .chart-title {{
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }}
+    .chart-meta {{
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }}
+    .bar-list {{ display: grid; gap: 10px; }}
     .bar-row {{
       display: grid;
       grid-template-columns: minmax(90px, 150px) minmax(140px, 1fr) 72px;
@@ -513,26 +736,34 @@ def write_html_report(
       align-items: center;
       width: 100%;
       border: 0;
-      padding: 0;
+      padding: 4px 0;
       text-align: left;
       background: transparent;
       color: var(--ink);
-      font-weight: 600;
+      font-weight: 550;
+      border-radius: 4px;
     }}
-    .bar-row:hover {{ color: var(--accent); }}
-    .bar-track {{
-      height: 14px;
-      border-radius: 999px;
+    .bar-row:hover {{ color: var(--accent-ink); background: transparent; }}
+    .bar-label {{
+      font-family: var(--font-mono);
+      font-size: 12px;
       overflow: hidden;
-      background: #edf1f6;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+    .bar-track {{
+      height: 8px;
+      border-radius: 2px;
+      overflow: hidden;
+      background: #e4e7ee;
     }}
     .bar-fill {{
       display: block;
       height: 100%;
       border-radius: inherit;
-      background: linear-gradient(90deg, var(--chart-a), var(--chart-b));
+      background: var(--chart);
       transform-origin: left center;
-      animation: growBar 650ms ease-out both;
+      animation: growBar 700ms var(--ease) both;
       animation-delay: var(--delay, 0ms);
     }}
     @keyframes growBar {{
@@ -542,28 +773,30 @@ def write_html_report(
     .bar-value {{
       color: var(--muted);
       text-align: right;
+      font-family: var(--font-mono);
+      font-size: 12px;
       font-variant-numeric: tabular-nums;
-      font-weight: 700;
+      font-weight: 500;
     }}
     .donut-layout {{
       display: grid;
-      grid-template-columns: 160px 1fr;
-      gap: 14px;
+      grid-template-columns: 150px 1fr;
+      gap: 16px;
       align-items: center;
     }}
-    .donut-wrap {{ position: relative; width: 160px; height: 160px; }}
-    .donut {{ width: 160px; height: 160px; overflow: visible; }}
+    .donut-wrap {{ position: relative; width: 150px; height: 150px; }}
+    .donut {{ width: 150px; height: 150px; overflow: visible; }}
     .donut circle {{
       fill: none;
-      stroke-width: 4.2;
+      stroke-width: 3.4;
       transform: rotate(-90deg);
       transform-origin: 18px 18px;
     }}
-    .donut-bg {{ stroke: #ead3d3; }}
+    .donut-bg {{ stroke: #e7d4d8; }}
     .donut-slice {{
-      stroke: var(--good);
-      stroke-linecap: round;
-      animation: drawDonut 900ms ease-out both;
+      stroke: var(--accent);
+      stroke-linecap: butt;
+      animation: drawDonut 900ms var(--ease) both;
     }}
     @keyframes drawDonut {{
       from {{ stroke-dashoffset: 100; }}
@@ -571,7 +804,7 @@ def write_html_report(
     }}
     .donut-hole {{
       position: absolute;
-      inset: 38px;
+      inset: 34px;
       display: grid;
       place-content: center;
       text-align: center;
@@ -579,84 +812,187 @@ def write_html_report(
       background: var(--panel);
       border: 1px solid var(--line);
     }}
-    .donut-hole strong {{ display: block; font-size: 24px; }}
-    .donut-hole span {{ display: block; color: var(--muted); font-size: 12px; }}
-    .legend {{ display: grid; gap: 8px; color: var(--muted); }}
-    .legend-row {{ display: flex; align-items: center; gap: 8px; }}
-    .swatch {{ width: 12px; height: 12px; border-radius: 3px; background: var(--good); }}
-    .swatch.bad {{ background: #ead3d3; }}
+    .donut-hole strong {{
+      display: block;
+      font-size: 26px;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+    }}
+    .donut-hole span {{
+      display: block;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }}
+    .legend {{ display: grid; gap: 10px; color: var(--ink-soft); }}
+    .legend-row {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }}
+    .swatch {{
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: var(--accent);
+    }}
+    .swatch.bad {{ background: #e7d4d8; }}
     .heatmap-wrap {{ overflow-x: auto; }}
-    .heatmap {{ width: 100%; border-collapse: separate; border-spacing: 4px; min-width: 760px; }}
+    .heatmap {{
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 5px;
+      min-width: 760px;
+    }}
     .heatmap th, .heatmap td {{ border: 0; padding: 0; text-align: center; }}
-    .heatmap th {{ background: transparent; color: var(--muted); font-size: 11px; }}
+    .heatmap th {{
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+    }}
     .heatmap .task-head {{
       width: 190px;
       text-align: left;
       padding-right: 8px;
       font-size: 12px;
+      color: var(--ink-soft);
     }}
     .heat-button {{
       width: 100%;
       min-width: 74px;
-      height: 34px;
+      height: 36px;
       border: 0;
-      border-radius: 6px;
+      border-radius: 4px;
       color: #fff;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
       font-variant-numeric: tabular-nums;
-      box-shadow: inset 0 0 0 1px rgb(255 255 255 / 32%);
-      animation: fadeCell 520ms ease-out both;
+      box-shadow: inset 0 0 0 1px rgb(255 255 255 / 22%);
+      animation: fadeCell 520ms var(--ease) both;
       animation-delay: var(--delay, 0ms);
+    }}
+    .heat-button:hover:not(.empty) {{
+      filter: brightness(1.06);
+      transform: translateY(-1px);
     }}
     .heat-button.empty {{
       color: var(--muted);
-      background: #edf1f6;
+      background: #e8ebf1;
       cursor: default;
+      box-shadow: none;
     }}
     @keyframes fadeCell {{
       from {{ opacity: 0; transform: scale(0.96); }}
       to {{ opacity: 1; transform: scale(1); }}
     }}
+    @keyframes fadeUp {{
+      from {{ opacity: 0; transform: translateY(8px); }}
+      to {{ opacity: 1; transform: translateY(0); }}
+    }}
+    @keyframes riseIn {{
+      from {{ opacity: 0; transform: translateY(12px); }}
+      to {{ opacity: 1; transform: translateY(0); }}
+    }}
     .table-wrap {{
       overflow-x: auto;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }}
     table {{ width: 100%; border-collapse: collapse; min-width: 760px; }}
-    th, td {{ padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; }}
-    th {{ background: #f3f5f9; font-size: 12px; color: var(--muted); white-space: nowrap; }}
-    td.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
-    tr:last-child td {{ border-bottom: 0; }}
-    a {{ color: var(--accent); text-decoration: none; }}
-    a:hover {{ text-decoration: underline; }}
-    .note {{
-      margin: 10px 0 14px;
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--muted);
+    th, td {{
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
     }}
-    .empty {{ padding: 16px; color: var(--muted); }}
+    th {{
+      background: var(--bg-soft);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }}
+    td {{ font-size: 13.5px; }}
+    td.num {{
+      text-align: right;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 12.5px;
+    }}
+    tbody tr {{ transition: background 140ms ease; }}
+    tbody tr:hover {{ background: #f7faf9; }}
+    tr:last-child td {{ border-bottom: 0; }}
+    a {{
+      color: var(--accent-ink);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 140ms ease, color 140ms ease;
+    }}
+    a:hover {{
+      color: var(--accent);
+      border-bottom-color: rgb(15 118 110 / 35%);
+    }}
+    .empty {{
+      padding: 22px 16px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-align: center;
+    }}
+    @media (max-width: 980px) {{
+      .metrics {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
+      .metric:nth-child(3) {{ border-right: 0; }}
+      .metric:nth-child(n+4) {{ border-top: 1px solid var(--line); }}
+      .filters {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
+    }}
     @media (max-width: 820px) {{
+      header {{ padding: 28px 20px 24px; }}
+      main {{ padding: 20px 16px 48px; }}
+      .metrics {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+      .metric:nth-child(2n) {{ border-right: 0; }}
+      .metric:nth-child(n+3) {{ border-top: 1px solid var(--line); }}
+      .filters {{ grid-template-columns: 1fr 1fr; }}
+      .clear-btn {{ grid-column: 1 / -1; }}
       .dashboard {{ grid-template-columns: 1fr; }}
       .donut-layout {{ grid-template-columns: 1fr; justify-items: center; }}
       .bar-row {{ grid-template-columns: 92px minmax(90px, 1fr) 58px; }}
+    }}
+    @media (prefers-reduced-motion: reduce) {{
+      *, *::before, *::after {{
+        animation: none !important;
+        transition: none !important;
+      }}
     }}
   </style>
 </head>
 <body>
   <header>
-    <h1>RaceBench Results Explorer</h1>
-    <p>Static report generated from replayable JSONL event logs in <code>{escape(out_dir.name)}</code>.</p>
-    <div class="pills">
-      <span class="pill good">Level A strategy benchmark</span>
-      <span class="pill warn">Level C black-box runtime checks</span>
-      <span class="pill">No external dependencies</span>
+    <div class="header-inner">
+      <div class="brand-row">
+        <div class="mark" aria-hidden="true"></div>
+        <div class="brand">RaceBench</div>
+      </div>
+      <h1>Results Explorer</h1>
+      <p class="lede">Static report generated from replayable JSONL event logs in <code>{escape(out_dir.name)}</code>.</p>
+      <div class="tags">
+        <span class="tag good">Level A strategy benchmark</span>
+        <span class="tag warn">Level C black-box runtime checks</span>
+        <span class="tag">Static HTML explorer</span>
+      </div>
     </div>
   </header>
   <main>
-    <section class="cards">{card_html}</section>
+    <section class="metrics" aria-label="summary metrics">{card_html}</section>
     <section class="note">
       <strong>Level A</strong> rows compare instrumented coordination strategies under the same agent loop.
       <strong>Level C</strong> rows score external runtimes as black boxes; they are not strategy columns unless
@@ -679,7 +1015,10 @@ def write_html_report(
       <button class="clear-btn" id="clearFilters" type="button">Clear filters</button>
     </section>
 
-    <h2>Interactive Comparison</h2>
+    <div class="section-label">
+      <h2>Interactive Comparison</h2>
+      <span class="section-kicker">Live filters</span>
+    </div>
     <section class="dashboard" aria-label="interactive comparison dashboard">
       <article class="chart-card">
         <div class="chart-head">
@@ -704,16 +1043,28 @@ def write_html_report(
       </article>
     </section>
 
-    <h2>Strategy Rollup</h2>
+    <div class="section-label">
+      <h2>Strategy Rollup</h2>
+      <span class="section-kicker">Aggregates</span>
+    </div>
     <div class="table-wrap" id="strategyTable"></div>
 
-    <h2>Task x Strategy Grid</h2>
+    <div class="section-label">
+      <h2>Task x Strategy Grid</h2>
+      <span class="section-kicker">Per-cell detail</span>
+    </div>
     <div class="table-wrap" id="aggregateTable"></div>
 
-    <h2>Trial Logs</h2>
+    <div class="section-label">
+      <h2>Trial Logs</h2>
+      <span class="section-kicker">Level A</span>
+    </div>
     <div class="table-wrap" id="trialTable"></div>
 
-    <h2>Level C Black-Box Runtime Checks</h2>
+    <div class="section-label">
+      <h2>Level C Black-Box Runtime Checks</h2>
+      <span class="section-kicker">External</span>
+    </div>
     <div class="table-wrap" id="externalTable"></div>
   </main>
   <script id="racebench-data" type="application/json">{payload}</script>
