@@ -271,8 +271,13 @@ def write_html_report(
     }
 
     function heatColor(rate) {
-      const hue = Math.round(10 + Math.max(0, Math.min(1, rate)) * 130);
-      return `hsl(${hue} 66% 40%)`;
+      const value = Math.max(0, Math.min(1, rate));
+      if (value >= 0.95) return "#15803d";
+      if (value >= 0.8) return "#84a21f";
+      if (value >= 0.6) return "#b7791f";
+      if (value >= 0.4) return "#e7a93a";
+      if (value >= 0.2) return "#ea580c";
+      return "#b91c1c";
     }
     function renderHeatmap(rows) {
       const target = document.getElementById("heatmapChart");
@@ -506,6 +511,7 @@ def write_html_report(
       background: #edf1f6;
     }}
     .bar-fill {{
+      display: block;
       height: 100%;
       border-radius: inherit;
       background: linear-gradient(90deg, var(--chart-a), var(--chart-b));
