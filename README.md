@@ -10,6 +10,20 @@
     RaceBench is that table: a fixed suite of collision-seeded coding tasks, run
     under interchangeable coordination strategies, with per-mechanism cost accounting.
   </p>
+  <p>
+    <img
+      src="assets/visualisation-p1.png"
+      alt="RaceBench static results explorer with metric cards, filters, and strategy comparison charts"
+      width="860"
+    >
+  </p>
+  <p>
+    <img
+      src="assets/visualisation-p2.png"
+      alt="RaceBench task by strategy heatmap showing correctness by strategy"
+      width="860"
+    >
+  </p>
 </div>
 
 ---
