@@ -138,6 +138,12 @@ def test_html_report_contains_labels_and_sections(tmp_path):
     html = path.read_text(encoding="utf-8")
     assert "Level A strategy benchmark" in html
     assert "Level C black-box runtime checks" in html
+    assert "Interactive Comparison" in html
+    assert "strategyChart" in html
+    assert "donutChart" in html
+    assert "heatmapChart" in html
+    assert "metricSelect" in html
+    assert "Clear filters" in html
     assert "Task x Strategy Grid" in html
     assert "Trial Logs" in html
     assert "racebench-data" in html
