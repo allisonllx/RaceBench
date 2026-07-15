@@ -12,13 +12,13 @@ The novelty is not just measuring failures. It is also measuring overcoordinatio
 
 RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records read and write events, applies a coordination strategy, runs the task oracle, and writes JSONL logs plus aggregate tables. The current suite has 16 tasks and 6 Level A strategies: `naive`, `file_lock`, `notify`, `optimistic`, `ast_merge`, and `dependency_graph`.
 
-I considered three broader agent coordination approaches and ruled them out for this submission. First, an auto-merge editor that rewrites two agents' patches into one final patch. I ruled it out because a pass or fail would depend on both the coordination rule and the **merge algorithm**, so the result would be harder to interpret. Second, a full CoAgent or MTPO-style saga layer. That is valuable, but requires inverse operations and workflow semantics beyond this coding benchmark. Third, direct comparison with commercial or open-source agent products like Claude Code and Cursor. However, without shared mediation hooks (e.g. tool call usage), that mostly measures each product's hidden planner, not a reusable coordination policy.
+I considered three broader multi-agent coordination approaches and ruled them out for this submission. First, an auto-merge editor that rewrites two agents' patches into one final patch. I ruled it out because a pass or fail would depend on both the coordination rule and the **merge algorithm**, so the result would be harder to interpret. Second, a full CoAgent or MTPO-style saga layer. That is valuable, but requires inverse operations and workflow semantics beyond this coding benchmark. Third, direct comparison with commercial or open-source agent products like Claude Code and Cursor. However, without shared mediation hooks (e.g. tool call usage), that mostly measures each product's hidden planner, not a reusable coordination policy.
 
 I chose an instrumented Level A harness because it gives the cleanest attribution. The task, model, oracle, and prompts stay fixed, while only the coordination mechanism changes. I still support Level C black-box runtime checks, but I label them separately because they are correctness and wall-clock checks, not apples-to-apples strategy comparisons unless the runtime emits RaceBench-compatible events.
 
 ## 3. Evidence
 
-The main run, `results/grid-v1`, contains 480 replayable trials: 16 tasks, 6 strategies, 5 repetitions. The pooled pass rate was 74.4 percent, with about $13.56 spent and 37.7M tokens recorded. The report pipeline now includes `python -m analysis.validate_logs results/grid-v1 --expect-trials 480` for JSONL validation, required event checks, token-accounting fallbacks, and external-mode tagging. `python -m analysis.make_report results/grid-v1` generates aggregate CSV/Markdown tables, deterministic bootstrap confidence intervals, and a static `report.html` explorer.
+The main run, `results/grid-v1`, contains 480 replayable trials: 16 tasks, 6 strategies, 5 repetitions. The pooled pass rate was 74.4 percent, with about $13.56 spent and 37.7M tokens recorded. The report pipeline validates JSONL structure, required events, token-accounting fallbacks, and external-mode tagging, then generates aggregate tables, deterministic bootstrap confidence intervals, and a static HTML explorer.
 
 The baseline is intentionally simple. `naive` gives the floor for "just run both agents." On hard clobber cases, the floor collapses: in `t01_same_line` and `t03_fetch_clobber`, naive went 0/5 while `file_lock` went 5/5. That supports the modest claim that coordination is necessary for destructive overlap. On `rw_d` antidependency cases, naive went 1/5 while `notify` went 5/5, showing that lightweight notification can help when the issue is stale reads rather than simultaneous writes.
 
@@ -37,3 +37,31 @@ RaceBench is not a plug-and-play benchmark for arbitrary existing agents. A blac
 Known failure modes are specific. The AST merge strategy is still too coarse for many real refactors. The dependency graph strategy depends on simplified static observations and can miss dynamic behavior. The task suite is small enough that strategies can accidentally fit it. The benchmark mostly studies two-agent races, not larger teams. It also rewards strategies implemented inside the harness more directly than external products, which is why I separate Level A and Level C throughout the docs and report.
 
 With two more weeks, I would add a small second-model run on the highest-signal tasks, rerun the existing Cursor C1 smoke with more repetitions, add read/write intent hooks for one external adapter so it can be compared as a true strategy, and improve AST/dependency granularity. The claim would still stay modest: RaceBench is a reusable, auditable benchmark for coordination mechanisms, plus a task and oracle suite for black-box runtime checks.
+
+---
+
+## Appendix: Links And Level Guide
+
+This appendix is supporting material and is not part of the five-pillar 1000-word body.
+
+### Full Results
+
+- Static results explorer: [`results/grid-v1/report.html`](../results/grid-v1/report.html)
+- Main result logs and tables: [`results/grid-v1/`](../results/grid-v1/)
+- Cursor C1 exploratory logs: [`results/ext-cursor/`](../results/ext-cursor/)
+- Report generator code: [`analysis/html_report.py`](../analysis/html_report.py)
+
+### Reproduction Commands
+
+```bash
+python -m analysis.validate_logs results/grid-v1 --expect-trials 480
+python -m analysis.make_report results/grid-v1
+```
+
+### Level A To C
+
+- **Level A: Strategy benchmark.** Built-in RaceBench strategies run under the same harness, tools, prompts, tasks, and oracles. These are the apples-to-apples strategy comparisons. See [`docs/adding-a-strategy.md`](../docs/adding-a-strategy.md).
+- **Level B: Task and oracle suite.** The reusable task layer: seeded repos, agent briefs, collision maps, and hidden verifiers. This is what lets the same race be replayed across strategies and runtimes.
+- **Level C: External runtime checks.** External systems such as Cursor or MegaAgent edit the workspace and RaceBench scores the result. These are black-box correctness and wall-clock checks unless the adapter emits RaceBench-compatible read, write, and coordination events. See [`docs/adding-an-external-runtime.md`](../docs/adding-an-external-runtime.md) and [`docs/external-coordination-protocol.md`](../docs/external-coordination-protocol.md).
+
+In short: use Level A for strategy rankings, Level B for reusable benchmark tasks, and Level C for external-validity checks against real agent stacks.
