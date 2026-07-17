@@ -1,11 +1,11 @@
 """Generate comparison tables (CSV + markdown) and plots for a run.
 
 Writes:
-  - comparison_table — per (task, strategy, n_agents)
-  - comparison_table_overall — across tasks, per (strategy, n_agents)
-  - comparison_table_by_strategy — across tasks and n, per strategy
-  - comparison_table*_ci — bootstrap confidence intervals for key metrics
-  - report.html — static results explorer
+  - comparison_table: per (task, strategy, n_agents)
+  - comparison_table_overall: across tasks, per (strategy, n_agents)
+  - comparison_table_by_strategy: across tasks and n, per strategy
+  - comparison_table*_ci: bootstrap confidence intervals for key metrics
+  - report.html: static results explorer
 
 Usage:
     python -m analysis.make_report results/<run_id>
@@ -17,6 +17,7 @@ the price table (run_meta.json in the run dir, --prices-config, or defaults).
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -68,12 +69,20 @@ def main(argv: list[str] | None = None) -> int:
 
     # Persist prices used for this report (backfills runs started before meta).
     if args.run_dirs:
+        meta_path = out_dir / "run_meta.json"
+        existing_meta = (
+            json.loads(meta_path.read_text(encoding="utf-8"))
+            if meta_path.is_file() else {}
+        )
         write_run_meta(
             out_dir,
             run_id=out_dir.name,
             model=str(df["model"].mode().iloc[0]) if "model" in df else "",
-            mode="openai",
+            mode=str(existing_meta.get("mode", "openai")),
+            provider=existing_meta.get("provider"),
+            base_url=existing_meta.get("base_url"),
             prices=prices,
+            budget=existing_meta.get("budget"),
         )
 
     df.to_csv(out_dir / "trials.csv", index=False)

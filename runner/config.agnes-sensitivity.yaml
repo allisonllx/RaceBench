@@ -1,0 +1,50 @@
+# Level A model-sensitivity run using Agnes' OpenAI-compatible chat API.
+# This is intentionally smaller than grid-v1: it checks whether the main
+# coordination conclusions survive a second model provider before spending on
+# a full 480-trial run.
+#
+# Required environment:
+#   AGNES_API_KEY=...
+#
+# Optional override:
+#   AGNES_BASE_URL=https://apihub.agnes-ai.com/v1
+#
+# If Agnes returns model_not_found during rollout, temporarily change model and
+# prices back to agnes-2.0-flash and rerun the same command.
+#
+# Run:
+#   python -m runner.run_grid --config runner/config.agnes-sensitivity.yaml --parallel 1
+#   python -m analysis.validate_logs results/grid-v1-agnes-sensitivity --expect-trials 72
+#   python -m analysis.make_report results/grid-v1-agnes-sensitivity
+run_id: grid-v1-agnes-sensitivity
+mode: openai
+provider: agnes
+api_key_env: AGNES_API_KEY
+base_url_env: AGNES_BASE_URL
+base_url: https://apihub.agnes-ai.com/v1
+model: agnes-2.5-flash
+tasks:
+  - t01_stale_clobber
+  - t02_benign_overlap
+  - t03_fetch_clobber
+  - t04_cascade
+  - t07_rw_canary
+  - t11_irreversible
+strategies: [naive, file_lock, notify, ast_dep]
+agent_counts: [2, 3, 4]
+reps: 3
+max_turns: 40
+lock_timeout_s: 30
+trial_timeout_s: 900
+parallel: 1
+request_rpm: 12
+max_model_retries: 8
+model_retry_initial_s: 20
+model_retry_max_s: 180
+rerun_infra_errors: true
+budget:
+  max_total_tokens: 8000000
+prices:
+  # Sponsor/free quota accounting. Replace with billed rates if your Agnes key
+  # is charged per token, then regenerate the report.
+  agnes-2.5-flash: {input: 0.0, output: 0.0}

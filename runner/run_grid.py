@@ -24,7 +24,7 @@ from pathlib import Path
 import yaml
 
 from harness.env import ENV_FILE, load_env
-from harness.models import OpenAIModel, ScriptedModel
+from harness.models import AsyncRequestRateLimiter, OpenAIModel, ScriptedModel
 from harness.pricing import DEFAULT_PRICES, estimate_usd, write_run_meta
 from harness.scripts import get_script
 from harness.task import TaskAgentSpec, load_task
@@ -45,7 +45,34 @@ def load_config(path: str) -> dict:
     cfg.setdefault("parallel", 1)
     cfg.setdefault("budget", {})
     cfg.setdefault("prices", {})
+    cfg.setdefault("provider", "openai")
+    cfg.setdefault("request_rpm", None)
+    cfg.setdefault("max_model_retries", 4)
+    cfg.setdefault("model_retry_initial_s", 10.0)
+    cfg.setdefault("model_retry_max_s", 120.0)
+    cfg.setdefault("rerun_infra_errors", False)
     return cfg
+
+
+def resolve_openai_provider(cfg: dict) -> dict:
+    """Resolve credentials for OpenAI-compatible chat-completions providers."""
+    provider = str(cfg.get("provider") or "openai")
+    api_key_env = str(
+        cfg.get("api_key_env")
+        or ("OPENAI_API_KEY" if provider == "openai"
+            else f"{provider.upper()}_API_KEY")
+    )
+    base_url_env = cfg.get("base_url_env")
+    base_url = cfg.get("base_url")
+    if not base_url and base_url_env:
+        base_url = os.environ.get(str(base_url_env))
+    return {
+        "provider": provider,
+        "api_key_env": api_key_env,
+        "api_key": os.environ.get(api_key_env),
+        "base_url": base_url,
+        "base_url_env": base_url_env,
+    }
 
 
 def make_model_factory(cfg: dict, task_name: str):
@@ -56,8 +83,23 @@ def make_model_factory(cfg: dict, task_name: str):
             return ScriptedModel(script=get_script(task_name, spec.id, variant))
         return factory
 
-    def factory(spec: TaskAgentSpec):  # noqa: ARG001 — one client config for all agents
-        return OpenAIModel(model=cfg["model"])
+    provider = resolve_openai_provider(cfg)
+    rate_limiter = cfg.get("_request_rate_limiter")
+    if rate_limiter is None and cfg.get("request_rpm"):
+        rate_limiter = AsyncRequestRateLimiter(float(cfg["request_rpm"]))
+        cfg["_request_rate_limiter"] = rate_limiter
+
+    def factory(spec: TaskAgentSpec):  # noqa: ARG001, one client config for all agents
+        return OpenAIModel(
+            model=cfg["model"],
+            temperature=cfg.get("temperature"),
+            api_key=provider["api_key"],
+            base_url=provider["base_url"],
+            rate_limiter=rate_limiter,
+            max_retries=int(cfg["max_model_retries"]),
+            retry_initial_s=float(cfg["model_retry_initial_s"]),
+            retry_max_s=float(cfg["model_retry_max_s"]),
+        )
     return factory
 
 
@@ -91,6 +133,29 @@ class GridState:
     n_skipped: int = 0
     n_script_skip: int = 0
     budget_stop: bool = False
+
+
+INFRA_ERROR_MARKERS = (
+    "APIConnectionError",
+    "APITimeoutError",
+    "APIStatusError",
+    "InternalServerError",
+    "RateLimitError",
+    "ServiceUnavailable",
+    "code': 429",
+    '"code": 429',
+)
+
+
+def should_rerun_existing_log(path: Path, cfg: dict) -> bool:
+    """True for stale infrastructure-failure logs when config opts in."""
+    if not cfg.get("rerun_infra_errors"):
+        return False
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+    return any(marker in text for marker in INFRA_ERROR_MARKERS)
 
 
 def collect_pending(cfg: dict, out_dir: Path, calibrate: bool) -> list[PendingTrial]:
@@ -137,9 +202,11 @@ async def main() -> int:
     args = parser.parse_args()
     load_env()
     cfg = load_config(args.config)
+    provider = resolve_openai_provider(cfg)
 
-    if cfg["mode"] == "openai" and not os.environ.get("OPENAI_API_KEY"):
-        print("OPENAI_API_KEY is not set. Add it to .env at the repo root "
+    if cfg["mode"] == "openai" and not provider["api_key"]:
+        print(f"{provider['api_key_env']} is not set for provider "
+              f"{provider['provider']}. Add it to .env at the repo root "
               f"({ENV_FILE}) or export it in your shell. For an offline run, "
               "use runner/config.smoke.yaml.", file=sys.stderr)
         return 1
@@ -154,6 +221,8 @@ async def main() -> int:
         run_id=run_id,
         model=cfg.get("model", "scripted"),
         mode=cfg["mode"],
+        provider=provider["provider"] if cfg["mode"] == "openai" else cfg["mode"],
+        base_url=provider["base_url"] if cfg["mode"] == "openai" else None,
         prices=prices,
         budget=cfg.get("budget"),
     )
@@ -167,7 +236,11 @@ async def main() -> int:
     to_run: list[PendingTrial] = []
     for job in pending:
         if job.log_path.exists():
-            state.n_skipped += 1
+            if should_rerun_existing_log(job.log_path, cfg):
+                job.log_path.unlink(missing_ok=True)
+                to_run.append(job)
+            else:
+                state.n_skipped += 1
         else:
             to_run.append(job)
 
@@ -196,9 +269,12 @@ async def main() -> int:
             # Re-check after waiting on the semaphore (another worker may have
             # written the same path in a weird resume race; normally unique).
             if job.log_path.exists():
-                async with lock:
-                    state.n_skipped += 1
-                return
+                if should_rerun_existing_log(job.log_path, cfg):
+                    job.log_path.unlink(missing_ok=True)
+                else:
+                    async with lock:
+                        state.n_skipped += 1
+                    return
 
             label = (f"[{job.task_name} | {job.strategy} | "
                      f"n={job.n} | rep={job.rep}]")

@@ -212,6 +212,33 @@ python -m analysis.make_report results/grid-v1
 
 If you do not activate the virtualenv, replace `python` with `.venv/bin/python`.
 
+### Agnes model sensitivity
+
+Keep model-provider runs in separate result directories instead of moving
+`results/grid-v1/`, which is the canonical OpenAI grid used by the current
+writeup.
+
+```bash
+# second-provider sensitivity check, 72 trials
+# echo 'AGNES_API_KEY=sk-...' >> .env
+python -m runner.run_grid --config runner/config.agnes-sensitivity.yaml --parallel 1
+python -m analysis.validate_logs results/grid-v1-agnes-sensitivity --expect-trials 72
+python -m analysis.make_report results/grid-v1-agnes-sensitivity
+
+# optional full Agnes grid, 480 trials, only if credits/time allow
+python -m runner.run_grid --config runner/config.agnes-full.yaml --parallel 1
+python -m analysis.validate_logs results/grid-v1-agnes --expect-trials 480
+python -m analysis.make_report results/grid-v1-agnes
+```
+
+Use `results/grid-v1-agnes-sensitivity/` as a model-sensitivity check, not as a
+replacement for the Level A OpenAI grid. If the sensitivity ranking agrees with
+`grid-v1`, the writeup can claim the main coordination conclusions were checked
+against a second OpenAI-compatible model provider.
+The Agnes configs include a conservative request-per-minute cap and rerun
+temporary provider-error logs so `429` throttles are not counted as benchmark
+failures.
+
 ## Repo layout
 
 ```

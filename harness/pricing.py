@@ -42,7 +42,9 @@ def load_prices(run_dir: Path | None = None,
 
 
 def write_run_meta(run_dir: Path, *, run_id: str, model: str, mode: str,
-                   prices: dict, budget: dict | None = None) -> Path:
+                   prices: dict, budget: dict | None = None,
+                   provider: str | None = None,
+                   base_url: str | None = None) -> Path:
     meta = {
         "run_id": run_id,
         "model": model,
@@ -51,6 +53,10 @@ def write_run_meta(run_dir: Path, *, run_id: str, model: str, mode: str,
         "budget": budget or {},
         "price_unit": "usd_per_1m_tokens",
     }
+    if provider:
+        meta["provider"] = provider
+    if base_url:
+        meta["base_url"] = base_url
     path = run_dir / "run_meta.json"
     path.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
     return path
