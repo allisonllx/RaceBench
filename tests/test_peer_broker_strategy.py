@@ -16,6 +16,7 @@ class BrokerAckModel(ModelClient):
     async def complete(self, messages: list[dict], tools: list[dict]) -> ModelTurn:
         assert tools[0]["function"]["name"] == "broker_decision"
         assert "ack_with_constraints" in tools[0]["function"]["parameters"]["properties"]["decision"]["enum"]
+        assert "irrelevant" in tools[0]["function"]["parameters"]["properties"]["decision"]["enum"]
         assert "Brokered write negotiation request" in messages[-1]["content"]
         assert "Proposed write preview" in messages[-1]["content"]
         return ModelTurn(
@@ -53,6 +54,24 @@ class BrokerConstraintsModel(ModelClient):
             ],
             prompt_tokens=23,
             completion_tokens=7,
+        )
+
+
+class BrokerIrrelevantModel(ModelClient):
+    async def complete(self, messages: list[dict], tools: list[dict]) -> ModelTurn:
+        assert "decision='irrelevant'" in messages[-1]["content"]
+        return ModelTurn(
+            tool_calls=[
+                ToolCall(
+                    name="broker_decision",
+                    arguments={
+                        "decision": "irrelevant",
+                        "notes": "different symbol, no constraints needed",
+                    },
+                )
+            ],
+            prompt_tokens=11,
+            completion_tokens=3,
         )
 
 
@@ -115,6 +134,36 @@ async def test_peer_broker_forces_private_ack_on_overlap(tmp_path):
         _finish(ws, logger)
 
 
+async def test_peer_broker_ignores_function_level_read_overlap(tmp_path):
+    ws, logger, strategy = _broker_workspace(
+        tmp_path, "t02_benign_overlap", ["agent-slugify", "agent-truncate"],
+        timeout=1.0,
+    )
+    try:
+        await strategy.read("agent-truncate", "stringutils.py")
+
+        async def unexpected_request(request):
+            raise AssertionError("plain function-level read should not trigger broker")
+
+        strategy.register_negotiator("agent-truncate", unexpected_request)
+        outcome = await strategy.write(
+            "agent-slugify",
+            "stringutils.py",
+            Mutation(kind="replace", old_string=T2_SLUGIFY_OLD,
+                     new_string=T2_SLUGIFY_NEW),
+        )
+
+        assert outcome.ok
+        events = read_events(logger.path)
+        assert not any(
+            event.get("event") == "coord"
+            and event.get("action") == "broker_triggered"
+            for event in events
+        )
+    finally:
+        _finish(ws, logger)
+
+
 async def test_peer_broker_conflict_refuses_overlapping_write(tmp_path):
     ws, logger, strategy = _broker_workspace(
         tmp_path, "t01_stale_clobber", ["agent-timeout", "agent-retries"],
@@ -141,6 +190,46 @@ async def test_peer_broker_conflict_refuses_overlapping_write(tmp_path):
         assert any(
             event.get("event") == "coord"
             and event.get("action") == "broker_conflict"
+            for event in events
+        )
+    finally:
+        _finish(ws, logger)
+
+
+async def test_peer_broker_irrelevant_decision_allows_write(tmp_path):
+    ws, logger, strategy = _broker_workspace(
+        tmp_path, "t01_stale_clobber", ["agent-timeout", "agent-retries"],
+        timeout=1.0,
+    )
+    try:
+        await strategy.read("agent-retries", "config.py")
+
+        async def irrelevant(request):
+            assert request["writer"] == "agent-timeout"
+            return {
+                "decision": "irrelevant",
+                "notes": "retry subtask unaffected",
+            }
+
+        strategy.register_negotiator("agent-retries", irrelevant)
+        outcome = await strategy.write(
+            "agent-timeout",
+            "config.py",
+            Mutation(kind="replace", old_string='    "port": 8080,\n}',
+                     new_string=T1_TIMEOUT_DEFAULT),
+        )
+
+        assert outcome.ok
+        events = read_events(logger.path)
+        assert any(
+            event.get("event") == "coord"
+            and event.get("action") == "broker_decision"
+            and event.get("decision") == "irrelevant"
+            for event in events
+        )
+        assert any(
+            event.get("event") == "coord"
+            and event.get("action") == "broker_write_allowed"
             for event in events
         )
     finally:
@@ -327,6 +416,45 @@ async def test_agent_private_broker_callback_parses_ack_with_constraints(tmp_pat
             event.get("event") == "broker_decision"
             and event.get("decision") == "ack_with_constraints"
             and event.get("constraints") == ["keep retries=3", "keep timeout=10"]
+            for event in events
+        )
+    finally:
+        _finish(ws, logger)
+
+
+async def test_agent_private_broker_callback_parses_irrelevant(tmp_path):
+    task = load_task("t02_benign_overlap")
+    ws = Workspace.create(task.repo, tmp_path / "ws")
+    logger = EventLogger(tmp_path / "events.jsonl")
+    strategy = PeerBrokerStrategy(ws, logger, ["agent-truncate"])
+    agent = Agent(
+        "agent-truncate",
+        "Add truncate support.",
+        BrokerIrrelevantModel(),
+        strategy,
+        ws,
+        logger,
+        max_turns=1,
+    )
+    try:
+        decision = await strategy.request_negotiation("agent-truncate", {
+            "contract_id": "contract-11",
+            "writer": "agent-slugify",
+            "path": "stringutils.py",
+            "symbols": ["slugify"],
+            "mutation_kind": "replace",
+            "summary": "add slugify",
+            "write_preview": "def slugify(value): ...",
+        })
+
+        assert decision["decision"] == "irrelevant"
+        assert decision["notes"] == "different symbol, no constraints needed"
+        assert agent.prompt_tokens == 11
+        assert agent.completion_tokens == 3
+        events = read_events(logger.path)
+        assert any(
+            event.get("event") == "broker_decision"
+            and event.get("decision") == "irrelevant"
             for event in events
         )
     finally:

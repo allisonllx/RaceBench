@@ -12,8 +12,8 @@ import time
 from typing import Any
 
 from harness.strategies.base import Mutation, WriteOutcome, register
-from harness.strategies.peer_contract import Intent, PeerContractStrategy
-from harness.symbols import changed_symbols
+from harness.strategies.peer_contract import Intent, PeerContractStrategy, _symbols_overlap
+from harness.symbols import FILE_SYMBOL, MODULE_SYMBOL, changed_symbols
 
 
 @register
@@ -64,6 +64,43 @@ class PeerBrokerStrategy(PeerContractStrategy):
         outcome = await self._apply_to_current(relpath, mutation, agent_id=agent_id)
         outcome.waited_s += time.monotonic() - t0
         return outcome
+
+    def _required_peers(
+        self,
+        agent_id: str,
+        relpath: str,
+        changed: set[str],
+        own_intent: Intent,
+    ) -> set[str]:
+        peers: set[str] = set()
+        for other in self.active:
+            if other == agent_id:
+                continue
+
+            peer_intents = [
+                intent for intent in self._intents.get(other, [])
+                if intent.path == relpath
+            ]
+            if peer_intents:
+                if any(_symbols_overlap(intent.symbols, changed)
+                       for intent in peer_intents):
+                    peers.add(other)
+                continue
+
+            if self._broad_read_overlap(other, relpath, changed):
+                peers.add(other)
+
+        return peers
+
+    def _broad_read_overlap(
+        self,
+        peer: str,
+        relpath: str,
+        changed: set[str],
+    ) -> bool:
+        if not ({FILE_SYMBOL, MODULE_SYMBOL} & changed):
+            return False
+        return any(path == relpath for path, _sym in self._read_sets.get(peer, set()))
 
     async def _broker_negotiation(
         self,
@@ -242,7 +279,7 @@ class PeerBrokerStrategy(PeerContractStrategy):
 
 def _normalize_decision(value: Any) -> str:
     decision = str(value or "").lower()
-    if decision in {"ack", "ack_with_constraints", "conflict"}:
+    if decision in {"ack", "ack_with_constraints", "irrelevant", "conflict"}:
         return decision
     return "conflict"
 

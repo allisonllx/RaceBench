@@ -57,6 +57,8 @@ agreements to the narrower setting of concurrent code edits.
       `contract_write_allowed`, and `contract_timeout`.
 - [x] Add unit and scripted tests for registration, non-overlap, overlap
       gating, ACK success, timeout/refusal, and event logging.
+- [x] Clarify ACK semantics: same-file or same-function overlap is not a
+      conflict when one final implementation can satisfy both subtasks.
 
 ## V1.5: Smarter Intent Scope And Diagnostics
 
@@ -88,6 +90,11 @@ hard veto loops.
       not only the file and symbols.
 - [x] Support `ack_with_constraints`, returning peer requirements to the writer
       as a revision request instead of treating every concern as a hard veto.
+- [x] Support `irrelevant`, allowing peers to explicitly say a brokered write
+      does not affect their subtask.
+- [x] Reduce broad read-set triggers: function-level writes now broker on
+      overlapping peer intents, while module/file-level writes still broker
+      against peers that read the same file.
 - [ ] Compare against V1 to see whether forced negotiation is worth the extra
       runtime and token cost.
 

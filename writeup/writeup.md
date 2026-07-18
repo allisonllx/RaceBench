@@ -183,28 +183,45 @@ as stall/wall-clock cost when mechanisms over-fire).
 
 After the main grid, we added two new Level A strategies to test A2A-style
 coordination inspired by automated negotiation protocols such as POANCD. These
-are **not** part of the 480-trial headline table yet. They are a 10-trial
-targeted smoke (`results/grid-v1-peer-targeted-v2/`): five high-signal tasks
-(`t02`, `t03`, `t04`, `rw_d`, `rw_e`) x two strategies x one rep.
+are **not** part of the 480-trial headline table yet. They are targeted smokes
+on five high-signal tasks (`t02`, `t03`, `t04`, `rw_d`, `rw_e`) x two
+strategies x one rep.
 
 `peer_contract` is voluntary: agents can declare edit intent and ACK a compact
 contract before overlapping writes. `peer_broker` is forced: the runtime detects
 an overlapping write, opens a private broker decision with affected peers, and
-allows ACK, ACK-with-constraints, or conflict.
+allows ACK, ACK-with-constraints, irrelevant, or conflict.
 
-Preliminary result: `peer_contract` was **5/5** correct; `peer_broker` was
-**3/5**. Broker improved after adding `ack_with_constraints`: it passed
-`t03_fetch_clobber` and `rw_e_cascade`, where an earlier hard-veto broker loop
-failed. But it still cost more: mean wall clock **119s vs 85s**, mean tokens
-**170k vs 153k**, stalls **24 vs 13**, coordination events **176 vs 88**.
+The iteration was more informative than a single final score. In v2,
+`peer_contract` was **5/5** correct while `peer_broker` was **3/5**. Contract was
+also cleaner: mean wall clock **85s vs 119s**, mean tokens **153k vs 170k**, and
+mean stalls **2.6 vs 4.8**. The forced broker was not useless, since
+`ack_with_constraints` helped it recover hard cases such as `t03_fetch_clobber`
+and `rw_e_cascade`, but it was noisier.
 
-Interpretation: forced negotiation is not automatically better. The broker's
-remaining problem is trigger precision. A full-file read can make a peer look
-dependent on many symbols, so the broker negotiates even on benign or weakly
-related overlap. Voluntary `peer_contract` often gives the system a sharper
-intent signal earlier. RaceBench therefore exposed a second design question:
-not just **how** agents negotiate, but **when** the runtime should invoke
-negotiation at all.
+In v3, we narrowed broker triggers so plain function-level read overlap no
+longer forced negotiation, and added `irrelevant` for weak dependencies. That
+diagnostic run validated cleanly, but exposed a separate `peer_contract`
+fragility: agents could misread same-function composition, such as timeout plus
+retries, as irreconcilable conflict. In v4, we clarified that conflict means no
+final implementation can satisfy both subtasks, not merely that two agents
+touched the same file or function.
+
+The latest targeted result is v4: both strategies reached **4/5** correctness.
+But the process metrics still favor `peer_contract`: mean wall clock **79s vs
+122s**, mean tokens **155k vs 237k**, mean stalls **2.2 vs 4.6**, and mean
+refused writes **1.6 vs 5.6**. The broker's `rw_e_cascade` pass is especially
+important to interpret honestly: the oracle passed, but the run took **376s**,
+used **898k** tokens, had **17** stalls, and all three agents ended at
+`max_turns`. That is correct, but not healthy.
+
+Interpretation: peer negotiation is promising, but forced negotiation is not
+automatically better. RaceBench exposed two concrete future extensions. First,
+`peer_contract` needs persistent obligations: when an agent ACKs an intent, that
+commitment should be injected into later prompts until the agent finishes.
+Second, `peer_broker` needs dependency-aware triggering, likely reusing the
+`ast_dep` signal, so it can catch cross-file semantic dependencies such as
+`rw_d_tag_antidependency` without over-firing on benign same-file work.
 
 ## 4. Constraints
 
@@ -394,11 +411,19 @@ black-box runtime scoring unless a product exposes mediation hooks.
 6. **Lite CRDT column.** Still deferred: overlaps `git_hash` on compose-heavy
    tasks and would need honest `always_merge` labeling.
 
-7. **Suite hardness vs stronger stacks.** Preliminary Cursor C1 passes on cells
+7. **Peer negotiation v5.** The latest targeted smoke is v4, not v2:
+   `peer_contract` and `peer_broker` both reach 4/5, but `peer_contract` is
+   cheaper and cleaner. The next iteration should not be "more prompting" in
+   general. It should add persistent obligations for `peer_contract` after an
+   ACK, and dependency-aware broker triggers for `peer_broker` so cross-file
+   semantic dependencies such as tag normalization are negotiated.
+
+8. **Suite hardness vs stronger stacks.** Preliminary Cursor C1 passes on cells
    where Level A `naive` scores 0/5 (e.g. t01, rw_e) suggest the probe suite may
    under-challenge capable foreign worker loops; future tasks could target
    harness-agnostic collisions or higher concurrency if we want C1 to separate stacks.
-8. **Level C adapter hardening.** The MegaAgent vendor bridge runs but is not
+
+9. **Level C adapter hardening.** The MegaAgent vendor bridge runs but is not
    production-ready: t02 timed out at 900s with no file writes; t04 burned ~2M
    input tokens on a Gobang demo instead of the cascade repo. Concrete fixes:
    request timeouts on upstream HTTP, stream `log.txt` to the runner terminal,

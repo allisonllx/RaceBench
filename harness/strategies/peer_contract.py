@@ -58,8 +58,9 @@ ACK_CONTRACT_SCHEMA = {
     "function": {
         "name": "ack_contract",
         "description": (
-            "Peer-contract strategy tool. ACK or reject another agent's intent "
-            "after receiving a coordination notice."
+            "Peer-contract strategy tool. ACK another agent's intent when one "
+            "final implementation can satisfy both subtasks; reject only when "
+            "the requirements cannot coexist."
         ),
         "parameters": {
             "type": "object",
@@ -68,8 +69,20 @@ ACK_CONTRACT_SCHEMA = {
                 "decision": {
                     "type": "string",
                     "enum": ["ack", "conflict"],
+                    "description": (
+                        "Use ack when the final code can include both changes, "
+                        "even if both agents touch the same file or function. "
+                        "Use conflict only when no final code can satisfy both "
+                        "subtasks."
+                    ),
                 },
-                "notes": {"type": "string"},
+                "notes": {
+                    "type": "string",
+                    "description": (
+                        "Short compatibility reason, behavior you will preserve, "
+                        "or why the requirements cannot coexist."
+                    ),
+                },
             },
             "required": ["contract_id", "decision"],
         },
@@ -109,9 +122,11 @@ class PeerContractStrategy(Strategy):
             "[peer-contract protocol] Before editing, call declare_intent with "
             "the file path, symbols you expect to change, a short summary, any "
             "exports other agents can rely on, and must-preserve constraints. "
-            "If you receive a peer intent, inspect whether it conflicts with "
-            "your subtask and call ack_contract with decision='ack' or "
-            "decision='conflict'."
+            "If you receive a peer intent, ACK when one final implementation "
+            "can satisfy both subtasks, even if both agents touch the same file "
+            "or function. If you ACK, finish your own changes so they preserve "
+            "the peer intent. Use conflict only when the requirements cannot "
+            "coexist."
         )
         for agent_id in self.agent_ids:
             self._mailboxes[agent_id].append(protocol_note)
@@ -364,9 +379,10 @@ class PeerContractStrategy(Strategy):
                 f"Summary: {intent.summary or 'unspecified'}. "
                 f"Exports: {', '.join(intent.exports) or 'none'}. "
                 f"Must preserve: {', '.join(intent.must_preserve) or 'none'}. "
-                "If this is compatible with your subtask, call ack_contract with "
-                "decision='ack'; otherwise call ack_contract with "
-                "decision='conflict' and explain why."
+                "ACK when one final implementation can satisfy both subtasks, "
+                "even if both agents touch the same file or function. If you "
+                "ACK, finish your own changes so they preserve this intent. "
+                "Use conflict only when the requirements cannot coexist."
             )
             self._mailboxes[peer].append(note)
             self.log.log("coord", strategy=self.name,

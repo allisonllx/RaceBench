@@ -73,11 +73,18 @@ BROKER_DECISION_SCHEMA = {
             "properties": {
                 "decision": {
                     "type": "string",
-                    "enum": ["ack", "ack_with_constraints", "conflict"],
+                    "enum": [
+                        "ack",
+                        "ack_with_constraints",
+                        "irrelevant",
+                        "conflict",
+                    ],
                     "description": (
                         "ACK if compatible as proposed. Use ack_with_constraints "
                         "when the writer can make it compatible by revising. "
-                        "Use conflict only when the write is irreconcilable."
+                        "Use irrelevant when the write does not affect your "
+                        "subtask. Use conflict only when the write is "
+                        "irreconcilable."
                     ),
                 },
                 "notes": {
@@ -108,9 +115,10 @@ BROKER_DECISION_SCHEMA = {
 BROKER_SYSTEM_PROMPT = """You are one coding agent in a brokered coordination \
 session. Another agent is trying to commit an overlapping write. Decide whether \
 that write is compatible with your own subtask. Do not solve the task here. \
-Return only a broker_decision tool call. Prefer ack_with_constraints over \
-conflict when the write can be made compatible by preserving specific \
-requirements. Use conflict only when the proposed write is irreconcilable.
+Return only a broker_decision tool call. Use irrelevant when the proposed \
+write does not affect your subtask. Prefer ack_with_constraints over conflict \
+when the write can be made compatible by preserving specific requirements. Use \
+conflict only when the proposed write is irreconcilable.
 
 Your subtask:
 {subtask}
@@ -351,6 +359,8 @@ def _format_broker_request(request: dict[str, Any]) -> str:
         "- decision='ack_with_constraints': the write can be compatible if the "
         "writer revises it. Put concrete requirements in constraints and/or "
         "contract.\n"
+        "- decision='irrelevant': the proposed write does not affect your "
+        "subtask, so the writer does not need constraints from you.\n"
         "- decision='conflict': use only when no local revision would make the "
         "write safe."
     )
@@ -361,7 +371,7 @@ def _parse_broker_decision(model_turn: ModelTurn) -> dict[str, Any]:
         if call.name != "broker_decision":
             continue
         decision = str(call.arguments.get("decision") or "").lower()
-        if decision not in {"ack", "ack_with_constraints", "conflict"}:
+        if decision not in {"ack", "ack_with_constraints", "irrelevant", "conflict"}:
             decision = "conflict"
         return {
             "decision": decision,
@@ -377,6 +387,13 @@ def _parse_broker_decision(model_turn: ModelTurn) -> dict[str, Any]:
             "notes": model_turn.text[:500],
             "constraints": [],
             "contract": model_turn.text[:500],
+        }
+    if "irrelevant" in text:
+        return {
+            "decision": "irrelevant",
+            "notes": model_turn.text[:500],
+            "constraints": [],
+            "contract": "",
         }
     if "ack" in text and "conflict" not in text:
         return {

@@ -40,6 +40,9 @@ async def test_peer_contract_registered_and_exposes_strategy_tools(tmp_path):
             for schema in strategy.extra_tool_schemas()
         }
         assert names == {"declare_intent", "ack_contract"}
+        note = "\n".join(strategy.drain_notifications("agent-a"))
+        assert "one final implementation can satisfy both subtasks" in note
+        assert "same file or function" in note
     finally:
         _finish(ws, logger)
 

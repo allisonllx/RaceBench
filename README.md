@@ -116,7 +116,7 @@ systems.
 8. `peer_broker`: forced mediated peer negotiation. The runtime detects an
    overlapping write, opens a private broker decision with affected peers, and
    applies the write only if peers ACK. Peers can also request concrete revision
-   constraints instead of hard-rejecting the write.
+   constraints, mark the write irrelevant to their subtask, or reject the write.
 
 `peer_contract` and `peer_broker` are intentionally separate, like `ast_scope`
 and `ast_dep`: they test whether voluntary negotiation is enough, and whether a
@@ -237,8 +237,8 @@ tasks where peer negotiation should matter.
 
 ```bash
 python -m runner.run_grid --config runner/config.peer-targeted.yaml
-python -m analysis.validate_logs results/grid-v1-peer-targeted-v2
-python -m analysis.make_report results/grid-v1-peer-targeted-v2 \
+python -m analysis.validate_logs results/grid-v1-peer-targeted-v4
+python -m analysis.make_report results/grid-v1-peer-targeted-v4 \
   --prices-config runner/config.peer-targeted.yaml
 ```
 
