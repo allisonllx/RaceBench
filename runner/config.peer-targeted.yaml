@@ -5,8 +5,8 @@
 # between voluntary peer contracts and forced brokered negotiation.
 #
 # Recommended flow:
-#   1. Run this once as-is.
-#   2. Generate a report and inspect peer_contract vs peer_broker.
+#   1. Run this once as-is. It spends only on the new peer strategies.
+#   2. Compare against existing grid-v1 baselines in analysis/writeup.
 #   3. If the signal is interesting, raise reps to 3 or 5.
 run_id: grid-v1-peer-targeted
 mode: openai
@@ -19,11 +19,6 @@ tasks:
   - rw_d_tag_antidependency
   - rw_e_cascade
 strategies:
-  - naive
-  - notify
-  - file_lock
-  - git_hash
-  - ast_dep
   - peer_contract
   - peer_broker
 agent_counts: [2, 3, 4]
@@ -33,7 +28,7 @@ lock_timeout_s: 30
 trial_timeout_s: 900
 parallel: 2
 budget:
-  max_usd: 8
-  max_total_tokens: 15000000
+  max_usd: 3
+  max_total_tokens: 5000000
 prices:
   gpt-5-mini: {input: 0.25, output: 2.00}

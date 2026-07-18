@@ -44,7 +44,12 @@ def test_peer_targeted_config_includes_peer_strategies(tmp_path):
     assert cfg["run_id"] == "grid-v1-peer-targeted"
     assert cfg["provider"] == "openai"
     assert cfg["reps"] == 1
-    assert {"peer_contract", "peer_broker"} <= {job.strategy for job in pending}
+    assert cfg["parallel"] == 2
+    assert cfg["budget"]["max_usd"] == 3
+    assert {job.strategy for job in pending} == {
+        "peer_contract",
+        "peer_broker",
+    }
     assert {
         "t02_benign_overlap",
         "t03_fetch_clobber",

@@ -35,9 +35,10 @@ If you are new to the repo, use this path:
 1. Open the static explorer: [`results/grid-v1/report.html`](results/grid-v1/report.html)
    (regenerate with `python -m analysis.make_report results/grid-v1`)
 2. Read the practical takeaways: [`docs/coordination-decision-guide.md`](docs/coordination-decision-guide.md)
-3. Read the external-runtime boundary: [`docs/external-coordination-protocol.md`](docs/external-coordination-protocol.md)
-4. Read the benchmark claim and limits: [`writeup/writeup.md`](writeup/writeup.md)
-5. Run validation locally:
+3. Read the peer-negotiation roadmap: [`docs/peer-contract-strategy-plan.md`](docs/peer-contract-strategy-plan.md)
+4. Read the external-runtime boundary: [`docs/external-coordination-protocol.md`](docs/external-coordination-protocol.md)
+5. Read the benchmark claim and limits: [`writeup/writeup.md`](writeup/writeup.md)
+6. Run validation locally:
 
 ```bash
 python -m analysis.validate_logs results/grid-v1 --expect-trials 480
@@ -109,10 +110,24 @@ systems.
    write races a claimed cross-file definition or use-site.
 6. `notify`: CoAgent-lite advisory notifications: writes land immediately; agents whose
    read set intersects a landed write get a notice injected into context and self-judge.
+7. `peer_contract`: voluntary mediated peer negotiation. Agents can call
+   `declare_intent` before editing and `ack_contract` after receiving an overlap
+   notice. Overlapping writes wait for peer ACK; disjoint declared edits can proceed.
+8. `peer_broker`: forced mediated peer negotiation. The runtime detects an
+   overlapping write, opens a private broker decision with affected peers, and
+   applies the write only if peers ACK.
 
-**Adding your strategy (Level A).** Implement two methods, register with `@register`,
-import in `harness/strategies/__init__.py`, add the name to `strategies:` in a runner
-config, and smoke-test with `runner/config.smoke.yaml` (scripted agents, no API key).
+`peer_contract` and `peer_broker` are intentionally separate, like `ast_scope`
+and `ast_dep`: they test whether voluntary negotiation is enough, and whether a
+runtime-triggered broker is worth the extra turn and token cost.
+
+**Adding your strategy (Level A).** Implement `_coordinate_read` and
+`_coordinate_write`, register with `@register`, import in
+`harness/strategies/__init__.py`, add the name to `strategies:` in a runner
+config, and smoke-test with `runner/config.smoke.yaml` (scripted agents, no API
+key). Strategies can also expose optional strategy-owned tools through
+`extra_tool_schemas()` / `handle_strategy_tool(...)`, or use private broker
+callbacks through `request_negotiation(...)`.
 Full checklist: [`docs/adding-a-strategy.md`](docs/adding-a-strategy.md).
 
 **Out of scope for the hackathon window** (reasons in `writeup/`): full CRDT substrate,
@@ -212,6 +227,19 @@ python -m analysis.make_report results/grid-v1
 ```
 
 If you do not activate the virtualenv, replace `python` with `.venv/bin/python`.
+
+### Peer negotiation strategies
+
+`peer_contract` and `peer_broker` are experimental Level A strategies. Use the
+targeted config first because it spends real model tokens and focuses only on
+tasks where peer negotiation should matter.
+
+```bash
+python -m runner.run_grid --config runner/config.peer-targeted.yaml
+python -m analysis.validate_logs results/grid-v1-peer-targeted
+python -m analysis.make_report results/grid-v1-peer-targeted \
+  --prices-config runner/config.peer-targeted.yaml
+```
 
 ### Agnes model sensitivity
 

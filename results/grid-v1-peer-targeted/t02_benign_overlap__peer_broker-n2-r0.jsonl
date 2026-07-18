@@ -1,0 +1,44 @@
+{"ts": 0.336, "event": "trial_start", "task": "t02_benign_overlap", "failure_mode": "benign_overlap_false_positive", "benign": true, "strategy": "peer_broker", "n_agents": 2, "rep": 0, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-slugify", "agent-truncate"]}
+{"ts": 2.6072, "event": "llm_usage", "agent": "agent-truncate", "turn": 1, "prompt_tokens": 670, "completion_tokens": 19}
+{"ts": 2.6073, "event": "tool_call", "agent": "agent-truncate", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 3.6688, "event": "llm_usage", "agent": "agent-truncate", "turn": 2, "prompt_tokens": 711, "completion_tokens": 19}
+{"ts": 3.6689, "event": "tool_call", "agent": "agent-truncate", "turn": 2, "tool": "read_file", "args": {"path": "stringutils.py"}}
+{"ts": 3.6693, "event": "read", "agent": "agent-truncate", "path": "stringutils.py", "found": true, "size": 795}
+{"ts": 4.1259, "event": "llm_usage", "agent": "agent-slugify", "turn": 1, "prompt_tokens": 648, "completion_tokens": 19}
+{"ts": 4.1261, "event": "tool_call", "agent": "agent-slugify", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 4.9708, "event": "llm_usage", "agent": "agent-slugify", "turn": 2, "prompt_tokens": 689, "completion_tokens": 19}
+{"ts": 4.9708, "event": "tool_call", "agent": "agent-slugify", "turn": 2, "tool": "read_file", "args": {"path": "stringutils.py"}}
+{"ts": 4.9714, "event": "read", "agent": "agent-slugify", "path": "stringutils.py", "found": true, "size": 795}
+{"ts": 6.485, "event": "llm_usage", "agent": "agent-slugify", "turn": 3, "prompt_tokens": 904, "completion_tokens": 27}
+{"ts": 6.4853, "event": "tool_call", "agent": "agent-slugify", "turn": 3, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 6.4858, "event": "read", "agent": "agent-slugify", "path": "tests/test_smoke.py", "found": true, "size": 134}
+{"ts": 13.4562, "event": "llm_usage", "agent": "agent-truncate", "turn": 3, "prompt_tokens": 926, "completion_tokens": 839}
+{"ts": 13.4564, "event": "tool_call", "agent": "agent-truncate", "turn": 3, "tool": "edit_file", "args": {"path": "stringutils.py", "old_string": "def truncate(text, max_len, suffix=\"...\"):\n    \"\"\"Truncate text so the result is at most max_len characters INCLUDING the\n    suffix. Return text unchanged when len(text) <= max_len. When truncation\n ", "new_string": "def truncate(text, max_len, suffix=\"...\"):\n    \"\"\"Truncate text so the result is at most max_len characters INCLUDING the\n    suffix. Return text unchanged when len(text) <= max_len. When truncation\n "}}
+{"ts": 13.4578, "event": "coord", "strategy": "peer_broker", "action": "intent_inferred", "agent": "agent-truncate", "contract_id": "contract-1", "path": "stringutils.py", "symbols": ["truncate"]}
+{"ts": 13.458, "event": "coord", "strategy": "peer_broker", "action": "broker_triggered", "agent": "agent-truncate", "contract_id": "contract-1", "path": "stringutils.py", "symbols": ["truncate"], "peers": ["agent-slugify"]}
+{"ts": 13.4581, "event": "coord", "strategy": "peer_broker", "action": "blocked", "agent": "agent-truncate", "path": "stringutils.py", "contract_id": "contract-1", "holders": ["agent-slugify"]}
+{"ts": 13.4592, "event": "coord", "strategy": "peer_broker", "action": "broker_request", "agent": "agent-truncate", "peer": "agent-slugify", "contract_id": "contract-1", "path": "stringutils.py", "symbols": ["truncate"]}
+{"ts": 15.5042, "event": "llm_usage", "agent": "agent-slugify", "turn": 4, "prompt_tokens": 963, "completion_tokens": 634}
+{"ts": 15.5044, "event": "tool_call", "agent": "agent-slugify", "turn": 4, "tool": "edit_file", "args": {"path": "stringutils.py", "old_string": "def slugify(text):\n    \"\"\"Return a URL slug: lowercase, every run of characters outside a-z0-9\n    replaced by a single hyphen, leading/trailing hyphens stripped.\n\n    slugify(\"Hello, World!\") == \"hel", "new_string": "def slugify(text):\n    \"\"\"Return a URL slug: lowercase, every run of characters outside a-z0-9\n    replaced by a single hyphen, leading/trailing hyphens stripped.\n\n    slugify(\"Hello, World!\") == \"hel"}}
+{"ts": 15.5057, "event": "coord", "strategy": "peer_broker", "action": "intent_inferred", "agent": "agent-slugify", "contract_id": "contract-2", "path": "stringutils.py", "symbols": ["slugify"]}
+{"ts": 15.508, "event": "write", "agent": "agent-slugify", "path": "stringutils.py", "kind": "replace", "status": "applied", "waited_s": 0.003, "changed_symbols": ["slugify"], "message": ""}
+{"ts": 20.1365, "event": "llm_usage", "agent": "agent-slugify", "turn": -1, "prompt_tokens": 393, "completion_tokens": 339, "phase": "broker"}
+{"ts": 20.1367, "event": "broker_decision", "agent": "agent-slugify", "requester": "agent-truncate", "contract_id": "contract-1", "path": "stringutils.py", "decision": "ack", "notes": "Proposed change replaces only truncate; does not touch slugify. That is compatible with my subtask.", "contract": "The writer must not modify slugify, its docstring, or module-level imports (including re). Changes should be limited to the truncate symbol to remain compatible."}
+{"ts": 20.1368, "event": "coord", "strategy": "peer_broker", "action": "broker_decision", "agent": "agent-slugify", "writer": "agent-truncate", "contract_id": "contract-1", "path": "stringutils.py", "decision": "ack", "notes": "Proposed change replaces only truncate; does not touch slugify. That is compatible with my subtask.", "contract": "The writer must not modify slugify, its docstring, or module-level imports (including re). Changes should be limited to the truncate symbol to remain compatible."}
+{"ts": 20.1419, "event": "coord", "strategy": "peer_broker", "action": "broker_write_allowed", "agent": "agent-truncate", "contract_id": "contract-1", "path": "stringutils.py", "peers": ["agent-slugify"]}
+{"ts": 20.1443, "event": "write", "agent": "agent-truncate", "path": "stringutils.py", "kind": "replace", "status": "applied", "waited_s": 6.688, "changed_symbols": ["truncate"], "message": ""}
+{"ts": 21.2324, "event": "llm_usage", "agent": "agent-truncate", "turn": 4, "prompt_tokens": 1327, "completion_tokens": 13}
+{"ts": 21.2326, "event": "tool_call", "agent": "agent-truncate", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 21.247, "event": "llm_usage", "agent": "agent-slugify", "turn": 5, "prompt_tokens": 1223, "completion_tokens": 13}
+{"ts": 21.2471, "event": "tool_call", "agent": "agent-slugify", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 21.5104, "event": "run_tests", "agent": "agent-truncate", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 21.5143, "event": "run_tests", "agent": "agent-slugify", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 23.2423, "event": "llm_usage", "agent": "agent-slugify", "turn": 6, "prompt_tokens": 1262, "completion_tokens": 47}
+{"ts": 23.2429, "event": "tool_call", "agent": "agent-slugify", "turn": 6, "tool": "done", "args": {"summary": "Implemented slugify in stringutils.py to lowercase, replace non-alphanumeric runs with hyphens, and strip leading/trailing hyphens; tests pass."}}
+{"ts": 23.2434, "event": "agent_done_coord", "agent": "agent-slugify"}
+{"ts": 23.2435, "event": "agent_done", "agent": "agent-slugify", "status": "done", "turns": 6, "prompt_tokens": 6082, "completion_tokens": 1098}
+{"ts": 23.2466, "event": "llm_usage", "agent": "agent-truncate", "turn": 5, "prompt_tokens": 1366, "completion_tokens": 30}
+{"ts": 23.2467, "event": "tool_call", "agent": "agent-truncate", "turn": 5, "tool": "done", "args": {"summary": "Implemented truncate in stringutils.py per spec and ran tests (1 passed)."}}
+{"ts": 23.2467, "event": "agent_done_coord", "agent": "agent-truncate"}
+{"ts": 23.2468, "event": "agent_done", "agent": "agent-truncate", "status": "done", "turns": 5, "prompt_tokens": 5000, "completion_tokens": 920}
+{"ts": 23.7644, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 22.36, "prompt_tokens": 11082, "completion_tokens": 2018, "agent_statuses": {"agent-slugify": "done", "agent-truncate": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.03s\n"}
