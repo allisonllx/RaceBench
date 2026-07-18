@@ -12,7 +12,8 @@ from harness.workspace import Workspace
 
 SYSTEM_PROMPT_SHARED = """You are a coding agent working inside a shared repository. \
 Other agents are working on OTHER subtasks in this same repository AT THE SAME \
-TIME, so files may change between your reads. You cannot talk to them.
+TIME, so files may change between your reads. You cannot talk to them directly \
+unless the environment exposes explicit coordination tools.
 
 Rules:
 - Use glob/grep to find files before editing when the repo has many modules.
@@ -35,7 +36,8 @@ Your subtask:
 
 SYSTEM_PROMPT_WORKTREE = """You are a coding agent working in an isolated git \
 worktree. Other agents edit SEPARATE worktrees; you will not see their changes \
-until an automatic end-of-trial merge. You cannot talk to them.
+until an automatic end-of-trial merge. You cannot talk to them directly unless \
+the environment exposes explicit coordination tools.
 
 Rules:
 - Use glob/grep to find files before editing when the repo has many modules.
@@ -90,6 +92,7 @@ class Agent:
 
     def _tool_schemas(self) -> list[dict]:
         schemas = list(FILE_TOOL_SCHEMAS)
+        schemas.extend(self.strategy.extra_tool_schemas())
         if self.registry is not None:
             schemas.extend(self.registry.openai_tool_schemas())
         return schemas
@@ -203,6 +206,10 @@ class Agent:
             self.log.log("run_tests", agent=self.id, passed=result.passed,
                          failed=result.failed, errored=result.errored)
             return result.output[-4000:] or "(no output)", False
+        strategy_result = await self.strategy.handle_strategy_tool(
+            self.id, name, args)
+        if strategy_result is not None:
+            return strategy_result[:8000], False
         if name == "list_tools":
             if not self.registry:
                 return "ERROR: no tool registry on this task", False

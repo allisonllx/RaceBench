@@ -16,7 +16,7 @@ from __future__ import annotations
 import asyncio
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Any, Literal
 
 from harness.events import EventLogger
 from harness.symbols import changed_symbols
@@ -108,6 +108,19 @@ class Strategy(ABC):
         """Messages the strategy wants injected into the agent's context before
         its next model call. Only notification-based strategies use this."""
         return []
+
+    def extra_tool_schemas(self) -> list[dict]:
+        """Additional tool schemas exposed only for this strategy."""
+        return []
+
+    async def handle_strategy_tool(self, agent_id: str, name: str,
+                                   arguments: dict[str, Any]) -> str | None:
+        """Handle a strategy-owned tool call.
+
+        Return a tool-result string when handled. Return None when this
+        strategy does not own the tool.
+        """
+        return None
 
     # ---- shared helper ----------------------------------------------------
 

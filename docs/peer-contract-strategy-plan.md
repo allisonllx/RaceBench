@@ -1,0 +1,95 @@
+# Peer Contract Strategy Plan
+
+RaceBench currently compares coordination strategies that block, notify, detect
+stale writes, or claim AST/dependency scopes. The `peer_contract` strategy adds
+a different Level A mechanism: when agents may overlap, the harness asks them to
+declare intent and acknowledge a compact shared contract before committing risky
+writes.
+
+This is a mediated peer negotiation layer. The harness detects collisions and
+enforces the protocol, but the agents provide the intent and agreement text.
+
+## Goals
+
+- [x] Add an instrumented Level A strategy that tests structured peer
+      negotiation, not only locks or stale-write detection.
+- [x] Preserve RaceBench's neutral benchmark framing: `peer_contract` is one
+      comparable strategy column, not the whole project.
+- [x] Log enough events for validation, metrics, and replay without exposing
+      hidden model reasoning.
+- [x] Keep V1 small enough to run on targeted race-heavy tasks before any full
+      grid rerun.
+
+## Non-Goals
+
+- [x] Do not claim full decentralization. The harness mediates the session.
+- [x] Do not turn Level C external runtimes into strategy comparisons unless
+      they emit RaceBench-compatible read/write/intent events.
+- [x] Do not build a CRDT, merge engine, or manager-agent planner in V1.
+- [x] Do not require paid reruns before the mechanics are covered by tests.
+
+## V1: Tool-Based Peer Contract
+
+- [x] Add optional strategy-owned tools to the agent loop:
+      `declare_intent` and `ack_contract`.
+- [x] Add base strategy hooks:
+      `extra_tool_schemas()` and `handle_strategy_tool(...)`.
+- [x] Implement `peer_contract` as a normal Level A strategy.
+- [x] Track declared intents with file path, optional symbols, summary,
+      exports, and must-preserve constraints.
+- [x] Detect overlap at write time using same-file and symbol intersections.
+- [x] Allow writes with no overlap.
+- [x] Require ACK before overlapping writes proceed.
+- [x] Refuse overlapping writes with a clear retry message when no contract is
+      acknowledged before timeout.
+- [x] Deliver peer intent notifications through the existing notification
+      mechanism.
+- [x] Log `coord` events:
+      `intent_declared`, `contract_proposed`, `contract_ack`,
+      `contract_write_allowed`, and `contract_timeout`.
+- [x] Add unit and scripted tests for registration, non-overlap, overlap
+      gating, ACK success, timeout/refusal, and event logging.
+
+## V1.5: Smarter Intent Scope
+
+- [ ] Use changed-symbol detection when possible so same-file disjoint edits do
+      not needlessly stall.
+- [ ] Add dependency-graph overlap for cross-file read/write antidependencies.
+- [ ] Count negotiation metrics in analysis:
+      negotiations per trial, ACK rate, contract timeout rate, and token
+      overhead.
+- [ ] Surface contract events in `report.html` replay with a distinct marker.
+- [ ] Add targeted grid config:
+      `t01`, `t03`, `t04`, `rw_d_antidependency`, `rw_e_cascade`, plus one
+      benign-overlap task such as `t02` or `t09`.
+
+## V2: Forced Private Negotiation Session
+
+- [ ] Add a `NegotiationBroker` that can ask affected agents for a private
+      structured response when a write collision is detected.
+- [ ] Pause only the involved agents, not the whole trial.
+- [ ] Exchange compact JSON intents, then collect ACK, conflict, or revision.
+- [ ] Bound negotiation rounds and wall-clock time.
+- [ ] Log negotiation-round counts and failure reasons.
+- [ ] Compare against V1 to see whether forced negotiation is worth the extra
+      runtime and token cost.
+
+## V3: External Mediation Protocol
+
+- [ ] Convert the protocol into adapter-facing hooks:
+      `on_read`, `on_write_intent`, `decision`, `on_write_committed`, and
+      `on_agent_done`.
+- [ ] Implement one external adapter that emits compatible events.
+- [ ] Keep external runtimes without these hooks as Level C black-box checks.
+- [ ] Document which results are strategy-comparable and which are only
+      correctness/wall-clock smoke checks.
+
+## Evaluation Plan
+
+- [x] First run offline scripted tests.
+- [ ] Then run a tiny smoke grid with `peer_contract`.
+- [ ] Then run a targeted sensitivity grid on race-heavy tasks.
+- [ ] Compare against `naive`, `notify`, `file_lock`, `git_hash`, and `ast_dep`.
+- [ ] Treat the strategy as successful if it improves hard race correctness,
+      avoids file-lock false-positive stalls on benign overlap, and produces
+      interpretable replay evidence at acceptable token/runtime cost.
