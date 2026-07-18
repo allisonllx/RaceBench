@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 from abc import ABC, abstractmethod
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -67,6 +68,9 @@ class Strategy(ABC):
         self.agent_ids = list(agent_ids)
         self.active = set(agent_ids)
         self.lock_timeout_s = lock_timeout_s
+        self._negotiators: dict[
+            str, Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
+        ] = {}
         # serializes the read-modify-write of a single apply; NOT a coordination
         # mechanism, just atomicity of individual file operations
         self._apply_lock = asyncio.Lock()
@@ -121,6 +125,28 @@ class Strategy(ABC):
         strategy does not own the tool.
         """
         return None
+
+    def register_negotiator(
+        self,
+        agent_id: str,
+        negotiator: Callable[[dict[str, Any]], Awaitable[dict[str, Any]]],
+    ) -> None:
+        """Register an agent-local callback for private broker sessions."""
+        self._negotiators[agent_id] = negotiator
+
+    async def request_negotiation(
+        self,
+        agent_id: str,
+        request: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Ask one agent for a private coordination decision."""
+        negotiator = self._negotiators.get(agent_id)
+        if negotiator is None:
+            return {
+                "decision": "conflict",
+                "notes": f"no negotiator registered for {agent_id}",
+            }
+        return await negotiator(request)
 
     # ---- shared helper ----------------------------------------------------
 

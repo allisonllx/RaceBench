@@ -65,12 +65,13 @@ enforces the protocol, but the agents provide the intent and agreement text.
 
 ## V2: Forced Private Negotiation Session
 
-- [ ] Add a `NegotiationBroker` that can ask affected agents for a private
+- [x] Add a `NegotiationBroker` that can ask affected agents for a private
       structured response when a write collision is detected.
-- [ ] Pause only the involved agents, not the whole trial.
-- [ ] Exchange compact JSON intents, then collect ACK, conflict, or revision.
-- [ ] Bound negotiation rounds and wall-clock time.
-- [ ] Log negotiation-round counts and failure reasons.
+- [x] Pause only the involved agents, not the whole trial.
+- [x] Exchange compact JSON intents, then collect ACK or conflict decisions.
+- [x] Bound negotiation wall-clock time with the existing lock timeout.
+- [x] Log broker requests, broker decisions, write-allowed events, conflicts,
+      and timeouts.
 - [ ] Compare against V1 to see whether forced negotiation is worth the extra
       runtime and token cost.
 
@@ -87,8 +88,9 @@ enforces the protocol, but the agents provide the intent and agreement text.
 ## Evaluation Plan
 
 - [x] First run offline scripted tests.
-- [ ] Then run a tiny smoke grid with `peer_contract`.
-- [ ] Then run a targeted sensitivity grid on race-heavy tasks.
+- [ ] Then run a tiny smoke grid with `peer_contract` and `peer_broker`.
+- [x] Add a targeted sensitivity config for race-heavy tasks.
+- [ ] Run the targeted sensitivity grid on race-heavy tasks.
 - [ ] Compare against `naive`, `notify`, `file_lock`, `git_hash`, and `ast_dep`.
 - [ ] Treat the strategy as successful if it improves hard race correctness,
       avoids file-lock false-positive stalls on benign overlap, and produces

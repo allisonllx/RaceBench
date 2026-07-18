@@ -1,10 +1,12 @@
 """Instrumented agent loop."""
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
+from typing import Any
 
 from harness.events import EventLogger
-from harness.models import ModelClient, ToolCall
+from harness.models import ModelClient, ModelTurn, ToolCall
 from harness.registry import ToolRegistry
 from harness.strategies.base import Mutation, Strategy
 from harness.tools import FILE_TOOL_SCHEMAS
@@ -58,6 +60,45 @@ Your subtask:
 # Back-compat alias
 SYSTEM_PROMPT = SYSTEM_PROMPT_SHARED
 
+BROKER_DECISION_SCHEMA = {
+    "type": "function",
+    "function": {
+        "name": "broker_decision",
+        "description": (
+            "Return a private coordination decision for a brokered write "
+            "negotiation."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "decision": {
+                    "type": "string",
+                    "enum": ["ack", "conflict"],
+                    "description": "ACK if compatible, conflict if unsafe.",
+                },
+                "notes": {
+                    "type": "string",
+                    "description": "Short reason or compatibility contract.",
+                },
+                "contract": {
+                    "type": "string",
+                    "description": "Optional shared contract text.",
+                },
+            },
+            "required": ["decision"],
+        },
+    },
+}
+
+BROKER_SYSTEM_PROMPT = """You are one coding agent in a brokered coordination \
+session. Another agent is trying to commit an overlapping write. Decide whether \
+that write is compatible with your own subtask. Do not solve the task here. \
+Return only a broker_decision tool call.
+
+Your subtask:
+{subtask}
+"""
+
 
 @dataclass
 class AgentResult:
@@ -75,12 +116,15 @@ class Agent:
                  registry: ToolRegistry | None = None,
                  isolation: str = "shared"):
         self.id = agent_id
+        self.subtask = subtask
         self.model = model
         self.strategy = strategy
         self.ws = workspace
         self.log = logger
         self.max_turns = max_turns
         self.registry = registry
+        self._model_lock = asyncio.Lock()
+        self._broker_turn = 0
         prompt_tmpl = (SYSTEM_PROMPT_WORKTREE if isolation == "worktree"
                        else SYSTEM_PROMPT_SHARED)
         self.messages: list[dict] = [
@@ -89,6 +133,7 @@ class Agent:
         ]
         self.prompt_tokens = 0
         self.completion_tokens = 0
+        self.strategy.register_negotiator(self.id, self.negotiate)
 
     def _tool_schemas(self) -> list[dict]:
         schemas = list(FILE_TOOL_SCHEMAS)
@@ -102,7 +147,6 @@ class Agent:
         turn = 0
         try:
             for turn in range(1, self.max_turns + 1):
-                import asyncio
                 await asyncio.sleep(0)
 
                 for note in self.strategy.drain_notifications(self.id):
@@ -110,8 +154,9 @@ class Agent:
                     self.log.log("notification_delivered", agent=self.id,
                                  turn=turn, note=note[:300])
 
-                model_turn = await self.model.complete(
-                    self.messages, self._tool_schemas())
+                async with self._model_lock:
+                    model_turn = await self.model.complete(
+                        self.messages, self._tool_schemas())
                 self.prompt_tokens += model_turn.prompt_tokens
                 self.completion_tokens += model_turn.completion_tokens
                 self.log.log("llm_usage", agent=self.id, turn=turn,
@@ -161,6 +206,33 @@ class Agent:
                          completion_tokens=self.completion_tokens)
         return AgentResult(self.id, status, turn, self.prompt_tokens,
                            self.completion_tokens)
+
+    async def negotiate(self, request: dict[str, Any]) -> dict[str, Any]:
+        """Private broker session used by forced coordination strategies."""
+        self._broker_turn += 1
+        turn = -self._broker_turn
+        messages = [
+            {"role": "system",
+             "content": BROKER_SYSTEM_PROMPT.format(subtask=self.subtask)},
+            {"role": "user", "content": _format_broker_request(request)},
+        ]
+        async with self._model_lock:
+            model_turn = await self.model.complete(messages, [BROKER_DECISION_SCHEMA])
+        self.prompt_tokens += model_turn.prompt_tokens
+        self.completion_tokens += model_turn.completion_tokens
+        self.log.log("llm_usage", agent=self.id, turn=turn,
+                     prompt_tokens=model_turn.prompt_tokens,
+                     completion_tokens=model_turn.completion_tokens,
+                     phase="broker")
+        decision = _parse_broker_decision(model_turn)
+        self.log.log("broker_decision", agent=self.id,
+                     requester=request.get("writer", ""),
+                     contract_id=request.get("contract_id", ""),
+                     path=request.get("path", ""),
+                     decision=decision["decision"],
+                     notes=decision.get("notes", "")[:300],
+                     contract=decision.get("contract", "")[:300])
+        return decision
 
     async def _dispatch(self, tc: ToolCall, turn: int) -> tuple[str, bool]:
         name, args = tc.name, tc.arguments
@@ -237,3 +309,43 @@ def _describe(outcome) -> str:
 def _dump_args(arguments: dict) -> str:
     import json
     return json.dumps(arguments, ensure_ascii=False)
+
+
+def _format_broker_request(request: dict[str, Any]) -> str:
+    symbols = request.get("symbols") or []
+    peer_intents = request.get("peer_intents") or []
+    return (
+        "Brokered write negotiation request:\n"
+        f"- contract_id: {request.get('contract_id', '')}\n"
+        f"- writer: {request.get('writer', '')}\n"
+        f"- path: {request.get('path', '')}\n"
+        f"- mutation_kind: {request.get('mutation_kind', '')}\n"
+        f"- changed_symbols: {', '.join(symbols) or 'unknown'}\n"
+        f"- writer_summary: {request.get('summary', '')}\n"
+        f"- your_related_intents: {peer_intents or 'none recorded'}\n\n"
+        "Call broker_decision with decision='ack' if the proposed write is "
+        "compatible with your subtask. Use decision='conflict' only if the "
+        "write would likely invalidate your work or requires a revised plan."
+    )
+
+
+def _parse_broker_decision(model_turn: ModelTurn) -> dict[str, str]:
+    for call in model_turn.tool_calls:
+        if call.name != "broker_decision":
+            continue
+        decision = str(call.arguments.get("decision") or "").lower()
+        if decision not in {"ack", "conflict"}:
+            decision = "conflict"
+        return {
+            "decision": decision,
+            "notes": str(call.arguments.get("notes") or "")[:500],
+            "contract": str(call.arguments.get("contract") or "")[:500],
+        }
+    text = (model_turn.text or "").lower()
+    if "ack" in text and "conflict" not in text:
+        return {"decision": "ack", "notes": model_turn.text[:500], "contract": ""}
+    return {
+        "decision": "conflict",
+        "notes": (model_turn.text or "broker_decision tool call missing")[:500],
+        "contract": "",
+    }
