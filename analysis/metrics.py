@@ -41,6 +41,22 @@ from harness.task import TASKS_DIR
 STALL_ACTIONS = {"blocked", "lock_timeout", "merge_conflict"}
 REFUSED_WRITE_STATUSES = {"edit_failed", "conflict", "lock_timeout"}
 
+EVENT_PROFILE_SPECS = dict(
+    trials=("correct", "size"),
+    mean_agent_turns=("agent_turns", "mean"),
+    mean_llm_calls=("llm_calls", "mean"),
+    mean_tool_calls=("tool_calls", "mean"),
+    mean_file_reads=("file_read_events", "mean"),
+    mean_write_attempts=("write_events", "mean"),
+    mean_write_applied=("write_applied_events", "mean"),
+    mean_write_refused=("write_refused_events", "mean"),
+    mean_search_events=("search_events", "mean"),
+    mean_coord_events=("coord_events", "mean"),
+    mean_test_runs=("run_tests_events", "mean"),
+    mean_notifications_delivered=("notification_delivered_events", "mean"),
+    mean_tokens_per_agent_turn=("tokens_per_agent_turn", "mean"),
+)
+
 
 def _critical_paths(task_name: str) -> list[str]:
     path = TASKS_DIR / task_name / "collision_map.yaml"
@@ -78,28 +94,55 @@ def trial_metrics(log_path: Path, prices: dict | None = None) -> dict | None:
     stalls: list[dict] = []
     notifications: list[dict] = []
     reads = 0
+    llm_calls = 0
+    tool_calls = 0
+    search_events = 0
+    run_tests_events = 0
+    write_events = 0
+    write_applied_events = 0
+    write_refused_events = 0
+    coord_events = 0
+    notification_delivered_events = 0
+    agent_done_turns: list[int] = []
     read_paths: set[str] = set()
     stall_wait_s = 0.0
 
     for e in events:
-        if e["event"] == "tool_call":
+        event = e["event"]
+        if event == "llm_usage":
+            llm_calls += 1
+        elif event == "tool_call":
+            tool_calls += 1
             current_turn[e["agent"]] = e["turn"]
-        elif e["event"] == "read":
+        elif event == "read":
             reads += 1
             if e.get("path"):
                 read_paths.add(e["path"])
-        elif e["event"] == "write":
+        elif event == "write":
+            write_events += 1
             agent = e["agent"]
             if e["status"] in REFUSED_WRITE_STATUSES:
+                write_refused_events += 1
                 refused_turns.add((agent, current_turn.get(agent, -1)))
             if e["status"] in ("applied", "merged"):
+                write_applied_events += 1
                 writes_by_agent_path[(agent, e["path"])].update(
                     e.get("changed_symbols") or [])
             stall_wait_s += float(e.get("waited_s") or 0.0)
-        elif e["event"] == "coord" and e.get("action") in STALL_ACTIONS:
-            stalls.append(e)
-        elif e["event"] == "coord" and e.get("action") == "notified":
-            notifications.append(e)
+        elif event == "coord":
+            coord_events += 1
+            if e.get("action") in STALL_ACTIONS:
+                stalls.append(e)
+            elif e.get("action") == "notified":
+                notifications.append(e)
+        elif event == "search":
+            search_events += 1
+        elif event == "run_tests":
+            run_tests_events += 1
+        elif event == "notification_delivered":
+            notification_delivered_events += 1
+        elif event == "agent_done":
+            agent_done_turns.append(int(e.get("turns") or 0))
 
     turn_total = sum(turn_tokens.values())
     wasted_tokens = sum(turn_tokens.get(key, 0) for key in refused_turns)
@@ -143,6 +186,12 @@ def trial_metrics(log_path: Path, prices: dict | None = None) -> dict | None:
 
     model = start.get("model", "")
     mode = start.get("mode", "strategy")
+    agent_turns = sum(agent_done_turns) if agent_done_turns else llm_calls
+    mean_agent_turns = (
+        agent_turns / len(start.get("agent_ids") or [])
+        if start.get("agent_ids") else 0.0
+    )
+    total_tokens = prompt_tokens + completion_tokens
     return {
         "task": start["task"],
         "failure_mode": start.get("failure_mode", ""),
@@ -159,7 +208,7 @@ def trial_metrics(log_path: Path, prices: dict | None = None) -> dict | None:
         "wall_clock_s": float(end.get("wall_clock_s", 0.0)),
         "prompt_tokens": prompt_tokens,
         "completion_tokens": completion_tokens,
-        "total_tokens": prompt_tokens + completion_tokens,
+        "total_tokens": total_tokens,
         "estimated_usd": round(
             estimate_usd(prices, model, prompt_tokens, completion_tokens), 6),
         "wasted_tokens": wasted_tokens,
@@ -171,6 +220,21 @@ def trial_metrics(log_path: Path, prices: dict | None = None) -> dict | None:
         "fp_notify_events": len(notifications) if benign else 0,
         "stall_wait_s": round(stall_wait_s, 3),
         "reads_observed": reads,
+        "llm_calls": llm_calls,
+        "tool_calls": tool_calls,
+        "file_read_events": reads,
+        "write_events": write_events,
+        "write_applied_events": write_applied_events,
+        "write_refused_events": write_refused_events,
+        "search_events": search_events,
+        "coord_events": coord_events,
+        "run_tests_events": run_tests_events,
+        "notification_delivered_events": notification_delivered_events,
+        "agent_turns": agent_turns,
+        "mean_agent_turns": mean_agent_turns,
+        "tokens_per_agent_turn": (
+            total_tokens / agent_turns if agent_turns else 0.0
+        ),
         "read_set_visibility": 1.0,
         "critical_paths_read_fraction": critical_frac,
         "timed_out": timed_out,
@@ -197,6 +261,156 @@ def run_dataframe(run_dir: Path, prices: dict | None = None) -> pd.DataFrame:
             row["run_dir"] = str(run_dir)
             rows.append(row)
     return pd.DataFrame(rows)
+
+
+def agent_activity_dataframe(run_dir: Path) -> pd.DataFrame:
+    """Return one row per agent per trial with event counts from JSONL logs."""
+    run_dir = Path(run_dir)
+    meta = _run_meta(run_dir)
+    run_id = str(meta.get("run_id") or run_dir.name)
+    provider = str(meta.get("provider") or _infer_provider(meta.get("model", "")))
+    rows = []
+    for log in sorted(run_dir.glob("*.jsonl")):
+        rows.extend(_agent_activity_rows(log, run_id=run_id, provider=provider,
+                                         run_dir=run_dir))
+    return pd.DataFrame(rows)
+
+
+def _agent_activity_rows(
+    log_path: Path,
+    *,
+    run_id: str,
+    provider: str,
+    run_dir: Path,
+) -> list[dict]:
+    try:
+        events = read_events(log_path)
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    start = next((e for e in events if e.get("event") == "trial_start"), None)
+    end = next((e for e in events if e.get("event") == "trial_end"), None)
+    if start is None or end is None:
+        return []
+
+    agent_ids = list(start.get("agent_ids") or [])
+    if not agent_ids:
+        agent_ids = sorted({
+            str(e.get("agent"))
+            for e in events
+            if e.get("agent")
+        })
+
+    statuses = dict(end.get("agent_statuses", {}) or {})
+    by_agent = {
+        agent: {
+            "run_id": run_id,
+            "provider": provider,
+            "run_dir": str(run_dir),
+            "log": log_path.name,
+            "task": start.get("task", ""),
+            "failure_mode": start.get("failure_mode", ""),
+            "benign": bool(start.get("benign", False)),
+            "strategy": start.get("strategy", ""),
+            "mode": start.get("mode", "strategy"),
+            "adapter": start.get("adapter", ""),
+            "n_agents": start.get("n_agents", len(agent_ids)),
+            "rep": start.get("rep", 0),
+            "model": start.get("model", ""),
+            "agent": agent,
+            "status": statuses.get(agent, ""),
+            "turns": 0,
+            "llm_calls": 0,
+            "tool_calls": 0,
+            "file_reads": 0,
+            "write_attempts": 0,
+            "write_applied": 0,
+            "write_refused": 0,
+            "search_events": 0,
+            "run_tests": 0,
+            "notifications_delivered": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+        }
+        for agent in agent_ids
+    }
+
+    def row_for(event: dict) -> dict | None:
+        agent = event.get("agent")
+        if not agent:
+            return None
+        return by_agent.setdefault(str(agent), {
+            "run_id": run_id,
+            "provider": provider,
+            "run_dir": str(run_dir),
+            "log": log_path.name,
+            "task": start.get("task", ""),
+            "failure_mode": start.get("failure_mode", ""),
+            "benign": bool(start.get("benign", False)),
+            "strategy": start.get("strategy", ""),
+            "mode": start.get("mode", "strategy"),
+            "adapter": start.get("adapter", ""),
+            "n_agents": start.get("n_agents", len(agent_ids)),
+            "rep": start.get("rep", 0),
+            "model": start.get("model", ""),
+            "agent": str(agent),
+            "status": statuses.get(str(agent), ""),
+            "turns": 0,
+            "llm_calls": 0,
+            "tool_calls": 0,
+            "file_reads": 0,
+            "write_attempts": 0,
+            "write_applied": 0,
+            "write_refused": 0,
+            "search_events": 0,
+            "run_tests": 0,
+            "notifications_delivered": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+        })
+
+    for event in events:
+        row = row_for(event)
+        if row is None:
+            continue
+        kind = event.get("event")
+        if kind == "llm_usage":
+            row["llm_calls"] += 1
+            prompt = int(event.get("prompt_tokens") or 0)
+            completion = int(event.get("completion_tokens") or 0)
+            row["prompt_tokens"] += prompt
+            row["completion_tokens"] += completion
+            row["total_tokens"] += prompt + completion
+        elif kind == "tool_call":
+            row["tool_calls"] += 1
+        elif kind == "read":
+            row["file_reads"] += 1
+        elif kind == "write":
+            row["write_attempts"] += 1
+            status = event.get("status")
+            if status in ("applied", "merged"):
+                row["write_applied"] += 1
+            elif status in REFUSED_WRITE_STATUSES:
+                row["write_refused"] += 1
+        elif kind == "search":
+            row["search_events"] += 1
+        elif kind == "run_tests":
+            row["run_tests"] += 1
+        elif kind == "notification_delivered":
+            row["notifications_delivered"] += 1
+        elif kind == "agent_done":
+            row["status"] = event.get("status") or row["status"]
+            row["turns"] = int(event.get("turns") or row["turns"] or 0)
+
+    for row in by_agent.values():
+        if not row["turns"]:
+            row["turns"] = row["llm_calls"]
+        if not row["status"]:
+            row["status"] = statuses.get(row["agent"], "unknown")
+
+    return list(by_agent.values())
 
 
 def _run_meta(run_dir: Path) -> dict:
@@ -245,6 +459,13 @@ def _round_agg(agg: pd.DataFrame) -> pd.DataFrame:
     return agg
 
 
+def _round_event_profile(table: pd.DataFrame) -> pd.DataFrame:
+    for col in table.columns:
+        if col.startswith("mean_"):
+            table[col] = table[col].round(2)
+    return table
+
+
 _AGG_SPECS = dict(
     trials=("correct", "size"),
     correct_rate=("correct", "mean"),
@@ -289,3 +510,24 @@ def aggregate_by_strategy(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
     return _round_agg(_groupby_metrics(df, ["strategy"]))
+
+
+def event_profile_by_strategy(df: pd.DataFrame) -> pd.DataFrame:
+    """Event and turn rollup: one row per strategy."""
+    if df.empty:
+        return df
+    specs = {"n_tasks": ("task", "nunique"), **EVENT_PROFILE_SPECS}
+    return _round_event_profile(
+        df.groupby(["strategy"], dropna=False).agg(**specs).reset_index()
+    )
+
+
+def event_profile_by_task_strategy(df: pd.DataFrame) -> pd.DataFrame:
+    """Event and turn rollup: one row per task/strategy/n_agents cell."""
+    if df.empty:
+        return df
+    return _round_event_profile(
+        df.groupby(["task", "strategy", "n_agents"], dropna=False)
+        .agg(**EVENT_PROFILE_SPECS)
+        .reset_index()
+    )

@@ -10,6 +10,8 @@ from analysis.metrics import (
     aggregate,
     aggregate_by_strategy,
     aggregate_overall,
+    agent_activity_dataframe,
+    event_profile_by_strategy,
     level_a_dataframe,
     run_dataframe,
 )
@@ -144,6 +146,93 @@ def test_run_dataframe_adds_run_metadata(tmp_path):
     assert df["run_dir"].tolist() == [str(tmp_path)]
 
 
+def test_trial_metrics_include_event_profile_counts(tmp_path):
+    _write_log(tmp_path / "events.jsonl", [
+        _start(strategy="file_lock"),
+        {"ts": 1, "event": "llm_usage", "agent": "agent-slugify", "turn": 1,
+         "prompt_tokens": 100, "completion_tokens": 20},
+        {"ts": 1.1, "event": "tool_call", "agent": "agent-slugify",
+         "turn": 1, "tool": "grep", "args": {"pattern": "slug"}},
+        {"ts": 1.2, "event": "search", "agent": "agent-slugify",
+         "kind": "grep", "pattern": "slug", "n": 2},
+        {"ts": 1.3, "event": "tool_call", "agent": "agent-slugify",
+         "turn": 1, "tool": "read_file", "args": {"path": "x.py"}},
+        {"ts": 1.4, "event": "read", "agent": "agent-slugify",
+         "path": "x.py", "found": True, "size": 10},
+        {"ts": 1.5, "event": "tool_call", "agent": "agent-slugify",
+         "turn": 1, "tool": "edit_file", "args": {"path": "x.py"}},
+        {"ts": 1.6, "event": "coord", "strategy": "file_lock",
+         "action": "blocked", "agent": "agent-slugify", "path": "x.py",
+         "holder": "agent-truncate"},
+        {"ts": 1.7, "event": "write", "agent": "agent-slugify",
+         "path": "x.py", "kind": "replace", "status": "lock_timeout",
+         "waited_s": 1.0, "changed_symbols": []},
+        {"ts": 1.8, "event": "agent_done", "agent": "agent-slugify",
+         "status": "done", "turns": 1, "prompt_tokens": 100,
+         "completion_tokens": 20},
+        {"ts": 1.9, "event": "agent_done", "agent": "agent-truncate",
+         "status": "done", "turns": 0, "prompt_tokens": 0,
+         "completion_tokens": 0},
+        _end(prompt_tokens=100, completion_tokens=20),
+    ])
+
+    df = run_dataframe(tmp_path, prices=DEFAULT_PRICES)
+    row = df.iloc[0]
+    assert row["llm_calls"] == 1
+    assert row["tool_calls"] == 3
+    assert row["file_read_events"] == 1
+    assert row["write_events"] == 1
+    assert row["write_refused_events"] == 1
+    assert row["search_events"] == 1
+    assert row["coord_events"] == 1
+    assert row["agent_turns"] == 1
+    assert row["tokens_per_agent_turn"] == 120
+
+    profile = event_profile_by_strategy(df)
+    assert profile.iloc[0]["mean_tool_calls"] == 3
+    assert profile.iloc[0]["mean_write_refused"] == 1
+
+
+def test_agent_activity_dataframe_attributes_events_to_agents(tmp_path):
+    _write_log(tmp_path / "agents.jsonl", [
+        _start(strategy="notify"),
+        {"ts": 1, "event": "llm_usage", "agent": "agent-slugify", "turn": 1,
+         "prompt_tokens": 100, "completion_tokens": 20},
+        {"ts": 1.1, "event": "tool_call", "agent": "agent-slugify",
+         "turn": 1, "tool": "read_file", "args": {"path": "x.py"}},
+        {"ts": 1.2, "event": "read", "agent": "agent-slugify",
+         "path": "x.py", "found": True, "size": 10},
+        {"ts": 1.3, "event": "llm_usage", "agent": "agent-truncate",
+         "turn": 1, "prompt_tokens": 50, "completion_tokens": 10},
+        {"ts": 1.4, "event": "tool_call", "agent": "agent-truncate",
+         "turn": 1, "tool": "write_file", "args": {"path": "x.py"}},
+        {"ts": 1.5, "event": "write", "agent": "agent-truncate",
+         "path": "x.py", "kind": "overwrite", "status": "applied",
+         "waited_s": 0, "changed_symbols": ["helper"]},
+        {"ts": 1.6, "event": "notification_delivered",
+         "agent": "agent-slugify", "turn": 2, "note": "x.py changed"},
+        {"ts": 1.7, "event": "agent_done", "agent": "agent-slugify",
+         "status": "done", "turns": 2, "prompt_tokens": 100,
+         "completion_tokens": 20},
+        {"ts": 1.8, "event": "agent_done", "agent": "agent-truncate",
+         "status": "done", "turns": 1, "prompt_tokens": 50,
+         "completion_tokens": 10},
+        _end(prompt_tokens=150, completion_tokens=30),
+    ])
+
+    activity = agent_activity_dataframe(tmp_path)
+
+    assert set(activity["agent"]) == {"agent-slugify", "agent-truncate"}
+    slugify = activity[activity["agent"] == "agent-slugify"].iloc[0]
+    truncate = activity[activity["agent"] == "agent-truncate"].iloc[0]
+    assert slugify["file_reads"] == 1
+    assert slugify["notifications_delivered"] == 1
+    assert slugify["turns"] == 2
+    assert truncate["write_attempts"] == 1
+    assert truncate["write_applied"] == 1
+    assert truncate["total_tokens"] == 60
+
+
 def test_html_report_contains_labels_and_sections(tmp_path):
     _write_log(tmp_path / "ok.jsonl", [_start(), _end()])
     df = run_dataframe(tmp_path, prices=DEFAULT_PRICES)
@@ -168,6 +257,10 @@ def test_html_report_contains_labels_and_sections(tmp_path):
     assert "heatColorForScore" in html
     assert "metricSelect" in html
     assert "Clear filters" in html
+    assert "Event Profile" in html
+    assert "eventMixChart" in html
+    assert "Agent Activity" in html
+    assert "agentActivityTable" in html
     assert "Task x Strategy Grid" in html
     assert "Trial Logs" in html
     assert "racebench-data" in html

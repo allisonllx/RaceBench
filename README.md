@@ -53,6 +53,7 @@ python -m analysis.make_report results/grid-v1
 | Wasted-work rate | tokens burned on blocked, conflicted, or failed actions |
 | **False-positive stall rate** | coordination triggered on provably-disjoint edits (nobody reports this today) |
 | Read-set visibility | fraction of agent reads the coordination layer can observe |
+| Event / turn profile | diagnostic counts for LLM calls, tool calls, reads, writes, searches, coordination events, and per-agent activity |
 
 The headline comparison table (Levels A and B below) holds agent tools, tasks, and
 event logging fixed and swaps only the coordination mechanism.
@@ -203,7 +204,7 @@ python -m runner.run_grid --config runner/config.example.yaml
 # optional: override concurrent trials (config default: parallel: 4)
 # python -m runner.run_grid --config runner/config.example.yaml --parallel 8
 
-# validate replay logs, then regenerate tables, CI intervals, plots, and report.html
+# validate replay logs, then regenerate tables, CI intervals, event profiles, plots, and report.html
 python -m analysis.validate_logs results/grid-v1 --expect-trials 480
 python -m analysis.make_report results/grid-v1
 # optional: pass the runner config that holds prices:
@@ -252,6 +253,13 @@ solo-versus-parallel tables. The provider comparison answers whether strategy
 rankings are stable across model providers. The solo comparison answers whether
 a task fails because of coordination races or because one agent could not solve
 the task even without concurrency.
+
+`analysis.make_report` also writes `event_profile_by_strategy.*`,
+`event_profile_by_task_strategy.*`, and `agent_activity.*`. These tables are
+diagnostics: they explain where a result came from by showing event mix, turn
+count, and which agent read, wrote, searched, or spent tokens. Keep them
+separate from Level C external-runtime comparisons unless the adapter emits the
+same RaceBench event schema.
 
 ## Repo layout
 

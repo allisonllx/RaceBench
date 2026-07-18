@@ -48,6 +48,9 @@ def write_html_report(
     overall: pd.DataFrame,
     by_strategy: pd.DataFrame,
     by_strategy_ci: pd.DataFrame | None = None,
+    event_by_strategy: pd.DataFrame | None = None,
+    event_by_task_strategy: pd.DataFrame | None = None,
+    agent_activity: pd.DataFrame | None = None,
 ) -> Path:
     """Write a dependency-free HTML report next to the CSV/Markdown tables."""
     out_dir = Path(out_dir)
@@ -61,6 +64,13 @@ def write_html_report(
         "byStrategy": _records(by_strategy),
         "byStrategyCi": _records(
             by_strategy_ci if by_strategy_ci is not None else pd.DataFrame()),
+        "eventByStrategy": _records(
+            event_by_strategy if event_by_strategy is not None else pd.DataFrame()),
+        "eventByTaskStrategy": _records(
+            event_by_task_strategy
+            if event_by_task_strategy is not None else pd.DataFrame()),
+        "agentActivity": _records(
+            agent_activity if agent_activity is not None else pd.DataFrame()),
     }
     payload = json.dumps(all_data, ensure_ascii=False)
 
@@ -146,7 +156,7 @@ def write_html_report(
     function matches(row) {
       const haystack = [
         row.task, row.strategy, row.failure_mode, row.log, row.model, row.mode,
-        row.adapter, row.n_agents
+        row.adapter, row.n_agents, row.agent, row.status
       ].map(v => String(v ?? "")).join(" ").toLowerCase();
       return (!filters.task.value || row.task === filters.task.value)
         && (!filters.strategy.value || row.strategy === filters.strategy.value)
@@ -158,6 +168,9 @@ def write_html_report(
     }
     function filteredExternal() {
       return data.externalTrials.filter(matches);
+    }
+    function filteredAgentActivity() {
+      return data.agentActivity.filter(matches);
     }
     function summarizeRows(rows) {
       const correct = rows.filter(row => row.correct).length;
@@ -173,6 +186,18 @@ def write_html_report(
         fp_stalls_per_trial: avg(rows, "fp_stall_events"),
         notifies_per_trial: avg(rows, "notify_events"),
         mean_stall_wait_s: avg(rows, "stall_wait_s"),
+        mean_agent_turns: avg(rows, "agent_turns"),
+        mean_llm_calls: avg(rows, "llm_calls"),
+        mean_tool_calls: avg(rows, "tool_calls"),
+        mean_file_reads: avg(rows, "file_read_events"),
+        mean_write_attempts: avg(rows, "write_events"),
+        mean_write_applied: avg(rows, "write_applied_events"),
+        mean_write_refused: avg(rows, "write_refused_events"),
+        mean_search_events: avg(rows, "search_events"),
+        mean_coord_events: avg(rows, "coord_events"),
+        mean_test_runs: avg(rows, "run_tests_events"),
+        mean_notifications_delivered: avg(rows, "notification_delivered_events"),
+        mean_tokens_per_agent_turn: avg(rows, "tokens_per_agent_turn"),
       };
     }
     function summarize(rows, keys) {
@@ -331,13 +356,92 @@ def write_html_report(
       });
     }
 
+    const eventMixKeys = [
+      {key: "mean_llm_calls", label: "LLM", color: "#0f766e"},
+      {key: "mean_tool_calls", label: "tool", color: "#42526e"},
+      {key: "mean_file_reads", label: "read", color: "#2f80ed"},
+      {key: "mean_write_attempts", label: "write", color: "#d25b3d"},
+      {key: "mean_search_events", label: "search", color: "#c98a00"},
+      {key: "mean_coord_events", label: "coord", color: "#9f2d55"},
+    ];
+    function renderEventMix(rollup, rows) {
+      const target = document.getElementById("eventMixChart");
+      const meta = document.getElementById("eventMixMeta");
+      if (!rollup.length) {
+        meta.textContent = "0 trials";
+        target.innerHTML = '<div class="empty">No event data for this view.</div>';
+        return;
+      }
+      const sorted = [...rollup].sort((a, b) => String(a.strategy).localeCompare(String(b.strategy)));
+      const totals = sorted.map(row => eventMixKeys.reduce(
+        (acc, item) => acc + toNumber(row[item.key]), 0));
+      const maxTotal = Math.max(...totals, 0.001);
+      meta.textContent = `${rows.length} trials; mean event records per trial`;
+      const legend = `<div class="event-legend">${eventMixKeys.map(item =>
+        `<span><i style="background:${item.color}"></i>${esc(item.label)}</span>`
+      ).join("")}</div>`;
+      target.innerHTML = `<div class="stack-list">${sorted.map((row, index) => {
+        const total = eventMixKeys.reduce((acc, item) => acc + toNumber(row[item.key]), 0);
+        const barWidth = Math.max(2, Math.min(100, (total / maxTotal) * 100));
+        const segments = eventMixKeys.map(item => {
+          const value = toNumber(row[item.key]);
+          const width = total ? Math.max(0, (value / total) * 100) : 0;
+          const title = `${row.strategy}: ${fmt(value, 2)} ${item.label} event(s) per trial`;
+          return `<span class="stack-segment" title="${attr(title)}" style="width:${width}%;background:${item.color}"></span>`;
+        }).join("");
+        return `<button type="button" class="stack-row" data-strategy="${attr(row.strategy)}">
+          <span class="stack-label">${esc(row.strategy)}</span>
+          <span class="stack-track"><span class="stack-fill" style="width:${barWidth}%;--delay:${index * 55}ms">${segments}</span></span>
+          <span class="stack-value">${esc(fmt(total, 1))}</span>
+        </button>`;
+      }).join("")}</div>${legend}`;
+      target.querySelectorAll("[data-strategy]").forEach(button => {
+        button.addEventListener("click", () => {
+          filters.strategy.value = button.dataset.strategy;
+          render();
+        });
+      });
+    }
+
+    function renderTurnChart(rollup, rows) {
+      const target = document.getElementById("turnChart");
+      const meta = document.getElementById("turnChartMeta");
+      if (!rollup.length) {
+        meta.textContent = "0 trials";
+        target.innerHTML = '<div class="empty">No turn data for this view.</div>';
+        return;
+      }
+      const sorted = [...rollup].sort(
+        (a, b) => toNumber(b.mean_agent_turns) - toNumber(a.mean_agent_turns));
+      const max = Math.max(...sorted.map(row => toNumber(row.mean_agent_turns)), 0.001);
+      meta.textContent = `${rows.length} trials; mean total turns across agents`;
+      target.innerHTML = `<div class="bar-list compact">${sorted.map((row, index) => {
+        const value = toNumber(row.mean_agent_turns);
+        const width = Math.max(2, Math.min(100, (value / max) * 100));
+        return `<button type="button" class="bar-row" data-strategy="${attr(row.strategy)}">
+          <span class="bar-label">${esc(row.strategy)}</span>
+          <span class="bar-track"><span class="bar-fill amber" style="width:${width}%;--delay:${index * 45}ms"></span></span>
+          <span class="bar-value">${esc(fmt(value, 1))}</span>
+        </button>`;
+      }).join("")}</div>`;
+      target.querySelectorAll("[data-strategy]").forEach(button => {
+        button.addEventListener("click", () => {
+          filters.strategy.value = button.dataset.strategy;
+          render();
+        });
+      });
+    }
+
     function render() {
       const trials = filteredTrials();
+      const agentRows = filteredAgentActivity();
       const strategyRollup = summarize(trials, ["strategy"]);
       const taskStrategy = summarize(trials, ["task", "strategy", "n_agents"]);
       renderStrategyChart(strategyRollup, trials);
       renderDonut(trials);
       renderHeatmap(trials);
+      renderEventMix(strategyRollup, trials);
+      renderTurnChart(strategyRollup, trials);
       table("strategyTable", [
         {key: "strategy", label: "strategy"},
         {key: "n_tasks", label: "tasks", num: true},
@@ -347,6 +451,33 @@ def write_html_report(
         {key: "mean_tokens", label: "tokens", num: true, render: r => esc(fmt(r.mean_tokens, 0))},
         {key: "fp_stalls_per_trial", label: "FP stalls", num: true, render: r => esc(fmt(r.fp_stalls_per_trial))},
       ], strategyRollup);
+      table("eventProfileTable", [
+        {key: "strategy", label: "strategy"},
+        {key: "trials", label: "trials", num: true},
+        {key: "mean_agent_turns", label: "turns", num: true, render: r => esc(fmt(r.mean_agent_turns, 2))},
+        {key: "mean_llm_calls", label: "LLM", num: true, render: r => esc(fmt(r.mean_llm_calls, 2))},
+        {key: "mean_tool_calls", label: "tools", num: true, render: r => esc(fmt(r.mean_tool_calls, 2))},
+        {key: "mean_file_reads", label: "reads", num: true, render: r => esc(fmt(r.mean_file_reads, 2))},
+        {key: "mean_write_attempts", label: "writes", num: true, render: r => esc(fmt(r.mean_write_attempts, 2))},
+        {key: "mean_search_events", label: "search", num: true, render: r => esc(fmt(r.mean_search_events, 2))},
+        {key: "mean_coord_events", label: "coord", num: true, render: r => esc(fmt(r.mean_coord_events, 2))},
+        {key: "mean_tokens_per_agent_turn", label: "tokens / turn", num: true, render: r => esc(fmt(r.mean_tokens_per_agent_turn, 0))},
+      ], strategyRollup);
+      table("agentActivityTable", [
+        {key: "task", label: "task"},
+        {key: "strategy", label: "strategy"},
+        {key: "rep", label: "rep", num: true},
+        {key: "agent", label: "agent"},
+        {key: "status", label: "status"},
+        {key: "turns", label: "turns", num: true},
+        {key: "llm_calls", label: "LLM", num: true},
+        {key: "tool_calls", label: "tools", num: true},
+        {key: "file_reads", label: "reads", num: true},
+        {key: "write_attempts", label: "writes", num: true},
+        {key: "search_events", label: "search", num: true},
+        {key: "total_tokens", label: "tokens", num: true, render: r => esc(fmt(r.total_tokens, 0))},
+        {key: "log", label: "log", render: logLink},
+      ], agentRows);
       table("aggregateTable", [
         {key: "task", label: "task"},
         {key: "strategy", label: "strategy"},
@@ -770,6 +901,7 @@ def write_html_report(
       from {{ transform: scaleX(0); }}
       to {{ transform: scaleX(1); }}
     }}
+    .bar-fill.amber {{ background: #c98a00; }}
     .bar-value {{
       color: var(--muted);
       text-align: right;
@@ -832,6 +964,78 @@ def write_html_report(
       align-items: center;
       gap: 8px;
       font-size: 13px;
+    }}
+    .stack-list {{ display: grid; gap: 10px; }}
+    .stack-row {{
+      display: grid;
+      grid-template-columns: minmax(90px, 150px) minmax(160px, 1fr) 58px;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      border: 0;
+      padding: 4px 0;
+      text-align: left;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 550;
+      border-radius: 4px;
+    }}
+    .stack-row:hover {{ color: var(--accent-ink); background: transparent; }}
+    .stack-label {{
+      font-family: var(--font-mono);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+    .stack-track {{
+      height: 12px;
+      border-radius: 2px;
+      overflow: hidden;
+      background: #e4e7ee;
+    }}
+    .stack-fill {{
+      display: flex;
+      height: 100%;
+      min-width: 2px;
+      overflow: hidden;
+      border-radius: inherit;
+      transform-origin: left center;
+      animation: growBar 760ms var(--ease) both;
+      animation-delay: var(--delay, 0ms);
+    }}
+    .stack-segment {{
+      display: block;
+      height: 100%;
+      min-width: 1px;
+    }}
+    .stack-value {{
+      color: var(--muted);
+      text-align: right;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+    }}
+    .event-legend {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }}
+    .event-legend span {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }}
+    .event-legend i {{
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
     }}
     .swatch {{
       width: 10px;
@@ -966,6 +1170,7 @@ def write_html_report(
       .dashboard {{ grid-template-columns: 1fr; }}
       .donut-layout {{ grid-template-columns: 1fr; justify-items: center; }}
       .bar-row {{ grid-template-columns: 92px minmax(90px, 1fr) 58px; }}
+      .stack-row {{ grid-template-columns: 92px minmax(90px, 1fr) 50px; }}
     }}
     @media (prefers-reduced-motion: reduce) {{
       *, *::before, *::after {{
@@ -1011,7 +1216,7 @@ def write_html_report(
           <option value="fp_stalls_per_trial">False-positive stalls</option>
         </select>
       </label>
-      <label>Search <input id="searchFilter" type="search" placeholder="task, strategy, log"></label>
+      <label>Search <input id="searchFilter" type="search" placeholder="task, strategy, agent, log"></label>
       <button class="clear-btn" id="clearFilters" type="button">Clear filters</button>
     </section>
 
@@ -1042,6 +1247,34 @@ def write_html_report(
         <div id="heatmapChart"></div>
       </article>
     </section>
+
+    <div class="section-label">
+      <h2>Event Profile</h2>
+      <span class="section-kicker">Level A diagnostics</span>
+    </div>
+    <section class="dashboard" aria-label="event profile dashboard">
+      <article class="chart-card">
+        <div class="chart-head">
+          <span class="chart-title">Event Mix by Strategy</span>
+          <span class="chart-meta" id="eventMixMeta"></span>
+        </div>
+        <div id="eventMixChart"></div>
+      </article>
+      <article class="chart-card">
+        <div class="chart-head">
+          <span class="chart-title">Turns by Strategy</span>
+          <span class="chart-meta" id="turnChartMeta"></span>
+        </div>
+        <div id="turnChart"></div>
+      </article>
+    </section>
+    <div class="table-wrap" id="eventProfileTable"></div>
+
+    <div class="section-label">
+      <h2>Agent Activity</h2>
+      <span class="section-kicker">Who did what</span>
+    </div>
+    <div class="table-wrap" id="agentActivityTable"></div>
 
     <div class="section-label">
       <h2>Strategy Rollup</h2>

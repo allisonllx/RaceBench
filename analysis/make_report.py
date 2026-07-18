@@ -29,6 +29,9 @@ from analysis.metrics import (
     aggregate,
     aggregate_by_strategy,
     aggregate_overall,
+    agent_activity_dataframe,
+    event_profile_by_strategy,
+    event_profile_by_task_strategy,
     level_a_dataframe,
     run_dataframe,
 )
@@ -92,6 +95,13 @@ def main(argv: list[str] | None = None) -> int:
     agg = aggregate(level_a)
     overall = aggregate_overall(level_a)
     by_strategy = aggregate_by_strategy(level_a)
+    event_by_strategy = event_profile_by_strategy(level_a)
+    event_by_task_strategy = event_profile_by_task_strategy(level_a)
+    agent_frames = [agent_activity_dataframe(Path(d)) for d in args.run_dirs]
+    agent_activity = (
+        pd.concat([f for f in agent_frames if not f.empty], ignore_index=True)
+        if any(not f.empty for f in agent_frames) else pd.DataFrame()
+    )
     ci = confidence_tables(level_a)
 
     print("=== per task × strategy × n_agents ===")
@@ -100,6 +110,15 @@ def main(argv: list[str] | None = None) -> int:
     print(_write_table(overall, out_dir, "comparison_table_overall"))
     print("\n=== overall (all tasks, all n) × strategy ===")
     print(_write_table(by_strategy, out_dir, "comparison_table_by_strategy"))
+    print("\n=== event profile × strategy ===")
+    print(_write_table(event_by_strategy, out_dir, "event_profile_by_strategy"))
+    print("\n=== event profile × task × strategy × n_agents ===")
+    print(_write_table(
+        event_by_task_strategy, out_dir, "event_profile_by_task_strategy"))
+    print("\n=== agent activity ===")
+    _write_table(agent_activity, out_dir, "agent_activity")
+    print(f"agent_activity -> {out_dir}/agent_activity.csv|.md "
+          f"({len(agent_activity)} rows)")
     print("\n=== bootstrap confidence intervals ===")
     for stem, table in ci.items():
         print(f"{stem} -> {out_dir}/{stem}.csv|.md")
@@ -120,11 +139,16 @@ def main(argv: list[str] | None = None) -> int:
         overall=overall,
         by_strategy=by_strategy,
         by_strategy_ci=ci.get("comparison_table_by_strategy_ci"),
+        event_by_strategy=event_by_strategy,
+        event_by_task_strategy=event_by_task_strategy,
+        agent_activity=agent_activity,
     )
     print(f"\nper-trial rows: {len(df)}  ->  {out_dir}/trials.csv")
     print(f"per-task table -> {out_dir}/comparison_table.csv|.md")
     print(f"overall table  -> {out_dir}/comparison_table_overall.csv|.md")
     print(f"by-strategy    -> {out_dir}/comparison_table_by_strategy.csv|.md")
+    print(f"event profile  -> {out_dir}/event_profile_by_strategy.csv|.md")
+    print(f"agent activity -> {out_dir}/agent_activity.csv|.md")
     print(f"static explorer -> {html}")
     print(f"run cost (priced trials): ${total_usd:.2f}  ({int(total_tokens):,} tokens)")
     for f in figures:
