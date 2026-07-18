@@ -37,6 +37,8 @@ def _write_log(
     wall_clock_s: float = 10.0,
     prompt_tokens: int = 100,
     completion_tokens: int = 10,
+    agent_turns: int = 0,
+    tool_calls: int = 0,
 ) -> None:
     events = [
         {
@@ -51,7 +53,27 @@ def _write_log(
             "model": model,
             "agent_ids": [f"agent-{i}" for i in range(n_agents)],
         },
-        {
+    ]
+    for index in range(tool_calls):
+        events.append({
+            "ts": 0.2 + index / 100,
+            "event": "tool_call",
+            "agent": "agent-0",
+            "turn": index + 1,
+            "tool": "list_files",
+            "args": {},
+        })
+    if agent_turns:
+        events.append({
+            "ts": 0.8,
+            "event": "agent_done",
+            "agent": "agent-0",
+            "status": "done",
+            "turns": agent_turns,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+        })
+    events.append({
             "ts": 1,
             "event": "trial_end",
             "correct": correct,
@@ -63,8 +85,7 @@ def _write_log(
             "agent_statuses": {
                 f"agent-{i}": "done" for i in range(n_agents)
             },
-        },
-    ]
+        })
     (run_dir / name).write_text(
         "\n".join(json.dumps(e) for e in events) + "\n",
         encoding="utf-8",
@@ -79,12 +100,14 @@ def test_provider_tables_use_shared_cells_only(tmp_path):
     _write_run_meta(agnes, run_id="grid-v1-agnes-sensitivity",
                     provider="agnes", model="agnes-2.0-flash")
     _write_log(openai, "t01__naive-r0.jsonl", correct=True,
-               wall_clock_s=10.0, prompt_tokens=100, completion_tokens=10)
+               wall_clock_s=10.0, prompt_tokens=100, completion_tokens=10,
+               agent_turns=8, tool_calls=6)
     _write_log(openai, "t02__naive-r0.jsonl", task="t02_benign_overlap",
                correct=True, wall_clock_s=8.0)
     _write_log(agnes, "t01__naive-r0.jsonl", model="agnes-2.0-flash",
                correct=False, wall_clock_s=20.0,
-               prompt_tokens=200, completion_tokens=20)
+               prompt_tokens=200, completion_tokens=20,
+               agent_turns=5, tool_calls=3)
 
     tables = build_provider_tables([openai, agnes])
 
@@ -97,8 +120,11 @@ def test_provider_tables_use_shared_cells_only(tmp_path):
     row = delta.iloc[0]
     assert row["strategy"] == "naive"
     assert row["compare_provider"] == "agnes"
+    assert row["direction"] == "grid-v1-agnes-sensitivity vs grid-v1"
     assert row["delta_correct_rate"] == -1.0
     assert row["delta_mean_wall_s"] == -10.0
+    assert row["delta_mean_agent_turns"] == 3.0
+    assert row["delta_mean_tool_calls"] == 3.0
 
 
 def test_solo_tables_compare_calibration_against_parallel(tmp_path):
@@ -120,6 +146,7 @@ def test_solo_tables_compare_calibration_against_parallel(tmp_path):
     by_cell = tables["solo_vs_parallel"]
     assert set(by_cell["strategy"]) == {"naive", "file_lock"}
     naive = by_cell[by_cell["strategy"] == "naive"].iloc[0]
+    assert naive["direction"] == "grid-v1 vs grid-v1-calibration"
     assert naive["delta_correct_rate"] == -1.0
     assert naive["delta_mean_wall_s"] == 10.0
 
@@ -152,3 +179,13 @@ def test_compare_runs_cli_writes_tables(tmp_path):
     assert (out / "provider_comparison.csv").is_file()
     assert (out / "provider_delta_by_strategy.md").is_file()
     assert (out / "solo_vs_parallel.csv").is_file()
+    html = (out / "dashboard.html").read_text(encoding="utf-8")
+    assert "Cross-Run Dashboard" in html
+    assert "Provider Sensitivity" in html
+    assert "Provider Advantage by Strategy" in html
+    assert "Solo vs Parallel" in html
+    assert "Parallel Advantage by Strategy" in html
+    assert "Turns per trial" in html
+    assert "Provider advantage" in html
+    assert "direction" in html
+    assert "providerDeltaChart" in html

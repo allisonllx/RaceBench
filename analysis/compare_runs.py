@@ -19,6 +19,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from analysis.cross_run_html import write_cross_run_dashboard
 from analysis.metrics import level_a_dataframe, run_dataframe
 
 CELL_KEYS = ["task", "strategy", "n_agents"]
@@ -31,6 +32,14 @@ METRIC_COLUMNS = [
     "wasted_rate",
     "stalls_per_trial",
     "fp_stalls_per_trial",
+    "mean_agent_turns",
+    "mean_llm_calls",
+    "mean_tool_calls",
+    "mean_file_reads",
+    "mean_write_attempts",
+    "mean_search_events",
+    "mean_coord_events",
+    "mean_tokens_per_agent_turn",
 ]
 LOWER_IS_BETTER = {
     "mean_wall_s",
@@ -40,6 +49,14 @@ LOWER_IS_BETTER = {
     "wasted_rate",
     "stalls_per_trial",
     "fp_stalls_per_trial",
+    "mean_agent_turns",
+    "mean_llm_calls",
+    "mean_tool_calls",
+    "mean_file_reads",
+    "mean_write_attempts",
+    "mean_search_events",
+    "mean_coord_events",
+    "mean_tokens_per_agent_turn",
 }
 
 
@@ -120,6 +137,13 @@ def build_solo_tables(solo_run: Path, parallel_run: Path) -> dict[str, pd.DataFr
     by_cell = _add_metric_deltas(by_cell, "solo", "parallel")
     by_cell.insert(0, "solo_run_id", str(solo["run_id"].iloc[0]))
     by_cell.insert(1, "parallel_run_id", str(parallel["run_id"].iloc[0]))
+    by_cell.insert(
+        2,
+        "direction",
+        by_cell["parallel_run_id"].astype(str)
+        + " vs "
+        + by_cell["solo_run_id"].astype(str),
+    )
     by_cell = _round_table(by_cell)
 
     by_strategy = _solo_vs_parallel_by_strategy(solo, parallel)
@@ -165,6 +189,15 @@ def _metric_rollup(df: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
             "wasted_rate": float(work["wasted_token_rate"].mean()),
             "stalls_per_trial": float(work["stall_events"].mean()),
             "fp_stalls_per_trial": float(work["fp_stall_events"].mean()),
+            "mean_agent_turns": float(work["agent_turns"].mean()),
+            "mean_llm_calls": float(work["llm_calls"].mean()),
+            "mean_tool_calls": float(work["tool_calls"].mean()),
+            "mean_file_reads": float(work["file_read_events"].mean()),
+            "mean_write_attempts": float(work["write_events"].mean()),
+            "mean_search_events": float(work["search_events"].mean()),
+            "mean_coord_events": float(work["coord_events"].mean()),
+            "mean_tokens_per_agent_turn": float(
+                work["tokens_per_agent_turn"].mean()),
         }
         return _round_table(pd.DataFrame([row]))
     agg = work.groupby(keys, dropna=False).agg(
@@ -180,6 +213,14 @@ def _metric_rollup(df: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
         wasted_rate=("wasted_token_rate", "mean"),
         stalls_per_trial=("stall_events", "mean"),
         fp_stalls_per_trial=("fp_stall_events", "mean"),
+        mean_agent_turns=("agent_turns", "mean"),
+        mean_llm_calls=("llm_calls", "mean"),
+        mean_tool_calls=("tool_calls", "mean"),
+        mean_file_reads=("file_read_events", "mean"),
+        mean_write_attempts=("write_events", "mean"),
+        mean_search_events=("search_events", "mean"),
+        mean_coord_events=("coord_events", "mean"),
+        mean_tokens_per_agent_turn=("tokens_per_agent_turn", "mean"),
     ).reset_index()
     return _round_table(agg)
 
@@ -219,11 +260,17 @@ def _delta_against_baseline(
     compare = compare.rename(columns={m: f"compare_{m}" for m in METRIC_COLUMNS})
 
     merged = compare.merge(base, on=keys, how="inner")
+    merged["direction"] = (
+        merged["compare_run_id"].astype(str)
+        + " vs "
+        + merged["baseline_run_id"].astype(str)
+    )
     ordered = (
         keys
         + ["baseline_run_id", "baseline_provider", "baseline_model",
            "compare_run_id", "compare_provider", "compare_model",
-           "baseline_trials", "compare_trials", "baseline_cells", "compare_cells"]
+           "direction", "baseline_trials", "compare_trials",
+           "baseline_cells", "compare_cells"]
     )
     merged = merged[ordered + [
         c for c in merged.columns if c not in ordered
@@ -255,6 +302,7 @@ def _solo_vs_parallel_by_strategy(
             "strategy": strategy,
             "solo_run_id": solo_run_id,
             "parallel_run_id": parallel_run_id,
+            "direction": f"{parallel_run_id} vs {solo_run_id}",
             "n_tasks": len(tasks),
             "solo_trials": int(solo_rollup["trials"].iloc[0]),
             "parallel_trials": int(parallel_rollup["trials"].iloc[0]),
@@ -311,6 +359,14 @@ def _round_table(df: pd.DataFrame) -> pd.DataFrame:
             out[col] = out[col].round(0)
         elif col.endswith("per_trial"):
             out[col] = out[col].round(3)
+        elif col.endswith("turns") or col.endswith("calls"):
+            out[col] = out[col].round(2)
+        elif col.endswith("reads") or col.endswith("attempts"):
+            out[col] = out[col].round(2)
+        elif col.endswith("events"):
+            out[col] = out[col].round(2)
+        elif col.endswith("per_agent_turn"):
+            out[col] = out[col].round(0)
         elif col.startswith("delta_"):
             out[col] = out[col].round(3)
     return out
@@ -358,8 +414,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     wrote: list[Path] = []
+    dashboard_tables: dict[str, pd.DataFrame] = {}
     if args.provider_runs:
         provider_tables = build_provider_tables(args.provider_runs)
+        dashboard_tables.update(provider_tables)
         for stem, table in provider_tables.items():
             wrote.append(write_table(table, args.out, stem))
 
@@ -371,6 +429,7 @@ def main(argv: list[str] | None = None) -> int:
                   file=sys.stderr)
             return 2
         solo_tables = build_solo_tables(args.solo_run, parallel_run)
+        dashboard_tables.update(solo_tables)
         for stem, table in solo_tables.items():
             wrote.append(write_table(table, args.out, stem))
 
@@ -379,9 +438,12 @@ def main(argv: list[str] | None = None) -> int:
               file=sys.stderr)
         return 2
 
+    dashboard = write_cross_run_dashboard(args.out, dashboard_tables)
+
     print(f"wrote {len(wrote)} tables to {args.out}")
     for path in wrote:
         print(f"table -> {path}")
+    print(f"dashboard -> {dashboard}")
     return 0
 
 

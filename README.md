@@ -245,14 +245,27 @@ the OpenAI grid and the solo calibration run:
 python -m analysis.compare_runs \
   --provider-runs results/grid-v1 results/grid-v1-agnes-sensitivity \
   --solo-run results/grid-v1-calibration \
+  --parallel-run results/grid-v1 \
   --out results/cross-run-analysis
 ```
 
 This writes provider/model tables for overlapping Level A cells, plus
-solo-versus-parallel tables. The provider comparison answers whether strategy
-rankings are stable across model providers. The solo comparison answers whether
-a task fails because of coordination races or because one agent could not solve
-the task even without concurrency.
+solo-versus-parallel tables and a static dashboard at
+`results/cross-run-analysis/dashboard.html`. The provider comparison answers
+whether strategy rankings are stable across model providers. The solo comparison
+answers whether a task fails because of coordination races or because one agent
+could not solve the task even without concurrency. The dashboard also exposes
+turn and event diagnostics such as LLM calls, tool calls, reads, writes,
+searches, coordination events, and tokens per turn.
+
+Direction matters. Provider advantage means the later provider run is compared
+against the first provider run. With the command above, that is
+`results/grid-v1-agnes-sensitivity` versus `results/grid-v1`. Parallel advantage
+means `--parallel-run` versus `--solo-run`, so the command above compares
+`results/grid-v1` versus `results/grid-v1-calibration`. Positive advantage
+always means the first named run in that sentence is better. The CSV/Markdown
+tables include a `direction` column, and the `delta_*` columns should be read as
+direction-aware advantage scores, not as raw subtraction in every case.
 
 `analysis.make_report` also writes `event_profile_by_strategy.*`,
 `event_profile_by_task_strategy.*`, and `agent_activity.*`. These tables are
