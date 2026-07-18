@@ -226,6 +226,9 @@ def write_cross_run_dashboard(
       gap: 14px;
       margin-bottom: 12px;
     }}
+    .provider-dashboard {{
+      grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+    }}
     .chart-card {{
       min-width: 0;
       padding: 16px;
@@ -236,6 +239,10 @@ def write_cross_run_dashboard(
       animation: fadeUp 700ms var(--ease) both;
     }}
     .chart-card.wide {{ grid-column: 1 / -1; }}
+    .provider-overview-card .bar-list {{ padding-right: 8px; }}
+    .provider-overview-card .bar-row {{
+      grid-template-columns: minmax(58px, 84px) minmax(80px, 1fr) minmax(58px, 72px);
+    }}
     .chart-head {{
       display: flex;
       align-items: baseline;
@@ -371,7 +378,8 @@ def write_cross_run_dashboard(
       <code>results/grid-v1</code> versus <code>results/grid-v1-calibration</code>.
       For correctness the formula is first named run minus second named run. For
       lower-is-better metrics such as wall time, tokens, turns, and tool calls,
-      the sign is flipped so positive always means the first named run is better.
+      the sign is flipped before coloring. Green means the first named run has
+      the advantage; red means the second named run has the advantage.
     </p>
 
     <section class="filters" aria-label="filters">
@@ -380,6 +388,7 @@ def write_cross_run_dashboard(
           <option value="correct_rate">Correctness</option>
           <option value="mean_wall_s">Wall time</option>
           <option value="mean_tokens">Tokens</option>
+          <option value="mean_estimated_usd">Estimated USD</option>
           <option value="fp_stalls_per_trial">False-positive stalls</option>
           <option value="mean_agent_turns">Turns per trial</option>
           <option value="mean_llm_calls">LLM calls</option>
@@ -400,8 +409,8 @@ def write_cross_run_dashboard(
       <h2>Provider Sensitivity</h2>
       <span class="kicker">OpenAI vs Agnes</span>
     </div>
-    <section class="dashboard" aria-label="provider dashboard">
-      <article class="chart-card">
+    <section class="dashboard provider-dashboard" aria-label="provider dashboard">
+      <article class="chart-card provider-overview-card">
         <div class="chart-head">
           <span class="chart-title">Provider Overview</span>
           <span class="chart-meta" id="providerOverviewMeta"></span>
@@ -458,6 +467,7 @@ def write_cross_run_dashboard(
       correct_rate: {{label: "Correctness", higherBetter: true, kind: "percent", digits: 1}},
       mean_wall_s: {{label: "Wall time", higherBetter: false, suffix: "s", digits: 1}},
       mean_tokens: {{label: "Tokens", higherBetter: false, digits: 0}},
+      mean_estimated_usd: {{label: "Estimated USD", higherBetter: false, kind: "currency", digits: 4}},
       fp_stalls_per_trial: {{label: "False-positive stalls", higherBetter: false, digits: 2}},
       mean_agent_turns: {{label: "Turns per trial", higherBetter: false, digits: 1}},
       mean_llm_calls: {{label: "LLM calls", higherBetter: false, digits: 1}},
@@ -501,7 +511,24 @@ def write_cross_run_dashboard(
       const n = num(value);
       const sign = signed && n > 0 ? "+" : "";
       if (cfg.kind === "percent") return `${{sign}}${{(n * 100).toFixed(cfg.digits)}}%`;
+      if (cfg.kind === "currency") {{
+        const currencySign = signed ? (n > 0 ? "+" : (n < 0 ? "-" : "")) : "";
+        return `${{currencySign}}${{new Intl.NumberFormat("en-US", {{
+          style: "currency",
+          currency: "USD",
+          minimumFractionDigits: cfg.digits,
+          maximumFractionDigits: cfg.digits
+        }}).format(Math.abs(n))}}`;
+      }}
       return `${{sign}}${{n.toFixed(cfg.digits)}}${{cfg.suffix || ""}}`;
+    }}
+    function advantageLabel(value, metric = filters.metric.value) {{
+      const cfg = metricSpec(metric);
+      const n = num(value);
+      if (Math.abs(n) < 1e-9) return "even";
+      if (cfg.higherBetter) return fmt(n, metric, true);
+      const magnitude = fmt(Math.abs(n), metric);
+      return n > 0 ? `saves ${{magnitude}}` : `costs ${{magnitude}}`;
     }}
     function matches(row) {{
       const haystack = [
@@ -576,7 +603,7 @@ def write_cross_run_dashboard(
         return;
       }}
       const maxAbs = Math.max(...rows.map(row => Math.abs(num(row[key]))), 0.001);
-      meta.textContent = `${{metricSpec(metric).label}} advantage: ${{direction}}; positive favors the first run`;
+      meta.textContent = `${{metricSpec(metric).label}} advantage: ${{direction}}; green favors the first run, red favors the second`;
       target.innerHTML = `<div class="delta-list">${{rows.map((row, index) => {{
         const value = num(row[key]);
         const width = Math.min(50, Math.abs(value) / maxAbs * 50);
@@ -585,7 +612,7 @@ def write_cross_run_dashboard(
         return `<div class="delta-row">
           <span class="label" title="${{attr(row[labelKey])}}">${{esc(row[labelKey])}}</span>
           <span class="delta-track"><span class="zero"></span><span class="delta-fill ${{cls}}" style="left:${{left}}%;width:${{width}}%;--delay:${{index * 45}}ms"></span></span>
-          <span class="value">${{esc(fmt(value, metric, true))}}</span>
+          <span class="value">${{esc(advantageLabel(value, metric))}}</span>
         </div>`;
       }}).join("")}}</div>`;
     }}
@@ -617,6 +644,7 @@ def write_cross_run_dashboard(
         {{key: "correct_rate", label: "correct", num: true, render: r => esc(fmt(r.correct_rate, "correct_rate"))}},
         {{key: "mean_wall_s", label: "wall", num: true, render: r => esc(fmt(r.mean_wall_s, "mean_wall_s"))}},
         {{key: "mean_tokens", label: "tokens", num: true, render: r => esc(fmt(r.mean_tokens, "mean_tokens"))}},
+        {{key: "mean_estimated_usd", label: "est. USD", num: true, render: r => esc(fmt(r.mean_estimated_usd, "mean_estimated_usd"))}},
         {{key: "mean_agent_turns", label: "turns", num: true, render: r => esc(fmt(r.mean_agent_turns, "mean_agent_turns"))}},
         {{key: "mean_tool_calls", label: "tools", num: true, render: r => esc(fmt(r.mean_tool_calls, "mean_tool_calls"))}},
         {{key: "mean_coord_events", label: "coord", num: true, render: r => esc(fmt(r.mean_coord_events, "mean_coord_events"))}},
@@ -627,9 +655,10 @@ def write_cross_run_dashboard(
         {{key: "n_tasks", label: "tasks", num: true}},
         {{key: "solo_correct_rate", label: "solo correct", num: true, render: r => esc(fmt(r.solo_correct_rate, "correct_rate"))}},
         {{key: "parallel_correct_rate", label: "parallel correct", num: true, render: r => esc(fmt(r.parallel_correct_rate, "correct_rate"))}},
-        {{key: "delta_correct_rate", label: "parallel advantage", num: true, render: r => esc(fmt(r.delta_correct_rate, "correct_rate", true))}},
+        {{key: "delta_correct_rate", label: "parallel advantage", num: true, render: r => esc(advantageLabel(r.delta_correct_rate, "correct_rate"))}},
         {{key: "parallel_mean_wall_s", label: "parallel wall", num: true, render: r => esc(fmt(r.parallel_mean_wall_s, "mean_wall_s"))}},
         {{key: "parallel_mean_tokens", label: "parallel tokens", num: true, render: r => esc(fmt(r.parallel_mean_tokens, "mean_tokens"))}},
+        {{key: "parallel_mean_estimated_usd", label: "parallel est. USD", num: true, render: r => esc(fmt(r.parallel_mean_estimated_usd, "mean_estimated_usd"))}},
         {{key: "parallel_mean_agent_turns", label: "parallel turns", num: true, render: r => esc(fmt(r.parallel_mean_agent_turns, "mean_agent_turns"))}},
         {{key: "parallel_mean_tool_calls", label: "parallel tools", num: true, render: r => esc(fmt(r.parallel_mean_tool_calls, "mean_tool_calls"))}},
       ], soloDelta);
@@ -642,11 +671,12 @@ def write_cross_run_dashboard(
         {{key: "baseline_run_id", label: "baseline run"}},
         {{key: "compare_correct_rate", label: "comparison correct", num: true, render: r => esc(fmt(r.compare_correct_rate, "correct_rate"))}},
         {{key: "baseline_correct_rate", label: "baseline correct", num: true, render: r => esc(fmt(r.baseline_correct_rate, "correct_rate"))}},
-        {{key: "delta_correct_rate", label: "provider advantage", num: true, render: r => esc(fmt(r.delta_correct_rate, "correct_rate", true))}},
-        {{key: "delta_mean_wall_s", label: "wall advantage", num: true, render: r => esc(fmt(r.delta_mean_wall_s, "mean_wall_s", true))}},
-        {{key: "delta_mean_tokens", label: "token advantage", num: true, render: r => esc(fmt(r.delta_mean_tokens, "mean_tokens", true))}},
-        {{key: "delta_mean_agent_turns", label: "turn advantage", num: true, render: r => esc(fmt(r.delta_mean_agent_turns, "mean_agent_turns", true))}},
-        {{key: "delta_mean_tool_calls", label: "tool-call advantage", num: true, render: r => esc(fmt(r.delta_mean_tool_calls, "mean_tool_calls", true))}},
+        {{key: "delta_correct_rate", label: "provider advantage", num: true, render: r => esc(advantageLabel(r.delta_correct_rate, "correct_rate"))}},
+        {{key: "delta_mean_wall_s", label: "wall advantage", num: true, render: r => esc(advantageLabel(r.delta_mean_wall_s, "mean_wall_s"))}},
+        {{key: "delta_mean_tokens", label: "token advantage", num: true, render: r => esc(advantageLabel(r.delta_mean_tokens, "mean_tokens"))}},
+        {{key: "delta_mean_estimated_usd", label: "cost advantage", num: true, render: r => esc(advantageLabel(r.delta_mean_estimated_usd, "mean_estimated_usd"))}},
+        {{key: "delta_mean_agent_turns", label: "turn advantage", num: true, render: r => esc(advantageLabel(r.delta_mean_agent_turns, "mean_agent_turns"))}},
+        {{key: "delta_mean_tool_calls", label: "tool-call advantage", num: true, render: r => esc(advantageLabel(r.delta_mean_tool_calls, "mean_tool_calls"))}},
       ], providerCells);
     }}
     for (const el of Object.values(filters)) {{

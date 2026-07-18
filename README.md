@@ -220,12 +220,14 @@ If you do not activate the virtualenv, replace `python` with `.venv/bin/python`.
 # echo 'AGNES_API_KEY=sk-...' >> .env
 python -m runner.run_grid --config runner/config.agnes-sensitivity.yaml --parallel 1
 python -m analysis.validate_logs results/grid-v1-agnes-sensitivity --expect-trials 144
-python -m analysis.make_report results/grid-v1-agnes-sensitivity
+python -m analysis.make_report results/grid-v1-agnes-sensitivity \
+  --prices-config runner/config.agnes-sensitivity.yaml
 
 # optional full Agnes grid, 480 trials, only if credits/time allow
 python -m runner.run_grid --config runner/config.agnes-full.yaml --parallel 1
 python -m analysis.validate_logs results/grid-v1-agnes --expect-trials 480
-python -m analysis.make_report results/grid-v1-agnes
+python -m analysis.make_report results/grid-v1-agnes \
+  --prices-config runner/config.agnes-full.yaml
 ```
 
 Use `results/grid-v1-agnes-sensitivity/` as a model-sensitivity check, not as a
@@ -235,6 +237,10 @@ against a second OpenAI-compatible model provider.
 The Agnes configs include a conservative request-per-minute cap and rerun
 temporary provider-error logs so `429` throttles are not counted as benchmark
 failures.
+The Agnes configs use a published list-rate estimate for analytical cost
+comparison (`$0.03 / 1M` input tokens and `$0.15 / 1M` output tokens for
+`agnes-2.0-flash`). Actual out-of-pocket spend may be `$0` under hackathon or
+free credits, but the reports and dashboards keep that separate from model cost.
 
 ### Cross-run analysis
 
@@ -256,16 +262,17 @@ whether strategy rankings are stable across model providers. The solo comparison
 answers whether a task fails because of coordination races or because one agent
 could not solve the task even without concurrency. The dashboard also exposes
 turn and event diagnostics such as LLM calls, tool calls, reads, writes,
-searches, coordination events, and tokens per turn.
+searches, coordination events, tokens per turn, and estimated USD per trial.
 
 Direction matters. Provider advantage means the later provider run is compared
 against the first provider run. With the command above, that is
 `results/grid-v1-agnes-sensitivity` versus `results/grid-v1`. Parallel advantage
 means `--parallel-run` versus `--solo-run`, so the command above compares
-`results/grid-v1` versus `results/grid-v1-calibration`. Positive advantage
-always means the first named run in that sentence is better. The CSV/Markdown
-tables include a `direction` column, and the `delta_*` columns should be read as
-direction-aware advantage scores, not as raw subtraction in every case.
+`results/grid-v1` versus `results/grid-v1-calibration`. The CSV/Markdown tables
+include a `direction` column, and the `delta_*` columns should be read as
+direction-aware advantage scores, not raw subtraction in every case. For
+lower-is-better metrics such as tokens, runtime, and turns, the sign is flipped
+before coloring so green means the first named run is better.
 
 `analysis.make_report` also writes `event_profile_by_strategy.*`,
 `event_profile_by_task_strategy.*`, and `agent_activity.*`. These tables are

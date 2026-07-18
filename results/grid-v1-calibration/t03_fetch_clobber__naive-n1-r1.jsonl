@@ -1,0 +1,23 @@
+{"ts": 0.0832, "event": "trial_start", "task": "t03_fetch_clobber", "failure_mode": "write_write_clobber", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 1, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["solo"]}
+{"ts": 2.7352, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 808, "completion_tokens": 147}
+{"ts": 2.7354, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 3.7121, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 847, "completion_tokens": 18}
+{"ts": 3.7122, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 3.7123, "event": "read", "agent": "solo", "path": "api.py", "found": true, "size": 551}
+{"ts": 9.0457, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 992, "completion_tokens": 346}
+{"ts": 9.0458, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "read_file", "args": {"path": "tests/test_api.py"}}
+{"ts": 9.0461, "event": "read", "agent": "solo", "path": "tests/test_api.py", "found": true, "size": 146}
+{"ts": 18.1287, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 1063, "completion_tokens": 747}
+{"ts": 18.1288, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "write_file", "args": {"path": "api.py", "content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents "}}
+{"ts": 18.1302, "event": "write", "agent": "solo", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 19.3192, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 1372, "completion_tokens": 13}
+{"ts": 19.3223, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 19.6947, "event": "run_tests", "agent": "solo", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 20.999, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 1411, "completion_tokens": 18}
+{"ts": 20.999, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 20.9992, "event": "read", "agent": "solo", "path": "api.py", "found": true, "size": 1081}
+{"ts": 23.6217, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 1675, "completion_tokens": 129}
+{"ts": 23.6236, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "done", "args": {"summary": "Implemented fetch in api.py to accept timeout=10 and retries=3, call transport(url, timeout=timeout), retry on TransportError up to retries times, and re-raise last TransportError if all attempts fail"}}
+{"ts": 23.6237, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 23.6237, "event": "agent_done", "agent": "solo", "status": "done", "turns": 7, "prompt_tokens": 8168, "completion_tokens": 1418}
+{"ts": 23.8192, "event": "trial_end", "correct": true, "oracle_passed": 5, "oracle_total": 5, "wall_clock_s": 23.53, "prompt_tokens": 8168, "completion_tokens": 1418, "agent_statuses": {"solo": "done"}, "oracle_output": ".....                                                                    [100%]\n5 passed in 0.01s\n"}

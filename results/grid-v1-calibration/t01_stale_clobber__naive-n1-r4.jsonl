@@ -1,0 +1,24 @@
+{"ts": 0.1162, "event": "trial_start", "task": "t01_stale_clobber", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "naive", "n_agents": 1, "rep": 4, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["solo"]}
+{"ts": 7.4459, "event": "llm_usage", "agent": "solo", "turn": 1, "prompt_tokens": 825, "completion_tokens": 664}
+{"ts": 7.4461, "event": "tool_call", "agent": "solo", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 7.4464, "event": "read", "agent": "solo", "path": "config.py", "found": true, "size": 1056}
+{"ts": 20.3851, "event": "llm_usage", "agent": "solo", "turn": 2, "prompt_tokens": 1096, "completion_tokens": 1203}
+{"ts": 20.3852, "event": "tool_call", "agent": "solo", "turn": 2, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 20.3861, "event": "write", "agent": "solo", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 21.2029, "event": "llm_usage", "agent": "solo", "turn": 3, "prompt_tokens": 1477, "completion_tokens": 18}
+{"ts": 21.2046, "event": "tool_call", "agent": "solo", "turn": 3, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 21.2192, "event": "read", "agent": "solo", "path": "config.py", "found": true, "size": 1228}
+{"ts": 27.3849, "event": "llm_usage", "agent": "solo", "turn": 4, "prompt_tokens": 1794, "completion_tokens": 549}
+{"ts": 27.385, "event": "tool_call", "agent": "solo", "turn": 4, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 27.3858, "event": "write", "agent": "solo", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 28.744, "event": "llm_usage", "agent": "solo", "turn": 5, "prompt_tokens": 2225, "completion_tokens": 18}
+{"ts": 28.7441, "event": "tool_call", "agent": "solo", "turn": 5, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 28.7443, "event": "read", "agent": "solo", "path": "config.py", "found": true, "size": 1390}
+{"ts": 30.0931, "event": "llm_usage", "agent": "solo", "turn": 6, "prompt_tokens": 2587, "completion_tokens": 13}
+{"ts": 30.0933, "event": "tool_call", "agent": "solo", "turn": 6, "tool": "run_tests", "args": {}}
+{"ts": 30.27, "event": "run_tests", "agent": "solo", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 31.6693, "event": "llm_usage", "agent": "solo", "turn": 7, "prompt_tokens": 2626, "completion_tokens": 55}
+{"ts": 31.67, "event": "tool_call", "agent": "solo", "turn": 7, "tool": "done", "args": {"summary": "Added 'timeout' (30.0) and 'retries' (3) to DEFAULTS and extended validate() to enforce timeout > 0 and retries >= 0; preserved existing behavior."}}
+{"ts": 31.67, "event": "agent_done_coord", "agent": "solo"}
+{"ts": 31.67, "event": "agent_done", "agent": "solo", "status": "done", "turns": 7, "prompt_tokens": 12630, "completion_tokens": 2520}
+{"ts": 32.0486, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 31.54, "prompt_tokens": 12630, "completion_tokens": 2520, "agent_statuses": {"solo": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

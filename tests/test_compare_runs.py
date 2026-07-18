@@ -186,6 +186,9 @@ def test_compare_runs_cli_writes_tables(tmp_path):
     assert "Solo vs Parallel" in html
     assert "Parallel Advantage by Strategy" in html
     assert "Turns per trial" in html
+    assert "Estimated USD" in html
     assert "Provider advantage" in html
+    assert "green favors the first run, red favors the second" in html
+    assert "advantageLabel" in html
     assert "direction" in html
     assert "providerDeltaChart" in html

@@ -29,6 +29,7 @@ METRIC_COLUMNS = [
     "mean_tokens",
     "mean_prompt_tokens",
     "mean_completion_tokens",
+    "mean_estimated_usd",
     "wasted_rate",
     "stalls_per_trial",
     "fp_stalls_per_trial",
@@ -46,6 +47,7 @@ LOWER_IS_BETTER = {
     "mean_tokens",
     "mean_prompt_tokens",
     "mean_completion_tokens",
+    "mean_estimated_usd",
     "wasted_rate",
     "stalls_per_trial",
     "fp_stalls_per_trial",
@@ -186,6 +188,7 @@ def _metric_rollup(df: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
             "mean_tokens": float(work["total_tokens"].mean()),
             "mean_prompt_tokens": float(work["prompt_tokens"].mean()),
             "mean_completion_tokens": float(work["completion_tokens"].mean()),
+            "mean_estimated_usd": float(work["estimated_usd"].mean()),
             "wasted_rate": float(work["wasted_token_rate"].mean()),
             "stalls_per_trial": float(work["stall_events"].mean()),
             "fp_stalls_per_trial": float(work["fp_stall_events"].mean()),
@@ -210,6 +213,7 @@ def _metric_rollup(df: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
         mean_tokens=("total_tokens", "mean"),
         mean_prompt_tokens=("prompt_tokens", "mean"),
         mean_completion_tokens=("completion_tokens", "mean"),
+        mean_estimated_usd=("estimated_usd", "mean"),
         wasted_rate=("wasted_token_rate", "mean"),
         stalls_per_trial=("stall_events", "mean"),
         fp_stalls_per_trial=("fp_stall_events", "mean"),
@@ -357,6 +361,8 @@ def _round_table(df: pd.DataFrame) -> pd.DataFrame:
             out[col] = out[col].round(1)
         elif col.endswith("tokens"):
             out[col] = out[col].round(0)
+        elif col.endswith("_usd"):
+            out[col] = out[col].round(4)
         elif col.endswith("per_trial"):
             out[col] = out[col].round(3)
         elif col.endswith("turns") or col.endswith("calls"):
