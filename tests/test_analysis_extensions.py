@@ -122,6 +122,28 @@ def test_bootstrap_ci_is_deterministic(tmp_path):
     assert {"correct_rate_lo", "correct_rate_hi"}.issubset(first.columns)
 
 
+def test_run_dataframe_adds_run_metadata(tmp_path):
+    (tmp_path / "run_meta.json").write_text(
+        json.dumps({
+            "run_id": "example-run",
+            "provider": "agnes",
+            "model": "agnes-2.0-flash",
+            "prices": {"agnes-2.0-flash": {"input": 0.0, "output": 0.0}},
+        }) + "\n",
+        encoding="utf-8",
+    )
+    _write_log(tmp_path / "r0.jsonl", [
+        _start(model="agnes-2.0-flash"),
+        _end(correct=True),
+    ])
+
+    df = run_dataframe(tmp_path)
+
+    assert df["run_id"].tolist() == ["example-run"]
+    assert df["provider"].tolist() == ["agnes"]
+    assert df["run_dir"].tolist() == [str(tmp_path)]
+
+
 def test_html_report_contains_labels_and_sections(tmp_path):
     _write_log(tmp_path / "ok.jsonl", [_start(), _end()])
     df = run_dataframe(tmp_path, prices=DEFAULT_PRICES)

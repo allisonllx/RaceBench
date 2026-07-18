@@ -1,0 +1,40 @@
+{"ts": 0.0919, "event": "trial_start", "task": "t01_stale_clobber", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "file_lock", "n_agents": 2, "rep": 0, "model": "agnes-2.0-flash", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 6.7844, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 1361, "completion_tokens": 29}
+{"ts": 6.7845, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "glob", "args": {"pattern": "**/config.py"}}
+{"ts": 6.7876, "event": "search", "agent": "agent-timeout", "kind": "glob", "pattern": "**/config.py", "n": 0}
+{"ts": 11.1927, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 1362, "completion_tokens": 27}
+{"ts": 11.1928, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "glob", "args": {"pattern": "config.py"}}
+{"ts": 11.1944, "event": "search", "agent": "agent-retries", "kind": "glob", "pattern": "config.py", "n": 1}
+{"ts": 14.6008, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 1410, "completion_tokens": 14}
+{"ts": 14.6008, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "list_files", "args": {}}
+{"ts": 18.7656, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 1408, "completion_tokens": 26}
+{"ts": 18.7657, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 18.7661, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 1056}
+{"ts": 22.6353, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 1456, "completion_tokens": 26}
+{"ts": 22.6355, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 22.6358, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-timeout", "path": "config.py", "holder": "agent-retries"}
+{"ts": 29.3093, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 1718, "completion_tokens": 380}
+{"ts": 29.3095, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "write_file", "args": {"content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi", "path": "config.py"}}
+{"ts": 29.3129, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 36.9269, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 2120, "completion_tokens": 15}
+{"ts": 36.9271, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 37.1351, "event": "run_tests", "agent": "agent-retries", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 47.3838, "event": "llm_usage", "agent": "agent-retries", "turn": 5, "prompt_tokens": 2170, "completion_tokens": 72}
+{"ts": 47.3839, "event": "tool_call", "agent": "agent-retries", "turn": 5, "tool": "done", "args": {"summary": "Added \"retries\" key with default 3 to DEFAULTS and validation rule requiring int >= 0, raising ValueError(\"retries must be a non-negative int\") otherwise. All tests pass."}}
+{"ts": 47.3841, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 47.3841, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 5, "prompt_tokens": 8778, "completion_tokens": 520}
+{"ts": 47.385, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 1218}
+{"ts": 70.0431, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 1813, "completion_tokens": 432}
+{"ts": 70.0432, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "write_file", "args": {"content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi", "path": "config.py"}}
+{"ts": 70.0445, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 79.8868, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 2267, "completion_tokens": 28}
+{"ts": 79.8883, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 80.9776, "event": "run_tests", "agent": "agent-timeout", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 87.9945, "event": "llm_usage", "agent": "agent-timeout", "turn": 6, "prompt_tokens": 2330, "completion_tokens": 52}
+{"ts": 87.9947, "event": "tool_call", "agent": "agent-timeout", "turn": 6, "tool": "read_file", "args": {"path": "tests/test_config.py"}}
+{"ts": 87.9964, "event": "read", "agent": "agent-timeout", "path": "tests/test_config.py", "found": true, "size": 458}
+{"ts": 98.7784, "event": "llm_usage", "agent": "agent-timeout", "turn": 7, "prompt_tokens": 2524, "completion_tokens": 151}
+{"ts": 98.7794, "event": "tool_call", "agent": "agent-timeout", "turn": 7, "tool": "done", "args": {"summary": "Added \"timeout\" key with default 30.0 to DEFAULTS and extended validate() to require timeout overrides be int/float > 0, raising ValueError(\"timeout must be a positive number\") otherwise. All 4 tests "}}
+{"ts": 98.7795, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 98.7795, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 7, "prompt_tokens": 13161, "completion_tokens": 732}
+{"ts": 99.0145, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 98.65, "prompt_tokens": 21939, "completion_tokens": 1252, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

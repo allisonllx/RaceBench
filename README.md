@@ -214,15 +214,11 @@ If you do not activate the virtualenv, replace `python` with `.venv/bin/python`.
 
 ### Agnes model sensitivity
 
-Keep model-provider runs in separate result directories instead of moving
-`results/grid-v1/`, which is the canonical OpenAI grid used by the current
-writeup.
-
 ```bash
-# second-provider sensitivity check, 72 trials
+# second-provider sensitivity check, 144 trials
 # echo 'AGNES_API_KEY=sk-...' >> .env
 python -m runner.run_grid --config runner/config.agnes-sensitivity.yaml --parallel 1
-python -m analysis.validate_logs results/grid-v1-agnes-sensitivity --expect-trials 72
+python -m analysis.validate_logs results/grid-v1-agnes-sensitivity --expect-trials 144
 python -m analysis.make_report results/grid-v1-agnes-sensitivity
 
 # optional full Agnes grid, 480 trials, only if credits/time allow
@@ -238,6 +234,24 @@ against a second OpenAI-compatible model provider.
 The Agnes configs include a conservative request-per-minute cap and rerun
 temporary provider-error logs so `429` throttles are not counted as benchmark
 failures.
+
+### Cross-run analysis
+
+After the Agnes sensitivity run has enough completed logs, compare it against
+the OpenAI grid and the solo calibration run:
+
+```bash
+python -m analysis.compare_runs \
+  --provider-runs results/grid-v1 results/grid-v1-agnes-sensitivity \
+  --solo-run results/grid-v1-calibration \
+  --out results/cross-run-analysis
+```
+
+This writes provider/model tables for overlapping Level A cells, plus
+solo-versus-parallel tables. The provider comparison answers whether strategy
+rankings are stable across model providers. The solo comparison answers whether
+a task fails because of coordination races or because one agent could not solve
+the task even without concurrency.
 
 ## Repo layout
 

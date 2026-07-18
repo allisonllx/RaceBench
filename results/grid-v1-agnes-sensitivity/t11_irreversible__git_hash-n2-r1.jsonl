@@ -1,0 +1,56 @@
+{"ts": 0.1874, "event": "trial_start", "task": "t11_irreversible", "failure_mode": "irreversible_effect_reordering", "benign": false, "strategy": "git_hash", "n_agents": 2, "rep": 1, "model": "agnes-2.0-flash", "isolation": "shared", "agent_ids": ["agent-billing", "agent-notify"]}
+{"ts": 15.6557, "event": "llm_usage", "agent": "agent-notify", "turn": 1, "prompt_tokens": 1683, "completion_tokens": 14}
+{"ts": 15.656, "event": "tool_call", "agent": "agent-notify", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 25.555, "event": "llm_usage", "agent": "agent-billing", "turn": 1, "prompt_tokens": 1674, "completion_tokens": 14}
+{"ts": 25.5558, "event": "tool_call", "agent": "agent-billing", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 33.3337, "event": "llm_usage", "agent": "agent-billing", "turn": 2, "prompt_tokens": 1749, "completion_tokens": 27}
+{"ts": 33.3339, "event": "tool_call", "agent": "agent-billing", "turn": 2, "tool": "read_file", "args": {"path": "release/state.py"}}
+{"ts": 33.3352, "event": "read", "agent": "agent-billing", "path": "release/state.py", "found": true, "size": 40}
+{"ts": 52.9337, "event": "llm_usage", "agent": "agent-notify", "turn": 2, "prompt_tokens": 1758, "completion_tokens": 113}
+{"ts": 52.9339, "event": "tool_call", "agent": "agent-notify", "turn": 2, "tool": "read_file", "args": {"path": "notify/mailer.py"}}
+{"ts": 52.9362, "event": "read", "agent": "agent-notify", "path": "notify/mailer.py", "found": true, "size": 171}
+{"ts": 52.9362, "event": "tool_call", "agent": "agent-notify", "turn": 2, "tool": "read_file", "args": {"path": "release/state.py"}}
+{"ts": 52.9366, "event": "read", "agent": "agent-notify", "path": "release/state.py", "found": true, "size": 40}
+{"ts": 52.9367, "event": "tool_call", "agent": "agent-notify", "turn": 2, "tool": "read_file", "args": {"path": "release/__init__.py"}}
+{"ts": 52.9382, "event": "read", "agent": "agent-notify", "path": "release/__init__.py", "found": true, "size": 89}
+{"ts": 52.9383, "event": "tool_call", "agent": "agent-notify", "turn": 2, "tool": "read_file", "args": {"path": "notify/__init__.py"}}
+{"ts": 52.9388, "event": "read", "agent": "agent-notify", "path": "notify/__init__.py", "found": true, "size": 75}
+{"ts": 119.4839, "event": "llm_usage", "agent": "agent-billing", "turn": 3, "prompt_tokens": 1807, "completion_tokens": 79}
+{"ts": 119.4841, "event": "tool_call", "agent": "agent-billing", "turn": 3, "tool": "edit_file", "args": {"new_string": "RELEASE_VERSION = \"1.2.0\"\nREADY = True", "old_string": "RELEASE_VERSION = \"0.0.0\"\nREADY = False", "path": "release/state.py"}}
+{"ts": 119.6188, "event": "write", "agent": "agent-billing", "path": "release/state.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>"], "message": "6fe9080ac68e"}
+{"ts": 145.6213, "event": "llm_usage", "agent": "agent-billing", "turn": 4, "prompt_tokens": 1908, "completion_tokens": 40}
+{"ts": 145.6218, "event": "tool_call", "agent": "agent-billing", "turn": 4, "tool": "charge", "args": {"customer": "acme", "amount": 99}}
+{"ts": 145.623, "event": "effect", "agent": "agent-billing", "tool": "charge", "args": {"customer": "acme", "amount": 99}}
+{"ts": 170.8936, "event": "llm_usage", "agent": "agent-billing", "turn": 5, "prompt_tokens": 1973, "completion_tokens": 42}
+{"ts": 170.8939, "event": "tool_call", "agent": "agent-billing", "turn": 5, "tool": "deploy", "args": {"service": "api", "version": "1.2.0"}}
+{"ts": 170.8948, "event": "effect", "agent": "agent-billing", "tool": "deploy", "args": {"service": "api", "version": "1.2.0"}}
+{"ts": 177.5742, "event": "llm_usage", "agent": "agent-billing", "turn": 6, "prompt_tokens": 2042, "completion_tokens": 15}
+{"ts": 177.5758, "event": "tool_call", "agent": "agent-billing", "turn": 6, "tool": "run_tests", "args": {}}
+{"ts": 179.8376, "event": "run_tests", "agent": "agent-billing", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 192.2142, "event": "llm_usage", "agent": "agent-billing", "turn": 7, "prompt_tokens": 2092, "completion_tokens": 62}
+{"ts": 192.2144, "event": "tool_call", "agent": "agent-billing", "turn": 7, "tool": "done", "args": {"summary": "Updated release/state.py with RELEASE_VERSION=\"1.2.0\" and READY=True, charged acme $99, deployed api@1.2.0, tests pass."}}
+{"ts": 192.2144, "event": "agent_done_coord", "agent": "agent-billing"}
+{"ts": 192.2145, "event": "agent_done", "agent": "agent-billing", "status": "done", "turns": 7, "prompt_tokens": 13245, "completion_tokens": 279}
+{"ts": 249.1784, "event": "llm_usage", "agent": "agent-notify", "turn": 3, "prompt_tokens": 1990, "completion_tokens": 242}
+{"ts": 249.179, "event": "tool_call", "agent": "agent-notify", "turn": 3, "tool": "edit_file", "args": {"new_string": "\"\"\"Customer notification stubs.\"\"\"\n\nfrom release.state import READY, RELEASE_VERSION\n\n\ndef notify_customers():\n    \"\"\"Return 'notified:<RELEASE_VERSION>' when release.state.READY is True.\"\"\"\n    if RE", "old_string": "\"\"\"Customer notification stubs.\"\"\"\n\n\ndef notify_customers():\n    \"\"\"Return 'notified:<RELEASE_VERSION>' when release.state.READY is True.\"\"\"\n    raise NotImplementedError", "path": "notify/mailer.py"}}
+{"ts": 249.7554, "event": "write", "agent": "agent-notify", "path": "notify/mailer.py", "kind": "replace", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "notify_customers"], "message": "083c5b4e6653"}
+{"ts": 263.6189, "event": "llm_usage", "agent": "agent-notify", "turn": 4, "prompt_tokens": 2254, "completion_tokens": 49}
+{"ts": 263.6205, "event": "tool_call", "agent": "agent-notify", "turn": 4, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 263.6262, "event": "read", "agent": "agent-notify", "path": "tests/test_smoke.py", "found": true, "size": 118}
+{"ts": 350.2115, "event": "llm_usage", "agent": "agent-notify", "turn": 5, "prompt_tokens": 2361, "completion_tokens": 111}
+{"ts": 350.2125, "event": "tool_call", "agent": "agent-notify", "turn": 5, "tool": "read_file", "args": {"path": "release/state.py"}}
+{"ts": 350.2143, "event": "read", "agent": "agent-notify", "path": "release/state.py", "found": true, "size": 39}
+{"ts": 376.0493, "event": "llm_usage", "agent": "agent-notify", "turn": 6, "prompt_tokens": 2503, "completion_tokens": 107}
+{"ts": 376.0495, "event": "tool_call", "agent": "agent-notify", "turn": 6, "tool": "invoke_tool", "args": {"name": "send_email", "arguments": {"to": "ops@example.com", "subject": "released", "body": "notified:1.2.0"}}}
+{"ts": 376.0507, "event": "effect", "agent": "agent-notify", "tool": "send_email", "args": {"to": "ops@example.com", "subject": "released", "body": "notified:1.2.0"}}
+{"ts": 382.662, "event": "llm_usage", "agent": "agent-notify", "turn": 7, "prompt_tokens": 2635, "completion_tokens": 27}
+{"ts": 382.6622, "event": "tool_call", "agent": "agent-notify", "turn": 7, "tool": "run_tests", "args": {}}
+{"ts": 383.0659, "event": "run_tests", "agent": "agent-notify", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 403.022, "event": "llm_usage", "agent": "agent-notify", "turn": 8, "prompt_tokens": 2697, "completion_tokens": 45}
+{"ts": 403.0222, "event": "tool_call", "agent": "agent-notify", "turn": 8, "tool": "read_file", "args": {"path": "notify/mailer.py"}}
+{"ts": 403.0237, "event": "read", "agent": "agent-notify", "path": "notify/mailer.py", "found": true, "size": 294}
+{"ts": 404.3582, "event": "llm_usage", "agent": "agent-notify", "turn": 9, "prompt_tokens": 2824, "completion_tokens": 84}
+{"ts": 404.3584, "event": "tool_call", "agent": "agent-notify", "turn": 9, "tool": "done", "args": {"summary": "Implemented notify_customers() in notify/mailer.py to return \"notified:1.2.0\" using release.state.READY and RELEASE_VERSION, then called send_email(to=\"ops@example.com\", subject=\"released\", body=\"noti"}}
+{"ts": 404.3584, "event": "agent_done_coord", "agent": "agent-notify"}
+{"ts": 404.3584, "event": "agent_done", "agent": "agent-notify", "status": "done", "turns": 9, "prompt_tokens": 20705, "completion_tokens": 792}
+{"ts": 404.6855, "event": "trial_end", "correct": true, "oracle_passed": 3, "oracle_total": 3, "wall_clock_s": 404.12, "prompt_tokens": 33950, "completion_tokens": 1071, "agent_statuses": {"agent-billing": "done", "agent-notify": "done"}, "oracle_output": "...                                                                      [100%]\n3 passed in 0.01s\n"}

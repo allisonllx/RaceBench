@@ -24,6 +24,7 @@ from pathlib import Path
 import yaml
 
 from harness.env import ENV_FILE, load_env
+from harness.events import has_trial_end
 from harness.models import AsyncRequestRateLimiter, OpenAIModel, ScriptedModel
 from harness.pricing import DEFAULT_PRICES, estimate_usd, write_run_meta
 from harness.scripts import get_script
@@ -47,10 +48,12 @@ def load_config(path: str) -> dict:
     cfg.setdefault("prices", {})
     cfg.setdefault("provider", "openai")
     cfg.setdefault("request_rpm", None)
+    cfg.setdefault("request_timeout_s", None)
     cfg.setdefault("max_model_retries", 4)
     cfg.setdefault("model_retry_initial_s", 10.0)
     cfg.setdefault("model_retry_max_s", 120.0)
     cfg.setdefault("rerun_infra_errors", False)
+    cfg.setdefault("rerun_incomplete_logs", False)
     return cfg
 
 
@@ -96,6 +99,10 @@ def make_model_factory(cfg: dict, task_name: str):
             api_key=provider["api_key"],
             base_url=provider["base_url"],
             rate_limiter=rate_limiter,
+            request_timeout_s=(
+                float(cfg["request_timeout_s"])
+                if cfg.get("request_timeout_s") is not None else None
+            ),
             max_retries=int(cfg["max_model_retries"]),
             retry_initial_s=float(cfg["model_retry_initial_s"]),
             retry_max_s=float(cfg["model_retry_max_s"]),
@@ -149,6 +156,8 @@ INFRA_ERROR_MARKERS = (
 
 def should_rerun_existing_log(path: Path, cfg: dict) -> bool:
     """True for stale infrastructure-failure logs when config opts in."""
+    if cfg.get("rerun_incomplete_logs") and not has_trial_end(path):
+        return True
     if not cfg.get("rerun_infra_errors"):
         return False
     try:

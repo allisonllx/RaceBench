@@ -1,0 +1,34 @@
+{"ts": 0.1057, "event": "trial_start", "task": "t01_stale_clobber", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "file_lock", "n_agents": 2, "rep": 2, "model": "agnes-2.0-flash", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 6.7441, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 1361, "completion_tokens": 27}
+{"ts": 6.7443, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "glob", "args": {"pattern": "config.py"}}
+{"ts": 6.7498, "event": "search", "agent": "agent-timeout", "kind": "glob", "pattern": "config.py", "n": 1}
+{"ts": 7.2199, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 1362, "completion_tokens": 26}
+{"ts": 7.22, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 7.2203, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 1056}
+{"ts": 11.0122, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 1407, "completion_tokens": 26}
+{"ts": 11.0124, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 11.0127, "event": "coord", "strategy": "file_lock", "action": "blocked", "agent": "agent-timeout", "path": "config.py", "holder": "agent-retries"}
+{"ts": 15.2334, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 1672, "completion_tokens": 377}
+{"ts": 15.2336, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "write_file", "args": {"content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi", "path": "config.py"}}
+{"ts": 15.2348, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 17.1927, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 2071, "completion_tokens": 55}
+{"ts": 17.1928, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 17.1931, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 1218}
+{"ts": 17.1931, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "run_tests", "args": {}}
+{"ts": 17.4175, "event": "run_tests", "agent": "agent-retries", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 28.351, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 2480, "completion_tokens": 145}
+{"ts": 28.3511, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "done", "args": {"summary": "Added \"retries\" key with default 3 to DEFAULTS and extended validate() to enforce retries must be a non-negative int, raising ValueError(\"retries must be a non-negative int\") otherwise. All 4 tests pa"}}
+{"ts": 28.3512, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 28.3512, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 4, "prompt_tokens": 7585, "completion_tokens": 603}
+{"ts": 28.3521, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 1218}
+{"ts": 37.3318, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 1764, "completion_tokens": 424}
+{"ts": 37.3319, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "write_file", "args": {"content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi", "path": "config.py"}}
+{"ts": 37.3336, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.0, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 44.6146, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 2210, "completion_tokens": 15}
+{"ts": 44.6149, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 44.8434, "event": "run_tests", "agent": "agent-timeout", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 72.4133, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 2260, "completion_tokens": 169}
+{"ts": 72.4135, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "done", "args": {"summary": "Added \"timeout\" key with default 30.0 to DEFAULTS and extended validate() to enforce timeout overrides must be int/float > 0, raising ValueError(\"timeout must be a positive number\") otherwise. All 4 t"}}
+{"ts": 72.4136, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 72.4136, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 5, "prompt_tokens": 9002, "completion_tokens": 661}
+{"ts": 72.7231, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 72.27, "prompt_tokens": 16587, "completion_tokens": 1264, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

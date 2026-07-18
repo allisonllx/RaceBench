@@ -22,12 +22,13 @@ Definitions (also quoted in the write-up):
 
 Level C external-runtime trials (`mode: external` on trial_start) bypass the
 Strategy layer. Do not mix them into strategy comparison tables without
-filtering — stalls / read-set are not comparable; use correctness and wall
+filtering: stalls / read-set are not comparable; use correctness and wall
 clock only unless the adapter emits compatible events.
 """
 from __future__ import annotations
 
 from collections import defaultdict
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -183,13 +184,42 @@ def run_dataframe(run_dir: Path, prices: dict | None = None) -> pd.DataFrame:
     run_dir = Path(run_dir)
     if prices is None:
         prices = load_prices(run_dir)
+    meta = _run_meta(run_dir)
+    run_id = str(meta.get("run_id") or run_dir.name)
+    provider = str(meta.get("provider") or _infer_provider(meta.get("model", "")))
     rows = []
     for log in sorted(run_dir.glob("*.jsonl")):
         row = trial_metrics(log, prices=prices)
         if row is not None:
             row["log"] = log.name
+            row["run_id"] = run_id
+            row["provider"] = provider
+            row["run_dir"] = str(run_dir)
             rows.append(row)
     return pd.DataFrame(rows)
+
+
+def _run_meta(run_dir: Path) -> dict:
+    path = Path(run_dir) / "run_meta.json"
+    if not path.is_file():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _infer_provider(model: object) -> str:
+    name = str(model or "").lower()
+    if name.startswith("external:"):
+        return "external"
+    if name.startswith("agnes-"):
+        return "agnes"
+    if name.startswith("gpt-") or name.startswith("o"):
+        return "openai"
+    if name.startswith("scripted"):
+        return "scripted"
+    return "unknown"
 
 
 def level_a_dataframe(df: pd.DataFrame) -> pd.DataFrame:

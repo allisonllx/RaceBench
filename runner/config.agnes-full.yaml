@@ -4,8 +4,9 @@
 # Required environment:
 #   AGNES_API_KEY=...
 #
-# If Agnes returns model_not_found during rollout, temporarily change model and
-# prices back to agnes-2.0-flash and rerun the same command.
+# Uses agnes-2.0-flash first because it is the documented stable API/tool model.
+# After the sensitivity run is clean, agnes-2.5-flash can be tried as an
+# optional follow-up by changing both model and the prices key.
 #
 # Run:
 #   python -m runner.run_grid --config runner/config.agnes-full.yaml --parallel 1
@@ -17,7 +18,7 @@ provider: agnes
 api_key_env: AGNES_API_KEY
 base_url_env: AGNES_BASE_URL
 base_url: https://apihub.agnes-ai.com/v1
-model: agnes-2.5-flash
+model: agnes-2.0-flash
 tasks:
   - t01_stale_clobber
   - t02_benign_overlap
@@ -42,14 +43,16 @@ max_turns: 40
 lock_timeout_s: 30
 trial_timeout_s: 900
 parallel: 1
-request_rpm: 12
+request_rpm: 15
+request_timeout_s: 60
 max_model_retries: 8
 model_retry_initial_s: 20
 model_retry_max_s: 180
 rerun_infra_errors: true
+rerun_incomplete_logs: true
 budget:
   max_total_tokens: 40000000
 prices:
   # Sponsor/free quota accounting. Replace with billed rates if your Agnes key
   # is charged per token, then regenerate the report.
-  agnes-2.5-flash: {input: 0.0, output: 0.0}
+  agnes-2.0-flash: {input: 0.0, output: 0.0}

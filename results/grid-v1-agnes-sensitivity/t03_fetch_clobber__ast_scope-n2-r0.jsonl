@@ -1,0 +1,35 @@
+{"ts": 0.2107, "event": "trial_start", "task": "t03_fetch_clobber", "failure_mode": "write_write_clobber", "benign": false, "strategy": "ast_scope", "n_agents": 2, "rep": 0, "model": "agnes-2.0-flash", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 3.4133, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 1340, "completion_tokens": 26}
+{"ts": 3.4135, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 3.4148, "event": "read", "agent": "agent-timeout", "path": "api.py", "found": true, "size": 551}
+{"ts": 6.4094, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 1366, "completion_tokens": 26}
+{"ts": 6.4096, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 6.4105, "event": "read", "agent": "agent-retries", "path": "api.py", "found": true, "size": 551}
+{"ts": 10.0038, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 1506, "completion_tokens": 215}
+{"ts": 10.004, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "write_file", "args": {"content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents ", "path": "api.py"}}
+{"ts": 10.0056, "event": "coord", "strategy": "ast_scope", "action": "read_write_intersection", "writer": "agent-timeout", "reader": "agent-retries", "path": "api.py", "symbols": ["fetch"]}
+{"ts": 10.0071, "event": "write", "agent": "agent-timeout", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.003, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 16.4244, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 1532, "completion_tokens": 279}
+{"ts": 16.4245, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "write_file", "args": {"content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents ", "path": "api.py"}}
+{"ts": 16.4267, "event": "coord", "strategy": "ast_scope", "action": "blocked", "agent": "agent-retries", "path": "api.py", "symbols": ["fetch"], "holders": ["agent-timeout"]}
+{"ts": 17.9917, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 1743, "completion_tokens": 27}
+{"ts": 17.9919, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "run_tests", "args": {}}
+{"ts": 18.3124, "event": "run_tests", "agent": "agent-timeout", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 22.0651, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 1805, "completion_tokens": 41}
+{"ts": 22.0654, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 22.0665, "event": "read", "agent": "agent-timeout", "path": "api.py", "found": true, "size": 583}
+{"ts": 26.0446, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 1996, "completion_tokens": 64}
+{"ts": 26.0448, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "done", "args": {"summary": "Replaced the entire fetch function in api.py with keyword-only timeout=10 parameter and transport(url, timeout=timeout) call, preserving TransportError and all other behavior. All tests pass."}}
+{"ts": 26.0449, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 26.045, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 5, "prompt_tokens": 8390, "completion_tokens": 373}
+{"ts": 26.048, "event": "write", "agent": "agent-retries", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 9.623, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 36.4627, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 1833, "completion_tokens": 55}
+{"ts": 36.4629, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 36.4642, "event": "read", "agent": "agent-retries", "path": "api.py", "found": true, "size": 863}
+{"ts": 36.4643, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "run_tests", "args": {}}
+{"ts": 36.7879, "event": "run_tests", "agent": "agent-retries", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 44.3986, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 2131, "completion_tokens": 133}
+{"ts": 44.3987, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "done", "args": {"summary": "Replaced fetch in api.py with keyword-only retries=3, retrying TransportError up to retries additional times and re-raising the last error on exhaustion. All tests pass."}}
+{"ts": 44.3988, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 44.3989, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 4, "prompt_tokens": 6862, "completion_tokens": 493}
+{"ts": 44.7433, "event": "trial_end", "correct": false, "oracle_passed": 3, "oracle_total": 5, "wall_clock_s": 44.14, "prompt_tokens": 15252, "completion_tokens": 866, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "FF...                                                                    [100%]\n=================================== FAILURES ===================================\nE   AssertionError: timeout parameter missing\n    assert 'timeout' in mappingproxy(OrderedDict({'url': <Parameter \"url\">, 'transport': <Parameter \"transport\">, 'retries': <Parameter \"retries=3\">}))\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t03_fetch_clobber-ast_scope-n2-r0/oracle_tests/test_oracle_t3.py:11: AssertionError: timeout parameter missing\nE   TypeError: fetch() got an unexpected keyword argument 'timeout'\n/Users/allisonlawlixuan/Documents/repos/ai-launchpad/.trial_workspaces/t03_fetch_clobber-ast_scope-n2-r0/oracle_tests/test_oracle_t3.py:24: TypeError: fetch() got an unexpected keyword argument 'timeout'\n=========================== short test summary info ============================\nFAILED oracle_tests/test_oracle_t3.py::test_signature_has_both_params - Asser...\nFAILED oracle_tests/test_oracle_t3.py::test_timeout_passed_through - TypeErro...\n2 failed, 3 passed in 0.02s\n"}

@@ -59,6 +59,7 @@ class OpenAIModel(ModelClient):
         api_key: str | None = None,
         base_url: str | None = None,
         rate_limiter: AsyncRequestRateLimiter | None = None,
+        request_timeout_s: float | None = None,
         max_retries: int = 4,
         retry_initial_s: float = 10.0,
         retry_max_s: float = 120.0,
@@ -69,10 +70,14 @@ class OpenAIModel(ModelClient):
             client_kwargs["api_key"] = api_key
         if base_url:
             client_kwargs["base_url"] = base_url
+        if request_timeout_s is not None:
+            client_kwargs["timeout"] = request_timeout_s
+        client_kwargs["max_retries"] = 0
         self.client = AsyncOpenAI(**client_kwargs)
         self.model = model
         self.temperature = temperature
         self.rate_limiter = rate_limiter
+        self.request_timeout_s = request_timeout_s
         self.max_retries = max_retries
         self.retry_initial_s = retry_initial_s
         self.retry_max_s = retry_max_s
@@ -85,7 +90,12 @@ class OpenAIModel(ModelClient):
             if self.rate_limiter is not None:
                 await self.rate_limiter.wait()
             try:
-                resp = await self.client.chat.completions.create(**kwargs)
+                request = self.client.chat.completions.create(**kwargs)
+                if self.request_timeout_s is not None:
+                    resp = await asyncio.wait_for(
+                        request, timeout=self.request_timeout_s)
+                else:
+                    resp = await request
                 break
             except Exception as exc:
                 if attempt >= self.max_retries or not _is_retryable_api_error(exc):
@@ -114,6 +124,8 @@ class OpenAIModel(ModelClient):
 
 
 def _is_retryable_api_error(exc: Exception) -> bool:
+    if isinstance(exc, (asyncio.TimeoutError, TimeoutError)):
+        return True
     name = type(exc).__name__
     if name in {"APIConnectionError", "APITimeoutError", "RateLimitError"}:
         return True
