@@ -349,6 +349,16 @@ def test_html_report_contains_labels_and_sections(tmp_path):
     assert "Observable Event Replay" in html
     assert "replayTimeline" in html
     assert "replayPlay" in html
+    assert "replaySearch" in html
+    assert "replaySelect" in html
+    assert "replayPickCount" in html
+    assert "replayZoom" in html
+    assert "laneEventLevels" in html
+    assert "replayTickStep" in html
+    assert "replayRuler" in html
+    assert "replay-grid-line" in html
+    assert "followReplayPlayhead" in html
+    assert "gesturechange" in html
     assert "eventLaneAgents" in html
     assert "run outcome" in html
     assert "Replay" in html
@@ -356,3 +366,5 @@ def test_html_report_contains_labels_and_sections(tmp_path):
     assert "edit_failed" in html
     assert "notified" in html
     assert "racebench-data" in html
+    assert html.index("Observable Event Replay") < html.index("Agent Activity")
+    assert html.index("Observable Event Replay") < html.index("Trial Logs")

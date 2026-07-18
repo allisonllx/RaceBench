@@ -159,10 +159,15 @@ def write_html_report(
 
     const replayEls = {
       section: document.getElementById("trialReplaySection"),
+      picker: document.getElementById("replaySelect"),
+      search: document.getElementById("replaySearch"),
+      count: document.getElementById("replayPickCount"),
       summary: document.getElementById("replaySummary"),
       play: document.getElementById("replayPlay"),
       scrubber: document.getElementById("replayScrubber"),
       speed: document.getElementById("replaySpeed"),
+      zoom: document.getElementById("replayZoom"),
+      zoomLabel: document.getElementById("replayZoomLabel"),
       clock: document.getElementById("replayClock"),
       timeline: document.getElementById("replayTimeline"),
       feed: document.getElementById("replayFeed"),
@@ -185,6 +190,8 @@ def write_html_report(
       log: "",
       time: 0,
       timer: null,
+      zoom: 1,
+      pinch: null,
       enabled: new Set(replayTypes.map(t => t.event)),
     };
 
@@ -200,6 +207,92 @@ def write_html_report(
         replayState.timer = null;
       }
       replayEls.play.textContent = "Play";
+    }
+    function replayZoomLabel() {
+      return `${Math.round(replayState.zoom * 100)}%`;
+    }
+    function replayTrackWidth() {
+      const base = Math.max(720, replayEls.timeline.clientWidth - 190);
+      return Math.round(base * replayState.zoom);
+    }
+    function replayPlayheadPx(duration, trackWidth) {
+      const currentPct = Math.max(0, Math.min(1, replayState.time / Math.max(0.1, duration)));
+      return 170 + currentPct * trackWidth;
+    }
+    function followReplayPlayhead(duration, trackWidth) {
+      if (!replayState.timer) return;
+      const viewport = replayEls.timeline.clientWidth;
+      const maxScroll = Math.max(0, replayEls.timeline.scrollWidth - viewport);
+      const playhead = replayPlayheadPx(duration, trackWidth);
+      const visibleLeft = replayEls.timeline.scrollLeft;
+      const visibleRight = visibleLeft + viewport;
+      let next = visibleLeft;
+      if (playhead > visibleRight - viewport * 0.22) {
+        next = playhead - viewport * 0.58;
+      } else if (playhead < visibleLeft + viewport * 0.18) {
+        next = playhead - viewport * 0.32;
+      }
+      replayEls.timeline.scrollLeft = Math.max(0, Math.min(maxScroll, next));
+    }
+    function setReplayZoom(value) {
+      const maxScroll = Math.max(1, replayEls.timeline.scrollWidth - replayEls.timeline.clientWidth);
+      const scrollRatio = replayEls.timeline.scrollLeft / maxScroll;
+      replayState.zoom = Math.max(1, Math.min(8, toNumber(value) || 1));
+      replayEls.zoom.value = String(replayState.zoom);
+      replayEls.zoomLabel.textContent = replayZoomLabel();
+      renderReplay();
+      window.requestAnimationFrame(() => {
+        const nextMaxScroll = Math.max(0, replayEls.timeline.scrollWidth - replayEls.timeline.clientWidth);
+        replayEls.timeline.scrollLeft = scrollRatio * nextMaxScroll;
+      });
+    }
+    function replayPinchDistance(event) {
+      if (!event.touches || event.touches.length < 2) return 0;
+      const [first, second] = event.touches;
+      return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
+    }
+    function replayLabel(row) {
+      const status = row.correct ? "pass" : "fail";
+      return `${row.task} | ${row.strategy} | n${row.n_agents} r${row.rep} | ${status} | ${row.log}`;
+    }
+    function replaySearchText(row) {
+      return [
+        row.task, row.strategy, row.failure_mode, row.log, row.model,
+        row.n_agents, row.rep, row.correct ? "pass" : "fail",
+      ].map(value => String(value ?? "")).join(" ").toLowerCase();
+    }
+    function updateReplayPicker(rows) {
+      const allPlayable = rows.filter(row => data.replays && data.replays[row.log]);
+      const term = replayEls.search.value.trim().toLowerCase();
+      const playable = term
+        ? allPlayable.filter(row => replaySearchText(row).includes(term))
+        : allPlayable;
+      replayEls.count.textContent = term
+        ? `${playable.length} of ${allPlayable.length} replays`
+        : `${allPlayable.length} replays`;
+      if (!allPlayable.length) {
+        replayState.log = "";
+        stopReplay();
+        renderReplay();
+        replayEls.picker.innerHTML = '<option value="">No replays for current filters</option>';
+        replayEls.picker.disabled = true;
+        return;
+      }
+      if (!playable.length) {
+        replayEls.picker.innerHTML = '<option value="">No matching replays</option>';
+        replayEls.picker.disabled = true;
+        return;
+      }
+      if (!playable.some(row => row.log === replayState.log)) {
+        selectReplay(playable[0].log, {scroll: false});
+      }
+      replayEls.picker.disabled = false;
+      replayEls.picker.innerHTML = playable.map(row => `
+        <option value="${attr(row.log)}"${row.log === replayState.log ? " selected" : ""}>
+          ${esc(replayLabel(row))}
+        </option>
+      `).join("");
+      replayEls.picker.value = replayState.log;
     }
     function eventDetail(event) {
       const bits = [];
@@ -267,6 +360,66 @@ def write_html_report(
       });
       return laneAgents;
     }
+    function laneEventLevels(laneEvents, duration, trackWidth) {
+      const lastByLevel = [-9999, -9999, -9999];
+      const levels = new Map();
+      laneEvents
+        .slice()
+        .sort((a, b) => toNumber(a.t) - toNumber(b.t))
+        .forEach(event => {
+          const leftPx = toNumber(event.t) / Math.max(0.1, duration) * trackWidth;
+          let level = lastByLevel.findIndex(last => leftPx - last >= 78);
+          if (level < 0) {
+            level = lastByLevel.indexOf(Math.min(...lastByLevel));
+          }
+          lastByLevel[level] = leftPx;
+          levels.set(event, level);
+      });
+      return levels;
+    }
+    function replayTickStep(duration, trackWidth) {
+      const pxPerSecond = trackWidth / Math.max(0.1, duration);
+      const targetSeconds = 72 / Math.max(0.01, pxPerSecond);
+      const steps = [0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600];
+      return steps.find(step => step >= targetSeconds) || steps[steps.length - 1];
+    }
+    function replayTickLabel(value, step) {
+      const digits = step < 0.5 ? 2 : step < 1 ? 1 : 0;
+      return `${fmt(value, digits)}s`;
+    }
+    function replayTicks(duration, trackWidth) {
+      const step = replayTickStep(duration, trackWidth);
+      const maxTicks = Math.min(700, Math.floor(duration / step) + 1);
+      const ticks = [];
+      for (let index = 0; index < maxTicks; index++) {
+        const time = Math.min(duration, index * step);
+        ticks.push({
+          time,
+          left: Math.max(0, Math.min(100, time / Math.max(0.1, duration) * 100)),
+          label: replayTickLabel(time, step),
+        });
+      }
+      if (duration > 0 && Math.abs(duration - ticks[ticks.length - 1]?.time) > step * 0.35) {
+        ticks.push({time: duration, left: 100, label: replayTickLabel(duration, step)});
+      }
+      return ticks;
+    }
+    function replayRuler(ticks) {
+      return `<div class="replay-ruler">
+        <div class="replay-ruler-label">time</div>
+        <div class="replay-ruler-track">
+          ${ticks.map(tick => `
+            <span class="replay-tick" style="left:${tick.left}%"></span>
+            <span class="replay-tick-label" style="left:${tick.left}%">${esc(tick.label)}</span>
+          `).join("")}
+        </div>
+      </div>`;
+    }
+    function replayTickLines(ticks) {
+      return ticks.map(tick =>
+        `<span class="replay-grid-line" style="left:${tick.left}%"></span>`
+      ).join("");
+    }
     function renderReplayToggles() {
       replayEls.toggles.innerHTML = replayTypes.map(item => `
         <label class="replay-toggle">
@@ -288,6 +441,9 @@ def write_html_report(
       replayState.log = log;
       replayState.time = 0;
       renderReplay();
+      if (replayEls.picker && [...replayEls.picker.options].some(option => option.value === log)) {
+        replayEls.picker.value = log;
+      }
       if (scroll) replayEls.section.scrollIntoView({behavior: "smooth", block: "start"});
     }
     function ensureReplaySelection(rows) {
@@ -335,15 +491,23 @@ def write_html_report(
         replayEls.scrubber.value = 0;
         replayEls.scrubber.max = 1;
         replayEls.clock.textContent = "0.0s / 0.0s";
+        replayEls.zoomLabel.textContent = replayZoomLabel();
         replayEls.play.disabled = true;
         replayEls.scrubber.disabled = true;
+        replayEls.zoom.disabled = true;
         return;
       }
       replayEls.play.disabled = false;
       replayEls.scrubber.disabled = false;
+      replayEls.zoom.disabled = false;
       const duration = replayDuration(replay);
+      const trackWidth = replayTrackWidth();
+      const previousScrollLeft = replayEls.timeline.scrollLeft;
+      const ticks = replayTicks(duration, trackWidth);
       replayEls.scrubber.max = String(duration);
       replayEls.scrubber.value = String(replayState.time);
+      replayEls.zoom.value = String(replayState.zoom);
+      replayEls.zoomLabel.textContent = replayZoomLabel();
       replayEls.clock.textContent = `${fmt(replayState.time, 1)}s / ${fmt(duration, 1)}s`;
       const status = replay.correct ? "passed" : "failed";
       replayEls.summary.innerHTML = `
@@ -370,22 +534,34 @@ def write_html_report(
         laneAgents.forEach(agent => laneMap.get(agent)?.push(event));
       });
       if (!laneMap.get("run").length) laneMap.delete("run");
-      replayEls.timeline.innerHTML = `<div class="replay-lanes">${[...laneMap.entries()].map(([agent, laneEvents]) => {
+      const tickLines = replayTickLines(ticks);
+      replayEls.timeline.innerHTML = `<div class="replay-lanes" style="--replay-track-width:${trackWidth}px">${replayRuler(ticks)}${[...laneMap.entries()].map(([agent, laneEvents]) => {
         const laneLabel = agent === "run" ? "run outcome" : agent;
+        const levels = laneEventLevels(laneEvents, duration, trackWidth);
         return `<div class="replay-lane">
           <div class="replay-agent" title="${attr(laneLabel)}">${esc(laneLabel)}</div>
           <div class="replay-track">
+            ${tickLines}
             <span class="replay-now" style="left:${currentPct}%"></span>
             ${laneEvents.map(event => {
               const left = Math.max(0, Math.min(100, toNumber(event.t) / duration * 100));
+              const top = [21, 50, 79][levels.get(event) || 0];
               const seen = toNumber(event.t) <= replayState.time ? "is-seen" : "";
               const title = `${fmt(event.t, 1)}s ${event.event} ${eventDetail(event)}`;
               return `<button type="button" class="replay-marker ${eventClass(event)} ${seen}"
-                title="${attr(title)}" style="left:${left}%">${esc(eventLabel(event))}</button>`;
+                title="${attr(title)}" style="left:${left}%; top:${top}%">${esc(eventLabel(event))}</button>`;
             }).join("")}
           </div>
         </div>`;
       }).join("")}</div>`;
+      if (replayState.timer) {
+        followReplayPlayhead(duration, trackWidth);
+      } else {
+        replayEls.timeline.scrollLeft = Math.min(
+          previousScrollLeft,
+          Math.max(0, replayEls.timeline.scrollWidth - replayEls.timeline.clientWidth),
+        );
+      }
       const seen = events
         .filter(event => toNumber(event.t) <= replayState.time)
         .sort((a, b) => toNumber(b.t) - toNumber(a.t))
@@ -688,7 +864,7 @@ def write_html_report(
       const agentRows = filteredAgentActivity();
       const strategyRollup = summarize(trials, ["strategy"]);
       const taskStrategy = summarize(trials, ["task", "strategy", "n_agents"]);
-      ensureReplaySelection(trials);
+      updateReplayPicker(trials);
       renderStrategyChart(strategyRollup, trials);
       renderDonut(trials);
       renderHeatmap(trials);
@@ -775,6 +951,39 @@ def write_html_report(
         stopReplay();
         playReplay();
       }
+    });
+    replayEls.zoom.addEventListener("input", () => setReplayZoom(replayEls.zoom.value));
+    replayEls.picker.addEventListener("change", () => selectReplay(replayEls.picker.value, {scroll: false}));
+    replayEls.search.addEventListener("input", () => updateReplayPicker(filteredTrials()));
+    replayEls.timeline.addEventListener("wheel", event => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      const delta = event.deltaY < 0 ? 0.35 : -0.35;
+      setReplayZoom(replayState.zoom + delta);
+    }, {passive: false});
+    replayEls.timeline.addEventListener("touchstart", event => {
+      const distance = replayPinchDistance(event);
+      replayState.pinch = distance ? {distance, zoom: replayState.zoom} : null;
+    }, {passive: true});
+    replayEls.timeline.addEventListener("touchmove", event => {
+      const distance = replayPinchDistance(event);
+      if (!distance || !replayState.pinch) return;
+      event.preventDefault();
+      setReplayZoom(replayState.pinch.zoom * distance / replayState.pinch.distance);
+    }, {passive: false});
+    replayEls.timeline.addEventListener("touchend", () => {
+      replayState.pinch = null;
+    });
+    replayEls.timeline.addEventListener("gesturestart", event => {
+      event.preventDefault();
+      replayState.pinch = {distance: 1, zoom: replayState.zoom};
+    }, {passive: false});
+    replayEls.timeline.addEventListener("gesturechange", event => {
+      event.preventDefault();
+      setReplayZoom((replayState.pinch?.zoom || replayState.zoom) * event.scale);
+    }, {passive: false});
+    replayEls.timeline.addEventListener("gestureend", () => {
+      replayState.pinch = null;
     });
     clearFilters.addEventListener("click", () => {
       filters.task.value = "";
@@ -1377,9 +1586,24 @@ def write_html_report(
       padding: 16px;
       box-shadow: var(--shadow);
     }}
+    .replay-picker {{
+      display: grid;
+      grid-template-columns: minmax(180px, 0.8fr) minmax(260px, 1.6fr) auto;
+      gap: 10px;
+      align-items: end;
+    }}
+    .replay-picker-count {{
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+      padding: 10px 0;
+    }}
     .replay-toolbar {{
       display: grid;
-      grid-template-columns: auto minmax(180px, 1fr) auto 110px;
+      grid-template-columns: auto minmax(180px, 1fr) auto 110px minmax(150px, 210px) 54px;
       gap: 10px;
       align-items: center;
     }}
@@ -1389,6 +1613,14 @@ def write_html_report(
       accent-color: var(--accent);
     }}
     .replay-clock {{
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+    }}
+    .replay-zoom-label {{
       color: var(--muted);
       font-family: var(--font-mono);
       font-size: 12px;
@@ -1457,18 +1689,58 @@ def write_html_report(
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: #f8fafc;
+      touch-action: pan-x pan-y;
     }}
     .replay-lanes {{
       display: grid;
       gap: 0;
-      min-width: 900px;
+      width: max-content;
+      min-width: 100%;
       padding: 10px;
+    }}
+    .replay-ruler {{
+      display: grid;
+      grid-template-columns: 150px var(--replay-track-width, 760px);
+      gap: 10px;
+      min-height: 38px;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+    }}
+    .replay-ruler-label {{
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding-bottom: 8px;
+    }}
+    .replay-ruler-track {{
+      position: relative;
+      width: var(--replay-track-width, 760px);
+      height: 32px;
+    }}
+    .replay-tick {{
+      position: absolute;
+      bottom: 0;
+      width: 1px;
+      height: 16px;
+      background: rgb(71 85 105 / 35%);
+      transform: translateX(-0.5px);
+    }}
+    .replay-tick-label {{
+      position: absolute;
+      top: 2px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      transform: translateX(-50%);
     }}
     .replay-lane {{
       display: grid;
-      grid-template-columns: 150px minmax(620px, 1fr);
+      grid-template-columns: 150px var(--replay-track-width, 760px);
       gap: 10px;
-      min-height: 54px;
+      min-height: 86px;
       align-items: center;
       border-bottom: 1px solid var(--line);
     }}
@@ -1484,7 +1756,8 @@ def write_html_report(
     }}
     .replay-track {{
       position: relative;
-      height: 42px;
+      width: var(--replay-track-width, 760px);
+      height: 76px;
       border-radius: 4px;
       background:
         repeating-linear-gradient(
@@ -1505,44 +1778,62 @@ def write_html_report(
       background: var(--ink);
       box-shadow: 0 0 0 1px rgb(255 255 255 / 80%);
     }}
+    .replay-grid-line {{
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: rgb(71 85 105 / 12%);
+      transform: translateX(-0.5px);
+    }}
     .replay-marker {{
       position: absolute;
-      top: 50%;
       min-width: 22px;
-      max-width: 88px;
-      height: 22px;
+      max-width: 112px;
+      height: 24px;
       overflow: hidden;
-      padding: 2px 5px;
-      border: 1px solid rgb(255 255 255 / 50%);
+      padding: 2px 7px;
+      border: 1px solid #cbd5e1;
       border-radius: 3px;
-      color: #fff;
-      background: #64748b;
-      box-shadow: 0 3px 8px rgb(15 23 42 / 12%);
+      color: #1f2937;
+      background: #fff;
+      box-shadow: 0 3px 8px rgb(15 23 42 / 10%);
       font-family: var(--font-mono);
-      font-size: 9.5px;
+      font-size: 10px;
+      font-weight: 700;
       line-height: 1;
       text-overflow: ellipsis;
       white-space: nowrap;
-      transform: translate(-50%, -50%) scale(0.88);
-      opacity: 0.38;
+      transform: translate(-50%, -50%) scale(0.92);
+      opacity: 0.46;
     }}
     .replay-marker.is-seen {{
       transform: translate(-50%, -50%) scale(1);
       opacity: 1;
     }}
-    .replay-llm-usage {{ background: #0f766e; }}
-    .replay-tool-call {{ background: #42526e; }}
-    .replay-read {{ background: #2f80ed; }}
-    .replay-write {{ background: #d25b3d; }}
-    .replay-search {{ background: #c98a00; }}
-    .replay-coord {{ background: #9f2d55; }}
-    .replay-notification-delivered {{ background: #7c3aed; }}
-    .replay-run-tests {{ background: #0e7490; }}
-    .replay-agent-done, .replay-agent-done-coord, .replay-trial-end {{ background: #334155; }}
-    .replay-marker.is-good {{ background: var(--good); }}
+    .replay-llm-usage {{ color: #115e59; background: #ccfbf1; border-color: #5eead4; }}
+    .replay-tool-call {{ color: #334155; background: #e2e8f0; border-color: #94a3b8; }}
+    .replay-read {{ color: #1d4ed8; background: #dbeafe; border-color: #93c5fd; }}
+    .replay-write {{ color: #9a3412; background: #ffedd5; border-color: #fdba74; }}
+    .replay-search {{ color: #854d0e; background: #fef3c7; border-color: #fcd34d; }}
+    .replay-coord {{ color: #9d174d; background: #fce7f3; border-color: #f9a8d4; }}
+    .replay-notification-delivered {{ color: #6d28d9; background: #ede9fe; border-color: #c4b5fd; }}
+    .replay-run-tests {{ color: #155e75; background: #cffafe; border-color: #67e8f9; }}
+    .replay-agent-done, .replay-agent-done-coord, .replay-trial-end {{
+      color: #334155;
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }}
+    .replay-marker.is-good {{
+      color: #065f46;
+      background: #d1fae5;
+      border-color: #34d399;
+    }}
     .replay-marker.is-important {{
-      background: var(--bad);
-      box-shadow: 0 0 0 2px rgb(190 18 60 / 18%), 0 4px 11px rgb(190 18 60 / 20%);
+      color: #9f1239;
+      background: #ffe4e6;
+      border-color: #fb7185;
+      box-shadow: 0 0 0 2px rgb(190 18 60 / 14%), 0 4px 11px rgb(190 18 60 / 16%);
     }}
     .replay-feed {{
       display: grid;
@@ -1662,6 +1953,8 @@ def write_html_report(
       .donut-layout {{ grid-template-columns: 1fr; justify-items: center; }}
       .bar-row {{ grid-template-columns: 92px minmax(90px, 1fr) 58px; }}
       .stack-row {{ grid-template-columns: 92px minmax(90px, 1fr) 50px; }}
+      .replay-picker {{ grid-template-columns: 1fr; }}
+      .replay-picker-count {{ text-align: left; padding: 0; }}
       .replay-toolbar {{ grid-template-columns: 1fr; }}
       .replay-clock {{ text-align: left; }}
       .replay-feed-row {{ grid-template-columns: 58px minmax(90px, 1fr); }}
@@ -1765,6 +2058,45 @@ def write_html_report(
     </section>
     <div class="table-wrap" id="eventProfileTable"></div>
 
+    <div class="section-label" id="trialReplaySection">
+      <h2>Observable Event Replay</h2>
+      <span class="section-kicker">Selected trial</span>
+    </div>
+    <section class="replay-card" aria-label="observable event replay">
+      <div class="replay-picker">
+        <label>Find replay
+          <input id="replaySearch" type="search" placeholder="task, strategy, rep, log">
+        </label>
+        <label>Selected trial
+          <select id="replaySelect" aria-label="Select replay trial">
+            <option value="">Loading replays</option>
+          </select>
+        </label>
+        <span class="replay-picker-count" id="replayPickCount">0 replays</span>
+      </div>
+      <div class="replay-summary" id="replaySummary"></div>
+      <div class="replay-toolbar">
+        <button id="replayPlay" type="button">Play</button>
+        <input id="replayScrubber" type="range" min="0" max="1" step="0.1" value="0" aria-label="Replay time">
+        <span class="replay-clock" id="replayClock">0.0s / 0.0s</span>
+        <label>Speed
+          <select id="replaySpeed">
+            <option value="5">5x</option>
+            <option value="20" selected>20x</option>
+            <option value="60">60x</option>
+            <option value="120">120x</option>
+          </select>
+        </label>
+        <label>Zoom
+          <input id="replayZoom" type="range" min="1" max="8" step="0.25" value="1" aria-label="Replay zoom">
+        </label>
+        <span class="replay-zoom-label" id="replayZoomLabel">100%</span>
+      </div>
+      <div class="replay-toggles" id="replayToggles" aria-label="replay event filters"></div>
+      <div class="replay-timeline" id="replayTimeline"></div>
+      <div class="replay-feed" id="replayFeed"></div>
+    </section>
+
     <div class="section-label">
       <h2>Agent Activity</h2>
       <span class="section-kicker">Who did what</span>
@@ -1788,30 +2120,6 @@ def write_html_report(
       <span class="section-kicker">Level A</span>
     </div>
     <div class="table-wrap" id="trialTable"></div>
-
-    <div class="section-label" id="trialReplaySection">
-      <h2>Observable Event Replay</h2>
-      <span class="section-kicker">Selected trial</span>
-    </div>
-    <section class="replay-card" aria-label="observable event replay">
-      <div class="replay-summary" id="replaySummary"></div>
-      <div class="replay-toolbar">
-        <button id="replayPlay" type="button">Play</button>
-        <input id="replayScrubber" type="range" min="0" max="1" step="0.1" value="0" aria-label="Replay time">
-        <span class="replay-clock" id="replayClock">0.0s / 0.0s</span>
-        <label>Speed
-          <select id="replaySpeed">
-            <option value="5">5x</option>
-            <option value="20" selected>20x</option>
-            <option value="60">60x</option>
-            <option value="120">120x</option>
-          </select>
-        </label>
-      </div>
-      <div class="replay-toggles" id="replayToggles" aria-label="replay event filters"></div>
-      <div class="replay-timeline" id="replayTimeline"></div>
-      <div class="replay-feed" id="replayFeed"></div>
-    </section>
 
     <div class="section-label">
       <h2>Level C Black-Box Runtime Checks</h2>
