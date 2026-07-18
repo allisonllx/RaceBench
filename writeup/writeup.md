@@ -179,6 +179,33 @@ as stall/wall-clock cost when mechanisms over-fire).
 
 **Unfair claim:** the tasks are ill-designed because naive works on the benign half.
 
+### Exploratory peer-negotiation extension
+
+After the main grid, we added two new Level A strategies to test A2A-style
+coordination inspired by automated negotiation protocols such as POANCD. These
+are **not** part of the 480-trial headline table yet. They are a 10-trial
+targeted smoke (`results/grid-v1-peer-targeted-v2/`): five high-signal tasks
+(`t02`, `t03`, `t04`, `rw_d`, `rw_e`) x two strategies x one rep.
+
+`peer_contract` is voluntary: agents can declare edit intent and ACK a compact
+contract before overlapping writes. `peer_broker` is forced: the runtime detects
+an overlapping write, opens a private broker decision with affected peers, and
+allows ACK, ACK-with-constraints, or conflict.
+
+Preliminary result: `peer_contract` was **5/5** correct; `peer_broker` was
+**3/5**. Broker improved after adding `ack_with_constraints`: it passed
+`t03_fetch_clobber` and `rw_e_cascade`, where an earlier hard-veto broker loop
+failed. But it still cost more: mean wall clock **119s vs 85s**, mean tokens
+**170k vs 153k**, stalls **24 vs 13**, coordination events **176 vs 88**.
+
+Interpretation: forced negotiation is not automatically better. The broker's
+remaining problem is trigger precision. A full-file read can make a peer look
+dependent on many symbols, so the broker negotiates even on benign or weakly
+related overlap. Voluntary `peer_contract` often gives the system a sharper
+intent signal earlier. RaceBench therefore exposed a second design question:
+not just **how** agents negotiate, but **when** the runtime should invoke
+negotiation at all.
+
 ## 4. Constraints
 
 Cost is a first-class constraint. The runner enforces **$25 / 40M-token** with

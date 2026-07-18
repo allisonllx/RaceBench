@@ -105,7 +105,7 @@ class PeerBrokerStrategy(PeerContractStrategy):
 
         conflicts = [
             decision for decision in decisions
-            if decision.get("decision") != "ack"
+            if decision.get("decision") == "conflict"
         ]
         if conflicts:
             notes = "; ".join(
@@ -121,6 +121,28 @@ class PeerBrokerStrategy(PeerContractStrategy):
                 status="conflict",
                 waited_s=time.monotonic() - started_at,
                 message=f"peer_broker rejected by peer: {notes}",
+            )
+
+        revisions = [
+            decision for decision in decisions
+            if decision.get("decision") == "ack_with_constraints"
+        ]
+        if revisions:
+            notes = self._revision_notes(revisions)
+            self.log.log("coord", strategy=self.name,
+                         action="broker_revision_requested",
+                         agent=intent.agent,
+                         contract_id=intent.contract_id, path=intent.path,
+                         peers=[d.get("agent") for d in revisions],
+                         notes=notes[:300])
+            return WriteOutcome(
+                status="conflict",
+                waited_s=time.monotonic() - started_at,
+                message=(
+                    "peer_broker asks you to revise before writing. "
+                    f"Re-read current files, incorporate these peer constraints, "
+                    f"then retry the write: {notes}"
+                ),
             )
 
         self.log.log("coord", strategy=self.name,
@@ -145,6 +167,11 @@ class PeerBrokerStrategy(PeerContractStrategy):
             "symbols": sorted(changed),
             "mutation_kind": mutation.kind,
             "summary": "broker-inferred write intent",
+            "old_string_preview": _preview(
+                mutation.old_string if mutation.kind == "replace" else ""),
+            "write_preview": _preview(
+                mutation.new_string if mutation.kind == "replace"
+                else mutation.content),
             "peer_intents": [
                 {
                     "contract_id": peer_intent.contract_id,
@@ -163,11 +190,9 @@ class PeerBrokerStrategy(PeerContractStrategy):
             self.request_negotiation(peer, request), timeout=timeout)
         normalized = {
             "agent": peer,
-            "decision": (
-                "ack" if str(decision.get("decision") or "").lower() == "ack"
-                else "conflict"
-            ),
+            "decision": _normalize_decision(decision.get("decision")),
             "notes": str(decision.get("notes") or "")[:500],
+            "constraints": _clean_constraints(decision.get("constraints")),
             "contract": str(decision.get("contract") or "")[:500],
         }
         self.log.log("coord", strategy=self.name,
@@ -175,6 +200,7 @@ class PeerBrokerStrategy(PeerContractStrategy):
                      writer=intent.agent, contract_id=intent.contract_id,
                      path=intent.path, decision=normalized["decision"],
                      notes=normalized["notes"][:300],
+                     constraints=normalized["constraints"],
                      contract=normalized["contract"][:300])
         return normalized
 
@@ -197,3 +223,44 @@ class PeerBrokerStrategy(PeerContractStrategy):
                 f"{', '.join(peers)} before editing {intent.path}"
             ),
         )
+
+    def _revision_notes(self, revisions: list[dict[str, Any]]) -> str:
+        parts = []
+        for decision in revisions:
+            agent = decision.get("agent")
+            constraints = decision.get("constraints") or []
+            contract = str(decision.get("contract") or "").strip()
+            notes = str(decision.get("notes") or "").strip()
+            requirements = "; ".join(constraints)
+            if contract:
+                requirements = f"{requirements}; {contract}" if requirements else contract
+            if not requirements:
+                requirements = notes or "revise to preserve peer requirements"
+            parts.append(f"{agent}: {requirements}")
+        return " | ".join(parts)
+
+
+def _normalize_decision(value: Any) -> str:
+    decision = str(value or "").lower()
+    if decision in {"ack", "ack_with_constraints", "conflict"}:
+        return decision
+    return "conflict"
+
+
+def _clean_constraints(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        raw = [value]
+    elif isinstance(value, list):
+        raw = value
+    else:
+        raw = list(value) if isinstance(value, (tuple, set)) else [value]
+    return sorted({str(item).strip()[:200] for item in raw if str(item).strip()})
+
+
+def _preview(value: str, limit: int = 1800) -> str:
+    value = str(value or "")
+    if len(value) <= limit:
+        return value
+    return value[:limit] + "\n... [truncated]"

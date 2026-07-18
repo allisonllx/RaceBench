@@ -15,7 +15,9 @@ from harness.workspace import Workspace
 class BrokerAckModel(ModelClient):
     async def complete(self, messages: list[dict], tools: list[dict]) -> ModelTurn:
         assert tools[0]["function"]["name"] == "broker_decision"
+        assert "ack_with_constraints" in tools[0]["function"]["parameters"]["properties"]["decision"]["enum"]
         assert "Brokered write negotiation request" in messages[-1]["content"]
+        assert "Proposed write preview" in messages[-1]["content"]
         return ModelTurn(
             tool_calls=[
                 ToolCall(
@@ -29,6 +31,28 @@ class BrokerAckModel(ModelClient):
             ],
             prompt_tokens=17,
             completion_tokens=5,
+        )
+
+
+class BrokerConstraintsModel(ModelClient):
+    async def complete(self, messages: list[dict], tools: list[dict]) -> ModelTurn:
+        return ModelTurn(
+            tool_calls=[
+                ToolCall(
+                    name="broker_decision",
+                    arguments={
+                        "decision": "ack_with_constraints",
+                        "notes": "compose timeout and retries",
+                        "constraints": [
+                            "keep timeout=10",
+                            "keep retries=3",
+                        ],
+                        "contract": "final fetch must support timeout and retries",
+                    },
+                )
+            ],
+            prompt_tokens=23,
+            completion_tokens=7,
         )
 
 
@@ -115,6 +139,52 @@ async def test_peer_broker_conflict_refuses_overlapping_write(tmp_path):
         assert "same module block" in outcome.message
         events = read_events(logger.path)
         assert any(
+            event.get("event") == "coord"
+            and event.get("action") == "broker_conflict"
+            for event in events
+        )
+    finally:
+        _finish(ws, logger)
+
+
+async def test_peer_broker_constraints_request_revision_not_hard_conflict(tmp_path):
+    ws, logger, strategy = _broker_workspace(
+        tmp_path, "t01_stale_clobber", ["agent-timeout", "agent-retries"],
+        timeout=1.0,
+    )
+    try:
+        await strategy.read("agent-retries", "config.py")
+
+        async def revise(request):
+            assert "write_preview" in request
+            assert "timeout" in request["write_preview"]
+            return {
+                "decision": "ack_with_constraints",
+                "notes": "compose config additions",
+                "constraints": ["preserve retries key"],
+                "contract": "DEFAULTS must include timeout and retries",
+            }
+
+        strategy.register_negotiator("agent-retries", revise)
+        outcome = await strategy.write(
+            "agent-timeout",
+            "config.py",
+            Mutation(kind="replace", old_string='    "port": 8080,\n}',
+                     new_string=T1_TIMEOUT_DEFAULT),
+        )
+
+        assert not outcome.ok
+        assert outcome.status == "conflict"
+        assert "revise before writing" in outcome.message
+        assert "preserve retries key" in outcome.message
+        assert "timeout and retries" in outcome.message
+        events = read_events(logger.path)
+        assert any(
+            event.get("event") == "coord"
+            and event.get("action") == "broker_revision_requested"
+            for event in events
+        )
+        assert not any(
             event.get("event") == "coord"
             and event.get("action") == "broker_conflict"
             for event in events
@@ -216,6 +286,47 @@ async def test_agent_private_broker_callback_uses_structured_tool(tmp_path):
         assert any(
             event.get("event") == "broker_decision"
             and event.get("decision") == "ack"
+            for event in events
+        )
+    finally:
+        _finish(ws, logger)
+
+
+async def test_agent_private_broker_callback_parses_ack_with_constraints(tmp_path):
+    task = load_task("t01_stale_clobber")
+    ws = Workspace.create(task.repo, tmp_path / "ws")
+    logger = EventLogger(tmp_path / "events.jsonl")
+    strategy = PeerBrokerStrategy(ws, logger, ["agent-retries"])
+    agent = Agent(
+        "agent-retries",
+        "Add retry support.",
+        BrokerConstraintsModel(),
+        strategy,
+        ws,
+        logger,
+        max_turns=1,
+    )
+    try:
+        decision = await strategy.request_negotiation("agent-retries", {
+            "contract_id": "contract-10",
+            "writer": "agent-timeout",
+            "path": "api.py",
+            "symbols": ["fetch"],
+            "mutation_kind": "replace",
+            "summary": "add timeout",
+            "write_preview": "def fetch(url, transport, timeout=10): ...",
+        })
+
+        assert decision["decision"] == "ack_with_constraints"
+        assert decision["constraints"] == ["keep retries=3", "keep timeout=10"]
+        assert decision["contract"] == "final fetch must support timeout and retries"
+        assert agent.prompt_tokens == 23
+        assert agent.completion_tokens == 7
+        events = read_events(logger.path)
+        assert any(
+            event.get("event") == "broker_decision"
+            and event.get("decision") == "ack_with_constraints"
+            and event.get("constraints") == ["keep retries=3", "keep timeout=10"]
             for event in events
         )
     finally:

@@ -41,7 +41,7 @@ def test_peer_targeted_config_includes_peer_strategies(tmp_path):
     cfg = load_config(str(ROOT / "runner" / "config.peer-targeted.yaml"))
     pending = collect_pending(cfg, tmp_path, calibrate=False)
 
-    assert cfg["run_id"] == "grid-v1-peer-targeted"
+    assert cfg["run_id"] == "grid-v1-peer-targeted-v2"
     assert cfg["provider"] == "openai"
     assert cfg["reps"] == 1
     assert cfg["parallel"] == 2

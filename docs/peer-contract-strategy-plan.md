@@ -9,6 +9,14 @@ writes.
 This is a mediated peer negotiation layer. The harness detects collisions and
 enforces the protocol, but the agents provide the intent and agreement text.
 
+Prior-art anchor: `peer_contract` and `peer_broker` are inspired by automated
+negotiation work such as Li, Vo, and Kowalczyk's POANCD protocol
+([UAI 2011 / arXiv 1202.3740](https://arxiv.org/abs/1202.3740)), which studies
+distributed negotiation over combinatorial domains under incomplete information.
+RaceBench does not implement POANCD directly. It adapts the high-level idea of
+agents exchanging partial commitments or constraints toward mutually acceptable
+agreements to the narrower setting of concurrent code edits.
+
 ## Goals
 
 - [x] Add an instrumented Level A strategy that tests structured peer
@@ -50,16 +58,20 @@ enforces the protocol, but the agents provide the intent and agreement text.
 - [x] Add unit and scripted tests for registration, non-overlap, overlap
       gating, ACK success, timeout/refusal, and event logging.
 
-## V1.5: Smarter Intent Scope
+## V1.5: Smarter Intent Scope And Diagnostics
 
-- [ ] Use changed-symbol detection when possible so same-file disjoint edits do
+This is useful polish, but it should not block the small peer-strategy rerun.
+The broker fix in V2 is higher priority because the first targeted logs showed
+hard veto loops.
+
+- [x] Use changed-symbol detection when possible so same-file disjoint edits do
       not needlessly stall.
 - [ ] Add dependency-graph overlap for cross-file read/write antidependencies.
 - [ ] Count negotiation metrics in analysis:
       negotiations per trial, ACK rate, contract timeout rate, and token
       overhead.
 - [ ] Surface contract events in `report.html` replay with a distinct marker.
-- [ ] Add targeted grid config:
+- [x] Add targeted grid config:
       `t01`, `t03`, `t04`, `rw_d_antidependency`, `rw_e_cascade`, plus one
       benign-overlap task such as `t02` or `t09`.
 
@@ -72,6 +84,10 @@ enforces the protocol, but the agents provide the intent and agreement text.
 - [x] Bound negotiation wall-clock time with the existing lock timeout.
 - [x] Log broker requests, broker decisions, write-allowed events, conflicts,
       and timeouts.
+- [x] Include a compact write preview so peers judge the actual proposed change,
+      not only the file and symbols.
+- [x] Support `ack_with_constraints`, returning peer requirements to the writer
+      as a revision request instead of treating every concern as a hard veto.
 - [ ] Compare against V1 to see whether forced negotiation is worth the extra
       runtime and token cost.
 

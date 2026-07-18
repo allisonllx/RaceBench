@@ -115,7 +115,8 @@ systems.
    notice. Overlapping writes wait for peer ACK; disjoint declared edits can proceed.
 8. `peer_broker`: forced mediated peer negotiation. The runtime detects an
    overlapping write, opens a private broker decision with affected peers, and
-   applies the write only if peers ACK.
+   applies the write only if peers ACK. Peers can also request concrete revision
+   constraints instead of hard-rejecting the write.
 
 `peer_contract` and `peer_broker` are intentionally separate, like `ast_scope`
 and `ast_dep`: they test whether voluntary negotiation is enough, and whether a
@@ -236,8 +237,8 @@ tasks where peer negotiation should matter.
 
 ```bash
 python -m runner.run_grid --config runner/config.peer-targeted.yaml
-python -m analysis.validate_logs results/grid-v1-peer-targeted
-python -m analysis.make_report results/grid-v1-peer-targeted \
+python -m analysis.validate_logs results/grid-v1-peer-targeted-v2
+python -m analysis.make_report results/grid-v1-peer-targeted-v2 \
   --prices-config runner/config.peer-targeted.yaml
 ```
 
@@ -330,6 +331,10 @@ writeup/     five-pillar write-up + demo video script
 - Verified Detection of Concurrency Anomalies: arXiv:2606.17182 (failure-mode taxonomy)
 - CooperBench: arXiv:2601.13295 (collaborative coding tasks; complementary axis:
   it varies communication, we vary the coordination mechanism)
+- POANCD: Li, Vo, and Kowalczyk, UAI 2011 / arXiv:1202.3740
+  (distributed negotiation over combinatorial domains under incomplete
+  information; inspiration for `peer_contract` / `peer_broker`, not directly
+  implemented)
 - Specification Gap: arXiv:2603.24284, and the tools Grit, Phantom, Weave
   (prior art for AST-level conflict detection; `ast_scope` is our neutral
   reimplementation for measurement, not a novel mechanism)

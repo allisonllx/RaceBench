@@ -73,16 +73,31 @@ BROKER_DECISION_SCHEMA = {
             "properties": {
                 "decision": {
                     "type": "string",
-                    "enum": ["ack", "conflict"],
-                    "description": "ACK if compatible, conflict if unsafe.",
+                    "enum": ["ack", "ack_with_constraints", "conflict"],
+                    "description": (
+                        "ACK if compatible as proposed. Use ack_with_constraints "
+                        "when the writer can make it compatible by revising. "
+                        "Use conflict only when the write is irreconcilable."
+                    ),
                 },
                 "notes": {
                     "type": "string",
                     "description": "Short reason or compatibility contract.",
                 },
+                "constraints": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": (
+                        "Concrete requirements the writer must include when "
+                        "decision is ack_with_constraints."
+                    ),
+                },
                 "contract": {
                     "type": "string",
-                    "description": "Optional shared contract text.",
+                    "description": (
+                        "Optional shared contract text, especially for "
+                        "ack_with_constraints."
+                    ),
                 },
             },
             "required": ["decision"],
@@ -93,7 +108,9 @@ BROKER_DECISION_SCHEMA = {
 BROKER_SYSTEM_PROMPT = """You are one coding agent in a brokered coordination \
 session. Another agent is trying to commit an overlapping write. Decide whether \
 that write is compatible with your own subtask. Do not solve the task here. \
-Return only a broker_decision tool call.
+Return only a broker_decision tool call. Prefer ack_with_constraints over \
+conflict when the write can be made compatible by preserving specific \
+requirements. Use conflict only when the proposed write is irreconcilable.
 
 Your subtask:
 {subtask}
@@ -231,6 +248,7 @@ class Agent:
                      path=request.get("path", ""),
                      decision=decision["decision"],
                      notes=decision.get("notes", "")[:300],
+                     constraints=decision.get("constraints", []),
                      contract=decision.get("contract", "")[:300])
         return decision
 
@@ -314,6 +332,8 @@ def _dump_args(arguments: dict) -> str:
 def _format_broker_request(request: dict[str, Any]) -> str:
     symbols = request.get("symbols") or []
     peer_intents = request.get("peer_intents") or []
+    write_preview = str(request.get("write_preview") or "").strip()
+    old_preview = str(request.get("old_string_preview") or "").strip()
     return (
         "Brokered write negotiation request:\n"
         f"- contract_id: {request.get('contract_id', '')}\n"
@@ -323,29 +343,63 @@ def _format_broker_request(request: dict[str, Any]) -> str:
         f"- changed_symbols: {', '.join(symbols) or 'unknown'}\n"
         f"- writer_summary: {request.get('summary', '')}\n"
         f"- your_related_intents: {peer_intents or 'none recorded'}\n\n"
-        "Call broker_decision with decision='ack' if the proposed write is "
-        "compatible with your subtask. Use decision='conflict' only if the "
-        "write would likely invalidate your work or requires a revised plan."
+        f"Old-string preview:\n{old_preview or '(not provided)'}\n\n"
+        f"Proposed write preview:\n{write_preview or '(not provided)'}\n\n"
+        "Decision guide:\n"
+        "- decision='ack': the proposed write is compatible as shown, including "
+        "your required behavior.\n"
+        "- decision='ack_with_constraints': the write can be compatible if the "
+        "writer revises it. Put concrete requirements in constraints and/or "
+        "contract.\n"
+        "- decision='conflict': use only when no local revision would make the "
+        "write safe."
     )
 
 
-def _parse_broker_decision(model_turn: ModelTurn) -> dict[str, str]:
+def _parse_broker_decision(model_turn: ModelTurn) -> dict[str, Any]:
     for call in model_turn.tool_calls:
         if call.name != "broker_decision":
             continue
         decision = str(call.arguments.get("decision") or "").lower()
-        if decision not in {"ack", "conflict"}:
+        if decision not in {"ack", "ack_with_constraints", "conflict"}:
             decision = "conflict"
         return {
             "decision": decision,
             "notes": str(call.arguments.get("notes") or "")[:500],
+            "constraints": _clean_broker_constraints(
+                call.arguments.get("constraints")),
             "contract": str(call.arguments.get("contract") or "")[:500],
         }
     text = (model_turn.text or "").lower()
+    if "ack_with_constraints" in text or "ack with constraints" in text:
+        return {
+            "decision": "ack_with_constraints",
+            "notes": model_turn.text[:500],
+            "constraints": [],
+            "contract": model_turn.text[:500],
+        }
     if "ack" in text and "conflict" not in text:
-        return {"decision": "ack", "notes": model_turn.text[:500], "contract": ""}
+        return {
+            "decision": "ack",
+            "notes": model_turn.text[:500],
+            "constraints": [],
+            "contract": "",
+        }
     return {
         "decision": "conflict",
         "notes": (model_turn.text or "broker_decision tool call missing")[:500],
+        "constraints": [],
         "contract": "",
     }
+
+
+def _clean_broker_constraints(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        raw = [value]
+    elif isinstance(value, list):
+        raw = value
+    else:
+        raw = list(value) if isinstance(value, (tuple, set)) else [value]
+    return sorted({str(item).strip()[:200] for item in raw if str(item).strip()})
