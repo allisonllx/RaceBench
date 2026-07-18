@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from analysis.replay import build_replay_payload
+
 
 def _records(df: pd.DataFrame) -> list[dict]:
     if df is None or df.empty:
@@ -71,6 +73,7 @@ def write_html_report(
             if event_by_task_strategy is not None else pd.DataFrame()),
         "agentActivity": _records(
             agent_activity if agent_activity is not None else pd.DataFrame()),
+        "replays": build_replay_payload(trials, default_run_dir=out_dir),
     }
     payload = json.dumps(all_data, ensure_ascii=False)
 
@@ -147,6 +150,254 @@ def write_html_report(
     function logLink(row) {
       const log = String(row.log ?? "");
       return `<a href="${attr(log)}">${esc(log)}</a>`;
+    }
+    function replayButton(row) {
+      const log = String(row.log ?? "");
+      if (!data.replays || !data.replays[log]) return "";
+      return `<button type="button" class="replay-btn" data-log="${attr(log)}">Replay</button>`;
+    }
+
+    const replayEls = {
+      section: document.getElementById("trialReplaySection"),
+      summary: document.getElementById("replaySummary"),
+      play: document.getElementById("replayPlay"),
+      scrubber: document.getElementById("replayScrubber"),
+      speed: document.getElementById("replaySpeed"),
+      clock: document.getElementById("replayClock"),
+      timeline: document.getElementById("replayTimeline"),
+      feed: document.getElementById("replayFeed"),
+      toggles: document.getElementById("replayToggles"),
+    };
+    const replayTypes = [
+      {event: "llm_usage", label: "LLM"},
+      {event: "tool_call", label: "tool"},
+      {event: "read", label: "read"},
+      {event: "write", label: "write"},
+      {event: "search", label: "search"},
+      {event: "coord", label: "coord"},
+      {event: "notification_delivered", label: "notice"},
+      {event: "run_tests", label: "tests"},
+      {event: "agent_done", label: "done"},
+      {event: "agent_done_coord", label: "done coord"},
+      {event: "trial_end", label: "outcome"},
+    ];
+    const replayState = {
+      log: "",
+      time: 0,
+      timer: null,
+      enabled: new Set(replayTypes.map(t => t.event)),
+    };
+
+    function selectedReplay() {
+      return data.replays ? data.replays[replayState.log] : null;
+    }
+    function replayDuration(replay) {
+      return Math.max(0.1, toNumber(replay?.duration_s));
+    }
+    function stopReplay() {
+      if (replayState.timer) {
+        window.clearInterval(replayState.timer);
+        replayState.timer = null;
+      }
+      replayEls.play.textContent = "Play";
+    }
+    function eventDetail(event) {
+      const bits = [];
+      if (event.tool) bits.push(event.tool);
+      if (event.path) bits.push(event.path);
+      if (event.pattern) bits.push(`pattern=${event.pattern}`);
+      if (event.status) bits.push(`status=${event.status}`);
+      if (event.action) bits.push(`action=${event.action}`);
+      if (event.reader) bits.push(`reader=${event.reader}`);
+      if (event.writer) bits.push(`writer=${event.writer}`);
+      if (event.holder) bits.push(`holder=${event.holder}`);
+      if (event.holders && event.holders.length) bits.push(`holders=${event.holders.join(",")}`);
+      if (event.symbols && event.symbols.length) bits.push(`symbols=${event.symbols.join(",")}`);
+      if (event.total_tokens) bits.push(`${fmt(event.total_tokens, 0)} tokens`);
+      if (event.passed !== undefined || event.failed !== undefined || event.errored !== undefined) {
+        bits.push(`tests ${event.passed ?? 0}/${event.failed ?? 0}/${event.errored ?? 0}`);
+      }
+      if (event.message) bits.push(event.message);
+      return bits.join(" | ");
+    }
+    function eventLabel(event) {
+      if (event.event === "llm_usage") return `LLM t${event.turn ?? ""}`.trim();
+      if (event.event === "tool_call") return event.tool || "tool";
+      if (event.event === "read") return "read";
+      if (event.event === "write") return event.status || "write";
+      if (event.event === "coord") return event.action || "coord";
+      if (event.event === "notification_delivered") return "notice";
+      if (event.event === "run_tests") return "tests";
+      if (event.event === "search") return event.kind || "search";
+      if (event.event === "agent_done") return "done";
+      if (event.event === "agent_done_coord") return "done coord";
+      if (event.event === "trial_end") return event.correct ? "pass" : "fail";
+      return event.event;
+    }
+    function eventClass(event) {
+      const classes = [`replay-${String(event.event).replace(/_/g, "-")}`];
+      const badWrite = event.event === "write"
+        && !["applied", "merged"].includes(String(event.status || ""));
+      const badCoord = event.event === "coord"
+        && ["blocked", "lock_timeout", "merge_conflict"].includes(String(event.action || ""));
+      const badTests = event.event === "run_tests"
+        && (toNumber(event.failed) > 0 || toNumber(event.errored) > 0);
+      const badEnd = event.event === "trial_end" && event.correct === false;
+      if (badWrite || badCoord || badTests || badEnd) classes.push("is-important");
+      if (event.event === "write" && ["applied", "merged"].includes(String(event.status || ""))) {
+        classes.push("is-good");
+      }
+      return classes.join(" ");
+    }
+    function visibleReplayEvents(replay) {
+      return (replay?.events || []).filter(event => replayState.enabled.has(event.event));
+    }
+    function eventLaneAgents(event, replay) {
+      const agents = new Set(replay?.agents || []);
+      const laneAgents = [];
+      [event.agent, event.writer, event.reader, event.holder].forEach(agent => {
+        if (agent && agents.has(agent) && !laneAgents.includes(agent)) {
+          laneAgents.push(agent);
+        }
+      });
+      (event.holders || []).forEach(agent => {
+        if (agent && agents.has(agent) && !laneAgents.includes(agent)) {
+          laneAgents.push(agent);
+        }
+      });
+      return laneAgents;
+    }
+    function renderReplayToggles() {
+      replayEls.toggles.innerHTML = replayTypes.map(item => `
+        <label class="replay-toggle">
+          <input type="checkbox" value="${attr(item.event)}" checked>
+          <span>${esc(item.label)}</span>
+        </label>
+      `).join("");
+      replayEls.toggles.querySelectorAll("input").forEach(input => {
+        input.addEventListener("change", () => {
+          if (input.checked) replayState.enabled.add(input.value);
+          else replayState.enabled.delete(input.value);
+          renderReplay();
+        });
+      });
+    }
+    function selectReplay(log, {scroll = true} = {}) {
+      if (!data.replays || !data.replays[log]) return;
+      stopReplay();
+      replayState.log = log;
+      replayState.time = 0;
+      renderReplay();
+      if (scroll) replayEls.section.scrollIntoView({behavior: "smooth", block: "start"});
+    }
+    function ensureReplaySelection(rows) {
+      const playable = rows.filter(row => data.replays && data.replays[row.log]);
+      if (!playable.length) {
+        replayState.log = "";
+        stopReplay();
+        renderReplay();
+        return;
+      }
+      if (!replayState.log || !playable.some(row => row.log === replayState.log)) {
+        selectReplay(playable[0].log, {scroll: false});
+      }
+    }
+    function setReplayTime(value) {
+      const replay = selectedReplay();
+      replayState.time = Math.max(0, Math.min(replayDuration(replay), toNumber(value)));
+      renderReplay();
+    }
+    function playReplay() {
+      const replay = selectedReplay();
+      if (!replay) return;
+      if (replayState.timer) {
+        stopReplay();
+        return;
+      }
+      if (replayState.time >= replayDuration(replay)) replayState.time = 0;
+      replayEls.play.textContent = "Pause";
+      replayState.timer = window.setInterval(() => {
+        const step = 0.08 * toNumber(replayEls.speed.value || 20);
+        replayState.time += step;
+        if (replayState.time >= replayDuration(replay)) {
+          replayState.time = replayDuration(replay);
+          stopReplay();
+        }
+        renderReplay();
+      }, 80);
+    }
+    function renderReplay() {
+      const replay = selectedReplay();
+      if (!replay) {
+        replayEls.summary.innerHTML = '<div class="empty">Select a trial row to replay its observable events.</div>';
+        replayEls.timeline.innerHTML = "";
+        replayEls.feed.innerHTML = '<div class="empty">No trial selected.</div>';
+        replayEls.scrubber.value = 0;
+        replayEls.scrubber.max = 1;
+        replayEls.clock.textContent = "0.0s / 0.0s";
+        replayEls.play.disabled = true;
+        replayEls.scrubber.disabled = true;
+        return;
+      }
+      replayEls.play.disabled = false;
+      replayEls.scrubber.disabled = false;
+      const duration = replayDuration(replay);
+      replayEls.scrubber.max = String(duration);
+      replayEls.scrubber.value = String(replayState.time);
+      replayEls.clock.textContent = `${fmt(replayState.time, 1)}s / ${fmt(duration, 1)}s`;
+      const status = replay.correct ? "passed" : "failed";
+      replayEls.summary.innerHTML = `
+        <div class="replay-title">
+          <strong>${esc(replay.task)} / ${esc(replay.strategy)}</strong>
+          <span class="${replay.correct ? "ok" : "bad"}">${esc(status)}</span>
+        </div>
+        <div class="replay-meta">
+          <span>${esc(replay.log)}</span>
+          <span>rep ${esc(replay.rep)}</span>
+          <span>${esc(replay.agents.length)} agent(s)</span>
+          <span>${esc(fmt(replay.wall_clock_s ?? replay.duration_s, 1))}s wall</span>
+          <span>oracle ${esc(replay.oracle_passed ?? "")}/${esc(replay.oracle_total ?? "")}</span>
+        </div>
+        <p>Observable event replay from logged timestamps. Hidden model planning and exact generation intervals are not reconstructed.</p>
+      `;
+      const currentPct = Math.max(0, Math.min(100, replayState.time / duration * 100));
+      const events = visibleReplayEvents(replay);
+      const laneMap = new Map(replay.agents.map(agent => [agent, []]));
+      laneMap.set("run", []);
+      events.forEach(event => {
+        const laneAgents = eventLaneAgents(event, replay);
+        if (!laneAgents.length) laneAgents.push("run");
+        laneAgents.forEach(agent => laneMap.get(agent)?.push(event));
+      });
+      if (!laneMap.get("run").length) laneMap.delete("run");
+      replayEls.timeline.innerHTML = `<div class="replay-lanes">${[...laneMap.entries()].map(([agent, laneEvents]) => {
+        const laneLabel = agent === "run" ? "run outcome" : agent;
+        return `<div class="replay-lane">
+          <div class="replay-agent" title="${attr(laneLabel)}">${esc(laneLabel)}</div>
+          <div class="replay-track">
+            <span class="replay-now" style="left:${currentPct}%"></span>
+            ${laneEvents.map(event => {
+              const left = Math.max(0, Math.min(100, toNumber(event.t) / duration * 100));
+              const seen = toNumber(event.t) <= replayState.time ? "is-seen" : "";
+              const title = `${fmt(event.t, 1)}s ${event.event} ${eventDetail(event)}`;
+              return `<button type="button" class="replay-marker ${eventClass(event)} ${seen}"
+                title="${attr(title)}" style="left:${left}%">${esc(eventLabel(event))}</button>`;
+            }).join("")}
+          </div>
+        </div>`;
+      }).join("")}</div>`;
+      const seen = events
+        .filter(event => toNumber(event.t) <= replayState.time)
+        .sort((a, b) => toNumber(b.t) - toNumber(a.t))
+        .slice(0, 40);
+      replayEls.feed.innerHTML = seen.length ? seen.map(event => `
+        <div class="replay-feed-row ${eventClass(event)}">
+          <span>${esc(fmt(event.t, 1))}s</span>
+          <strong>${esc(event.agent || "run")}</strong>
+          <em>${esc(eventLabel(event))}</em>
+          <p>${esc(eventDetail(event) || event.event)}</p>
+        </div>
+      `).join("") : '<div class="empty">Move the scrubber or press Play to reveal events.</div>';
     }
 
     addOptions(filters.task, uniq(data.levelATrials.map(r => r.task)));
@@ -437,6 +688,7 @@ def write_html_report(
       const agentRows = filteredAgentActivity();
       const strategyRollup = summarize(trials, ["strategy"]);
       const taskStrategy = summarize(trials, ["task", "strategy", "n_agents"]);
+      ensureReplaySelection(trials);
       renderStrategyChart(strategyRollup, trials);
       renderDonut(trials);
       renderHeatmap(trials);
@@ -497,7 +749,11 @@ def write_html_report(
         {key: "total_tokens", label: "tokens", num: true, render: r => esc(fmt(r.total_tokens, 0))},
         {key: "wall_clock_s", label: "wall s", num: true, render: r => esc(fmt(r.wall_clock_s, 1))},
         {key: "log", label: "log", render: logLink},
+        {key: "replay", label: "replay", render: replayButton},
       ], trials);
+      document.querySelectorAll(".replay-btn[data-log]").forEach(button => {
+        button.addEventListener("click", () => selectReplay(button.dataset.log));
+      });
       table("externalTable", [
         {key: "task", label: "task"},
         {key: "strategy", label: "synthetic id"},
@@ -512,6 +768,14 @@ def write_html_report(
       el.addEventListener("input", render);
       el.addEventListener("change", render);
     }
+    replayEls.play.addEventListener("click", playReplay);
+    replayEls.scrubber.addEventListener("input", () => setReplayTime(replayEls.scrubber.value));
+    replayEls.speed.addEventListener("change", () => {
+      if (replayState.timer) {
+        stopReplay();
+        playReplay();
+      }
+    });
     clearFilters.addEventListener("click", () => {
       filters.task.value = "";
       filters.strategy.value = "";
@@ -520,6 +784,7 @@ def write_html_report(
       filters.search.value = "";
       render();
     });
+    renderReplayToggles();
     render();
 """
     html = f"""<!doctype html>
@@ -1103,6 +1368,232 @@ def write_html_report(
       from {{ opacity: 0; transform: translateY(12px); }}
       to {{ opacity: 1; transform: translateY(0); }}
     }}
+    .replay-card {{
+      display: grid;
+      gap: 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }}
+    .replay-toolbar {{
+      display: grid;
+      grid-template-columns: auto minmax(180px, 1fr) auto 110px;
+      gap: 10px;
+      align-items: center;
+    }}
+    .replay-toolbar input[type="range"] {{
+      width: 100%;
+      padding: 0;
+      accent-color: var(--accent);
+    }}
+    .replay-clock {{
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+    }}
+    .replay-title {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+    }}
+    .replay-title strong {{
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }}
+    .replay-title span {{
+      border-radius: 999px;
+      padding: 2px 8px;
+      color: #fff;
+      background: var(--bad);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }}
+    .replay-title span.ok {{ background: var(--good); }}
+    .replay-meta {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }}
+    .replay-summary p {{
+      margin: 8px 0 0;
+      color: var(--ink-soft);
+      font-size: 13px;
+    }}
+    .replay-toggles {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--bg-soft);
+    }}
+    .replay-toggle {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+      color: var(--ink-soft);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0;
+      text-transform: none;
+    }}
+    .replay-toggle input {{ accent-color: var(--accent); }}
+    .replay-timeline {{
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f8fafc;
+    }}
+    .replay-lanes {{
+      display: grid;
+      gap: 0;
+      min-width: 900px;
+      padding: 10px;
+    }}
+    .replay-lane {{
+      display: grid;
+      grid-template-columns: 150px minmax(620px, 1fr);
+      gap: 10px;
+      min-height: 54px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+    }}
+    .replay-lane:last-child {{ border-bottom: 0; }}
+    .replay-agent {{
+      overflow: hidden;
+      color: var(--ink-soft);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+    .replay-track {{
+      position: relative;
+      height: 42px;
+      border-radius: 4px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent calc(10% - 1px),
+          rgb(18 21 28 / 8%) calc(10% - 1px),
+          rgb(18 21 28 / 8%) 10%
+        ),
+        #eef2f7;
+    }}
+    .replay-now {{
+      position: absolute;
+      top: -4px;
+      bottom: -4px;
+      width: 2px;
+      z-index: 5;
+      background: var(--ink);
+      box-shadow: 0 0 0 1px rgb(255 255 255 / 80%);
+    }}
+    .replay-marker {{
+      position: absolute;
+      top: 50%;
+      min-width: 22px;
+      max-width: 88px;
+      height: 22px;
+      overflow: hidden;
+      padding: 2px 5px;
+      border: 1px solid rgb(255 255 255 / 50%);
+      border-radius: 3px;
+      color: #fff;
+      background: #64748b;
+      box-shadow: 0 3px 8px rgb(15 23 42 / 12%);
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      line-height: 1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transform: translate(-50%, -50%) scale(0.88);
+      opacity: 0.38;
+    }}
+    .replay-marker.is-seen {{
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }}
+    .replay-llm-usage {{ background: #0f766e; }}
+    .replay-tool-call {{ background: #42526e; }}
+    .replay-read {{ background: #2f80ed; }}
+    .replay-write {{ background: #d25b3d; }}
+    .replay-search {{ background: #c98a00; }}
+    .replay-coord {{ background: #9f2d55; }}
+    .replay-notification-delivered {{ background: #7c3aed; }}
+    .replay-run-tests {{ background: #0e7490; }}
+    .replay-agent-done, .replay-agent-done-coord, .replay-trial-end {{ background: #334155; }}
+    .replay-marker.is-good {{ background: var(--good); }}
+    .replay-marker.is-important {{
+      background: var(--bad);
+      box-shadow: 0 0 0 2px rgb(190 18 60 / 18%), 0 4px 11px rgb(190 18 60 / 20%);
+    }}
+    .replay-feed {{
+      display: grid;
+      max-height: 260px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }}
+    .replay-feed-row {{
+      display: grid;
+      grid-template-columns: 62px minmax(110px, 150px) 88px minmax(180px, 1fr);
+      gap: 8px;
+      align-items: baseline;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+    }}
+    .replay-feed-row:last-child {{ border-bottom: 0; }}
+    .replay-feed-row span,
+    .replay-feed-row strong,
+    .replay-feed-row em {{
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+    .replay-feed-row span {{ color: var(--muted); font-variant-numeric: tabular-nums; }}
+    .replay-feed-row em {{ color: var(--accent-ink); font-style: normal; }}
+    .replay-feed-row p {{
+      min-width: 0;
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink-soft);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+    .replay-feed-row.is-important {{ background: #fff1f2; }}
+    .replay-btn {{
+      min-height: 30px;
+      padding: 6px 9px;
+      color: var(--accent-ink);
+      background: var(--accent-soft);
+      border-color: rgb(15 118 110 / 22%);
+    }}
+    .replay-btn:hover {{
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }}
     .table-wrap {{
       overflow-x: auto;
       background: var(--panel);
@@ -1171,6 +1662,10 @@ def write_html_report(
       .donut-layout {{ grid-template-columns: 1fr; justify-items: center; }}
       .bar-row {{ grid-template-columns: 92px minmax(90px, 1fr) 58px; }}
       .stack-row {{ grid-template-columns: 92px minmax(90px, 1fr) 50px; }}
+      .replay-toolbar {{ grid-template-columns: 1fr; }}
+      .replay-clock {{ text-align: left; }}
+      .replay-feed-row {{ grid-template-columns: 58px minmax(90px, 1fr); }}
+      .replay-feed-row em, .replay-feed-row p {{ grid-column: 2; }}
     }}
     @media (prefers-reduced-motion: reduce) {{
       *, *::before, *::after {{
@@ -1293,6 +1788,30 @@ def write_html_report(
       <span class="section-kicker">Level A</span>
     </div>
     <div class="table-wrap" id="trialTable"></div>
+
+    <div class="section-label" id="trialReplaySection">
+      <h2>Observable Event Replay</h2>
+      <span class="section-kicker">Selected trial</span>
+    </div>
+    <section class="replay-card" aria-label="observable event replay">
+      <div class="replay-summary" id="replaySummary"></div>
+      <div class="replay-toolbar">
+        <button id="replayPlay" type="button">Play</button>
+        <input id="replayScrubber" type="range" min="0" max="1" step="0.1" value="0" aria-label="Replay time">
+        <span class="replay-clock" id="replayClock">0.0s / 0.0s</span>
+        <label>Speed
+          <select id="replaySpeed">
+            <option value="5">5x</option>
+            <option value="20" selected>20x</option>
+            <option value="60">60x</option>
+            <option value="120">120x</option>
+          </select>
+        </label>
+      </div>
+      <div class="replay-toggles" id="replayToggles" aria-label="replay event filters"></div>
+      <div class="replay-timeline" id="replayTimeline"></div>
+      <div class="replay-feed" id="replayFeed"></div>
+    </section>
 
     <div class="section-label">
       <h2>Level C Black-Box Runtime Checks</h2>

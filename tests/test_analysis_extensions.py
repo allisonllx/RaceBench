@@ -4,6 +4,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pandas as pd
+
 from analysis.confidence import bootstrap_ci
 from analysis.html_report import write_html_report
 from analysis.metrics import (
@@ -15,6 +17,7 @@ from analysis.metrics import (
     level_a_dataframe,
     run_dataframe,
 )
+from analysis.replay import build_replay_payload, trial_replay
 from analysis.validate_logs import validate_run_dir
 from harness.pricing import DEFAULT_PRICES
 
@@ -233,8 +236,88 @@ def test_agent_activity_dataframe_attributes_events_to_agents(tmp_path):
     assert truncate["total_tokens"] == 60
 
 
+def test_trial_replay_payload_is_compact_and_normalized(tmp_path):
+    log = _write_log(tmp_path / "cascade.jsonl", [
+        _start(
+            ts=5,
+            task="t04_cascade",
+            strategy="file_lock",
+            n_agents=4,
+            agent_ids=["agent-a", "agent-b", "agent-c", "agent-d"],
+        ),
+        {"ts": 6, "event": "llm_usage", "agent": "agent-a", "turn": 1,
+         "prompt_tokens": 100, "completion_tokens": 20},
+        {"ts": 6.1, "event": "tool_call", "agent": "agent-a",
+         "turn": 1, "tool": "edit_file", "args": {
+             "path": "pipeline/aggregate.py",
+             "old_string": "x" * 1000,
+             "new_string": "y" * 1000,
+         }},
+        {"ts": 6.2, "event": "read", "agent": "agent-b",
+         "path": "pipeline/aggregate.py", "found": True, "size": 12},
+        {"ts": 6.3, "event": "coord", "strategy": "file_lock",
+         "action": "blocked", "agent": "agent-c",
+         "path": "pipeline/aggregate.py", "holder": "agent-a"},
+        {"ts": 6.4, "event": "write", "agent": "agent-a",
+         "path": "pipeline/aggregate.py", "kind": "replace",
+         "status": "edit_failed", "changed_symbols": ["summarize"],
+         "message": "old_string not found"},
+        {"ts": 6.5, "event": "run_tests", "agent": "agent-d",
+         "passed": 1, "failed": 2, "errored": 0},
+        _end(ts=8, correct=False, oracle_passed=2, oracle_total=4,
+             wall_clock_s=3.0),
+    ])
+
+    replay = trial_replay(log)
+
+    assert replay is not None
+    assert replay["agents"] == ["agent-a", "agent-b", "agent-c", "agent-d"]
+    assert replay["events"][0]["t"] == 1.0
+    assert replay["events"][1]["path"] == "pipeline/aggregate.py"
+    assert not any("old_string" in e or "new_string" in e
+                   for e in replay["events"])
+    assert any(e["event"] == "coord" and e["action"] == "blocked"
+               for e in replay["events"])
+    assert any(e["event"] == "write" and e["status"] == "edit_failed"
+               for e in replay["events"])
+    assert any(e["event"] == "run_tests" and e["failed"] == 2
+               for e in replay["events"])
+    assert replay["correct"] is False
+
+
+def test_build_replay_payload_keys_by_log_and_handles_missing_fields(tmp_path):
+    _write_log(tmp_path / "minimal.jsonl", [
+        _start(agent_ids=["agent-a"]),
+        {"ts": 1.0, "event": "tool_call", "agent": "agent-a",
+         "tool": "list_files"},
+        _end(agent_statuses={"agent-a": "done"}),
+    ])
+    df = pd.DataFrame([{"log": "minimal.jsonl", "run_dir": str(tmp_path)}])
+
+    payload = build_replay_payload(df, default_run_dir=tmp_path)
+
+    assert set(payload) == {"minimal.jsonl"}
+    assert payload["minimal.jsonl"]["agents"] == ["agent-a"]
+    assert any(e["event"] == "tool_call" for e in payload["minimal.jsonl"]["events"])
+
+
 def test_html_report_contains_labels_and_sections(tmp_path):
     _write_log(tmp_path / "ok.jsonl", [_start(), _end()])
+    _write_log(tmp_path / "cascade.jsonl", [
+        _start(
+            task="t04_cascade",
+            strategy="notify",
+            n_agents=4,
+            agent_ids=["agent-a", "agent-b", "agent-c", "agent-d"],
+        ),
+        {"ts": 1.0, "event": "coord", "strategy": "notify",
+         "action": "notified", "writer": "agent-a", "reader": "agent-b",
+         "path": "pipeline/aggregate.py", "symbols": ["summarize"]},
+        {"ts": 1.1, "event": "write", "agent": "agent-a",
+         "path": "pipeline/aggregate.py", "kind": "replace",
+         "status": "edit_failed", "changed_symbols": ["summarize"]},
+        _end(correct=False, oracle_passed=1, oracle_total=2),
+    ])
     df = run_dataframe(tmp_path, prices=DEFAULT_PRICES)
     level_a = level_a_dataframe(df)
     path = write_html_report(
@@ -263,4 +346,13 @@ def test_html_report_contains_labels_and_sections(tmp_path):
     assert "agentActivityTable" in html
     assert "Task x Strategy Grid" in html
     assert "Trial Logs" in html
+    assert "Observable Event Replay" in html
+    assert "replayTimeline" in html
+    assert "replayPlay" in html
+    assert "eventLaneAgents" in html
+    assert "run outcome" in html
+    assert "Replay" in html
+    assert "agent-a" in html
+    assert "edit_failed" in html
+    assert "notified" in html
     assert "racebench-data" in html
