@@ -16,13 +16,13 @@ For the headline [Level A](#level-a-to-c) grid, I ruled out auto-merge editors (
 
 ## 3. Evidence
 
-The main run, `results/grid-v1`, contains 480 replayable trials: 16 tasks, 6 strategies, 5 repetitions. The pooled pass rate was 74.4 percent, with about $13.56 spent and 37.7M tokens recorded. JSONL logs trace reads, writes, stalls, and coordination events to auditable trajectories. Solo calibration passed 96.2 percent ([appendix](#cross-run-findings)), confirming parallel failures measure coordination pressure, not impossible tasks. See the [static HTML explorer](#full-results) for aggregate tables and bootstrap confidence intervals.
+The main run, `results/grid-v1`, contains 480 replayable trials: 16 tasks, 6 strategies, 5 repetitions. The pooled pass rate was 74.4 percent, with about $13.56 spent and 37.7M tokens recorded ([Figure 1](#figures)). JSONL logs trace reads, writes, stalls, and coordination events to auditable trajectories ([Figure 2](#figures)). Solo calibration passed 96.2 percent ([appendix](#cross-run-findings)), confirming parallel failures measure coordination pressure, not impossible tasks. See the [static HTML explorer](#full-results) for aggregate tables and bootstrap confidence intervals.
 
 On the baseline grid, parallel correctness ranged from 60 percent (`ast_dep`) to 90 percent (`file_lock`), with `git_hash` at 85 percent, `notify` at 80 percent, `naive` at 70 percent, and `ast_scope` at 61 percent. There is no universal winner: `file_lock` leads on hard races but averaged 174s per trial and 0.66 false-positive stalls; `notify` was faster (52s) with zero stalls but weaker on some clobber cells; AST strategies lag overall but expose where coarse locks over-block.
 
 Two patterns drive that spread. On destructive overlap (`t01_stale_clobber`, `t03_fetch_clobber`), `naive` went 0/5 while `file_lock` and `git_hash` went 5/5. On benign overlap (`t02_benign_overlap`), all six strategies pass 5/5, but `file_lock` averages 1.0 false-positive stall per trial while `notify` and `naive` average zero. A strategy can pass tests and still destroy concurrency. Notification also helps stale-read cases (`rw_d_tag_antidependency`: naive 1/5, notify 5/5).
 
-After the baseline grid, I evaluated three extensions on the same 16 tasks (`results/grid-v1-plus-extensions/`). `peer_contract` reached 83.8 percent, near `git_hash` and below `file_lock`; `adaptive_lease` reached 78.8 percent with zero false-positive stalls, beating `naive` and both AST rows; `peer_broker` reached 63.8 percent and is best read as a failed ablation on cascade and cross-file cells. Promising hybrids, not a new overall winner. Iteration detail is in the [appendix](#peer-broker-v25-iteration).
+After the baseline grid, I evaluated three extensions on the same 16 tasks (`results/grid-v1-plus-extensions/`; [Figures 3–5](#figures)). `peer_contract` reached 83.8 percent, near `git_hash` and below `file_lock`; `adaptive_lease` reached 78.8 percent with zero false-positive stalls, beating `naive` and both AST rows; `peer_broker` reached 63.8 percent and is best read as a failed ablation on cascade and cross-file cells. Promising hybrids, not a new overall winner. Iteration detail is in the [appendix](#peer-broker-v25-iteration).
 
 ## 4. Constraints
 
@@ -63,22 +63,29 @@ python -m analysis.validate_logs results/grid-v1 --expect-trials 480
 python -m analysis.make_report results/grid-v1
 ```
 
-### Suggested Screenshots
+### Figures
 
-Judges spot-check the repo; these views best match the write-up claims. PNGs are in [`assets/`](../assets/).
+Screenshots from the static HTML explorers. Paths are relative to this file.
 
-**Baseline grid (`results/grid-v1/report.html`):**
+**Figure 1.** Baseline grid-v1 scale and Level A ranking (480 trials, 74.4% pass, $13.56). Supports §3 Evidence.
 
-1. **Summary metrics bar** — 480 trials, 74.4% pass, spend/tokens.
-2. **Task x Strategy heatmap** (`correct_rate`, unfiltered) — selective strategy value.
-3. **Heatmap filtered to `t02_benign_overlap`**, metric **false-positive stalls** — overcoordination claim.
-4. **Observable Event Replay** — `t02_benign_overlap__file_lock-n2-r0` vs `...__notify-n2-r0`.
+![Figure 1: RaceBench grid-v1 metrics and strategy comparison](../assets/fig-metrics-bar.png)
 
-**Extension grid (supports §3 extension paragraph):**
+**Figure 2.** Observable event replay for a failed trajectory (`rw_d_tag_antidependency` / `ast_dep`). Claims trace to JSONL timelines, not demos alone.
 
-5. **`assets/fig-heatmap-correctness-extended.png`** — nine strategies on the same 16 tasks.
+![Figure 2: Observable event replay](../assets/fig-replay.png)
 
-Skip: Pass/Fail donut alone, Level C section unless you foreground Cursor C1.
+**Figure 3.** Post-grid extension metrics (720 trials, 9 strategies). Same 16 tasks as the headline grid, plus `adaptive_lease`, `peer_contract`, and `peer_broker`.
+
+![Figure 3: RaceBench plus-extensions metrics bar](../assets/fig-metrics-bar-extended.png)
+
+**Figure 4.** Task × strategy correctness heatmap for the 9-strategy extension grid. Strategy value is task-specific; `peer_broker` underperforms on cascade / cross-file cells.
+
+![Figure 4: Extended task x strategy correctness heatmap](../assets/fig-heatmap-correctness-extended.png)
+
+**Figure 5.** Event profile diagnostics for the extension grid (event mix and turns by strategy). Useful for reading coordination cost beyond pass rate.
+
+![Figure 5: Extended event profile](../assets/fig-event-profile-extended.png)
 
 ### Cross-Run Findings
 
