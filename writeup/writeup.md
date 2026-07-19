@@ -229,10 +229,7 @@ These are support checks, not replacements for the main grid.
 On the eight overlapping Agnes sensitivity tasks, `agnes-2.0-flash` scores
 **69.4%** versus **57.9%** for gpt-5-mini on the same Level A cells. It uses
 fewer tokens on average (**74.9k** vs **97.8k**) but takes much longer wall time
-(**219s** vs **81s**). The ranking is similar but not identical: `file_lock`
-stays at the top or tied at the top, `git_hash` remains strong, `notify` becomes
-stronger on Agnes, and the AST strategies stay in the lower half. I read this as
-a useful sensitivity check, not proof that rankings are model-invariant.
+(**219s** vs **81s**).
 
 The solo comparison is cleaner. Solo calibration succeeds on **96.2%** of
 trials, while parallel correctness drops under every strategy: `file_lock`
@@ -241,7 +238,15 @@ trials, while parallel correctness drops under every strategy: `file_lock`
 solvable by one agent; the failures become more informative when multiple
 agents edit at once.
 
-**Condensed strategy takeaways.**
+The speed story is not "parallel always wins." Solo calibration averages
+**45.7s** and **44.5k** tokens per trial. Parallel `notify` averages **51.8s**
+and **72.7k** tokens, and parallel `naive` averages **57.1s** and **78.3k**
+tokens. Safer coordination costs more time: `git_hash` averages **63.0s**,
+while `file_lock` averages **174.2s**. RaceBench makes that tradeoff explicit:
+parallelism can buy coordination risk, extra tokens, or waiting unless the
+mechanism fits the failure mode.
+
+**Condensed strategy takeaways:**
 
 | Scenario | Best current read |
 |----------|-------------------|
@@ -253,7 +258,6 @@ agents edit at once.
 
 **Headline finding on t02.** `t02_benign_overlap` is the "do nothing" test. All
 six baseline strategies pass the oracle 5/5, so correctness is not the signal.
-
 The signal is unnecessary waiting. `file_lock` averages **1.0 false-positive
 stall per trial**, while `ast_scope`, `ast_dep`, and `notify` average **0**.
 

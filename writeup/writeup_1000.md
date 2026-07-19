@@ -22,7 +22,7 @@ The main run, `results/grid-v1`, contains 480 replayable trials: 16 tasks, 6 str
 
 The baseline is intentionally simple. `naive` gives the floor for "just run both agents." On hard clobber cases, the floor collapses: in `t01_same_line` and `t03_fetch_clobber`, naive went 0/5 while `file_lock` went 5/5. That supports the modest claim that coordination is necessary for destructive overlap. On `rw_d` antidependency cases, naive went 1/5 while `notify` went 5/5, showing that lightweight notification can help when the issue is stale reads rather than simultaneous writes.
 
-The evidence also shows trade-offs. In `t02_disjoint`, `file_lock` stayed correct but produced 5/5 false-positive stalls on benign parallel work. That is why RaceBench tracks stalls separately from correctness. A strategy can pass tests and still destroy concurrency. The five repetitions per cell are not enough to claim universal statistical truth, but they are enough to catch consistent directional effects and to expose failure classes for follow-up runs.
+The evidence also shows trade-offs. In `t02_disjoint`, `file_lock` stayed correct but produced 5/5 false-positive stalls on benign parallel work. That is why RaceBench tracks stalls separately from correctness. A strategy can pass tests and still destroy concurrency.
 
 ## 4. Constraints
 
@@ -36,7 +36,7 @@ RaceBench is not a plug-and-play benchmark for arbitrary existing agents. A blac
 
 Known failure modes are specific. The AST merge strategy is still too coarse for many real refactors. The dependency graph strategy depends on simplified static observations and can miss dynamic behavior. The task suite is small enough that strategies can accidentally fit it. The benchmark mostly studies two-agent races, not larger teams. It also rewards strategies implemented inside the harness more directly than external products, which is why I separate Level A and Level C throughout the docs and report.
 
-With two more weeks, I would rerun the Cursor C1 smoke with more repetitions, refine the new strategies instead of overclaiming them, and add harder multi-agent probes. The most promising strategy path is hybrid: adaptive semantic leases first, peer negotiation only for ambiguous conflicts. The claim would stay modest: RaceBench is a reusable benchmark for coordination mechanisms, plus a task and oracle suite for black-box runtime checks.
+With two more weeks, I would spend effort where it changes the benchmark most. First, build the hybrid strategy: adaptive semantic leases first, peer negotiation only for ambiguous conflicts, followed by mandatory re-read before commit. Second, add harder probes such as 5-8 agent chains, fan-in/fan-out migrations, and generated-client schema drift. Third, implement one mediated Level C adapter that emits read/write intent events. More Cursor repetitions and a full Agnes grid are useful, but lower priority. The claim would stay modest: RaceBench is a reusable benchmark for coordination mechanisms, plus a task and oracle suite for black-box runtime checks.
 
 ---
 
@@ -67,7 +67,7 @@ This note is appendix material, not part of the 1000-word body.
 
 On the eight overlapping Agnes sensitivity tasks, `agnes-2.0-flash` scored 69.4 percent versus 57.9 percent for gpt-5-mini on the same Level A cells. It used fewer tokens on average but much more wall time. The broad ranking stayed recognizable: `file_lock` remained top or tied at the top, `git_hash` stayed strong, `notify` improved under Agnes, and AST strategies stayed in the lower half.
 
-Solo calibration passed 96.2 percent of trials, while parallel correctness dropped under every strategy. That is useful because it shows most tasks are solvable by one agent. The failures become informative when multiple agents edit at once.
+Solo calibration passed 96.2 percent of trials, while parallel correctness dropped under every strategy. Solo also averaged 45.7s and 44.5k tokens. Parallel `notify` was 51.8s / 72.7k tokens, `naive` was 57.1s / 78.3k, `git_hash` was 63.0s, and `file_lock` was 174.2s. That is useful because it shows the benchmark captures the real tradeoff: parallelism can add risk, tokens, or waiting if the coordination policy does not fit the failure mode.
 
 ### Level A To C
 
