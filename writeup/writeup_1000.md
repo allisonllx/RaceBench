@@ -88,7 +88,7 @@ V1 used symbol leases for precise function/class edits, file leases for broad or
 
 V2 added declared and inferred semantic-resource leases. Agents can call `declare_scope` for resources such as `tag.normalization`, `article.summary.schema`, `article.summary.feed_output`, `api.fetch.signature`, or `datasource.parse_dataset.public_api`. The strategy also infers a small seed catalog from paths, changed symbols, and code text. This is not a general semantics engine. It is an inspectable prototype for testing whether application-level resources can make locking more granular.
 
-The first V2 targeted run was 6/6 correct with 0 false-positive stalls, 56.0s mean wall time, 104.7k mean tokens, and 1.5 stalls per trial. On the same six tasks in `grid-v1`, `file_lock` was 26/30 correct, with 201.5s mean wall time and 26.0 stalls per trial. Since V2 has only one repetition per task, the honest claim is "promising hybrid", not "new winner". The next step is four more repetitions and an obligation-carrying V3 that keeps promises such as "preserve timeout behavior" visible until the agent finishes.
+The first V2 targeted run was 6/6 correct with 0 false-positive stalls, 56.0s mean wall time, 104.7k mean tokens, and 1.5 stalls per trial. The later full extension grid gives broader evidence: `adaptive_lease` completed 78 trials and scored 61/78, or 78.2 percent. That beats `naive`, `ast_scope`, and `ast_dep`, but stays below `file_lock`, `git_hash`, and `peer_contract`. The honest claim is "promising hybrid", not "new winner". The next step is an obligation-carrying V3 and focused fixes for weak cells such as `t08`, `rw_b`, and `rw_d`.
 
 ### Peer Broker V2.5 Iteration
 

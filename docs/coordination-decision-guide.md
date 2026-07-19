@@ -76,10 +76,15 @@ finer-grained coordination helps, not as finished production coordinators.
 file-lock safety while recovering finer granularity through symbol leases,
 semantic-resource leases, and stale-overwrite refusal.
 
-The current evidence is encouraging but early. It should be described as a
-promising hybrid, not a proven winner. The next useful step is more repetitions
-on the targeted slice and an obligation-carrying version that keeps preservation
-promises visible until agents finish.
+The current evidence is broader than the first targeted smoke. In the full
+extension run, `adaptive_lease` completed 78 trials and scored 61/78, or 78.2%.
+That beats `naive`, `ast_scope`, and `ast_dep`, but it does not beat
+`file_lock`, `git_hash`, or `peer_contract`.
+
+So the practical read is "promising hybrid", not "proven winner." The next
+useful step is focused improvement on weak cells such as `t08`, `rw_b`, and
+`rw_d`, plus an obligation-carrying version that keeps preservation promises
+visible until agents finish.
 
 ## Use `peer_contract`, not `peer_broker`, for the A2A story
 

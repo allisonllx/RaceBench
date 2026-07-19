@@ -207,7 +207,9 @@ stall per trial**, while `ast_scope`, `ast_dep`, and `notify` average **0**.
 
 **t12 after the worktree fix.** The fixed `t12_split_view` cells are in the main
 grid. The pre-fix logs are archived. After the fix, all six baseline strategies
-score **5/5** at n=2.
+score **5/5** at n=2. See
+[Incident: t12 worktree merge (fixed)](#incident-t12-worktree-merge-fixed) for
+the postmortem.
 
 **Headline metric.** RaceBench reports **false-positive stall rate**. This means
 a coordination strategy blocked two agents even though their final applied
@@ -265,8 +267,7 @@ The first targeted smokes used five high-signal tasks: `t02`, `t03`, `t04`,
 
 The version names are conceptual. V1 is `peer_contract`. V2.x is the
 `peer_broker` family. V3 is reserved for a future protocol that would let
-external runtimes expose read and write intent events. Some result folders still
-use raw names such as `v4` and `v5`.
+external runtimes expose read and write intent events.
 
 The early result favored the voluntary protocol. `peer_contract` reached **5/5**
 on the targeted slice, while `peer_broker` reached **3/5**. Contract was also
@@ -277,9 +278,9 @@ The broker still taught us something useful. Its `ack_with_constraints` path
 helped recover hard cases such as `t03_fetch_clobber` and `rw_e_cascade`. The
 problem was that it asked for negotiation too often and created retry loops.
 
-V2.4 narrowed the trigger and clarified the decision language. A conflict now
-means "no final implementation can satisfy both subtasks," not merely "two
-agents touched the same function."
+V2.4, stored under the raw `v4` result folder, narrowed the trigger and
+clarified the decision language. A conflict now means "no final implementation
+can satisfy both subtasks," not merely "two agents touched the same function."
 
 That helped correctness, but not process health. In V2.4, both strategies
 reached **4/5**, yet `peer_contract` was still cleaner: **79s vs 122s** mean
@@ -291,10 +292,10 @@ took **376s**, used **898k** tokens, had **17** stalls, and all three agents hit
 `max_turns`. That is technically correct, but not a healthy coordination
 mechanism.
 
-V2.5 made broker less wasteful. It records `ack_with_constraints` as a cached
-obligation instead of refusing the write immediately. It also uses
-adaptive-lease semantic resources to avoid asking peers about every broad
-read/write overlap.
+V2.5, stored under the raw `v5` result folder, made broker less wasteful. It
+records `ack_with_constraints` as a cached obligation instead of refusing the
+write immediately. It also uses adaptive-lease semantic resources to avoid
+asking peers about every broad read/write overlap.
 
 On the targeted slice, V2.5 looked much better. `peer_broker` reached **5/5**,
 mean wall time fell from **122s** to **71s**, mean tokens fell from **237k** to
@@ -350,17 +351,23 @@ This is not a general program-semantics engine. It is a small, inspectable
 resource catalog used to test a narrower idea: can file-lock safety become more
 granular if we add a little application-level knowledge?
 
-The first V2 targeted run is promising but early. It was **6/6** correct, with
-**0** false-positive stalls, **56.0s** mean wall time, **104.7k** mean tokens,
-and **1.5** stalls per trial.
+The first V2 targeted run was **6/6** correct, with **0** false-positive stalls,
+**56.0s** mean wall time, **104.7k** mean tokens, and **1.5** stalls per trial.
 
-On the same six tasks in `results/grid-v1/`, `file_lock` was **26/30** correct
-(**86.7%**), with **201.5s** mean wall time, **114.6k** mean tokens, and **26.0**
-stalls per trial.
+I then ran `adaptive_lease` in the full post-grid extension. That gives broader
+evidence than the targeted slice, but it is still not a new headline winner.
+The extension report has **78 completed adaptive-lease trials** because two
+`t01_stale_clobber` logs are incomplete and excluded.
 
-The fair claim is not "adaptive lease beats file lock." V2 has only one
-repetition per task. The fair claim is that semantic leases are a promising
-hybrid and deserve more repetitions.
+Across those completed trials, `adaptive_lease` scored **61/78** (**78.2%**).
+That is better than `naive` (**56/80**), `ast_scope` (**49/80**), and `ast_dep`
+(**48/80**), but below `file_lock` (**72/80**), `git_hash` (**68/80**), and
+`peer_contract` (**67/80**).
+
+The fair claim is now stronger than the original targeted-run conclusion.
+Semantic leases beat the two AST strategies in the broader extension run and
+remain a promising hybrid. The fair claim is still not "adaptive lease replaces
+file lock," because file locks remain more correct overall on this grid.
 
 ## 4. Constraints
 
@@ -538,80 +545,100 @@ operational-transform integrator.
 
 ### Other limits
 
-1. t01-t12 are probes. Conduit adds more structure, but it is still not a
-   full Newman/Postgres/live-server benchmark.
-2. Strategy columns are Level A mechanism reimplementations, not upstream
-   product runs.
+1. t01-t12 are small isolated tasks. Each focuses on one failure mode, so they
+   do not reflect the full complexity of real-world repositories. Conduit adds
+   more structure, but it is still not a full Newman/Postgres/live-server
+   benchmark.
+2. Strategy columns are simplified, inspired implementations of the mechanism
+   classes. They are not direct runs of the original paper systems.
 3. Roles and agent counts are predefined. This keeps the comparison stable, but
    it does not measure dynamic role allocation or adaptive team sizing.
-4. Symbol granularity is top-level only. `ast_scope` and `ast_dep` can
-   over-serialize class-internal edits, which is visible on t06.
-5. Scripted trials validate mechanics. Headline claims use real-model JSONL logs.
-6. Solo calibration creates a ceiling. If one agent cannot solve the task alone,
-   the concurrency result has little signal.
-7. `ast_dep` uses a best-effort import resolver, not a type checker.
+4. Symbol granularity is top-level functions/classes only. Methods inside a
+   class are treated as one class-level symbol, so `ast_scope` and `ast_dep`
+   cannot distinguish two agents editing different methods of the same class.
+   t06 shows this class-level logging on `cache/core.py`, although the task
+   still passes in the main grid.
+5. Scripted trials only check that the harness behaves as expected. The main
+   benchmark claims come from JSONL logs produced by real model runs.
+6. Solo calibration is a sanity check. If one agent usually fails a task even
+   without concurrent edits, then a parallel failure should not be blamed mainly
+   on coordination.
+7. `ast_dep` builds an approximate dependency map from Python imports and
+   top-level symbols. It can miss dependencies that require full type inference,
+   dynamic imports, or runtime behavior.
 8. Older timeout paths sometimes missed `trial_end` token totals. The validator
    reports fallback token accounting instead of hiding it.
-9. A lite CRDT column is deferred. It would overlap with `git_hash` on
-   compose-heavy tasks and would need honest `always_merge` labeling.
-10. `grep`, `glob`, and `list_files` bypass the strategy. Full read-set
+9. `grep`, `glob`, and `list_files` bypass the strategy. Full read-set
    visibility applies to `read_file`, not every possible information channel.
-11. Cascade tasks need their full agent chains. `rw_e` runs at n=3 and `t04`
-   runs at n=4. Truncated n=2 cells are archived.
 
 ### Next steps
 
 The Level A/B grid for gpt-5-mini is shipped in `results/grid-v1/`. That is the
 core comparison table.
 
-The remaining work is optional extension work. The submission now includes a
-static explorer, a log validator, a practical decision guide, and an external
-coordination protocol explaining why Level C is black-box scoring unless a
-runtime exposes mediation hooks.
+The remaining work is optional extension work. I would prioritize it by expected
+value rather than by how easy it is to add.
 
-1. **Cursor C1 exploratory cells.** Shipped in `results/ext-cursor/` with 15/16
-   correct on one pass. Treat this as harness-vs-harness smoke, not strategy
-   ranking. More reps on t01, t03, and rw_e would be useful if budget allows.
+#### Priority 1: highest yield
 
-2. **Claude Code C1 adapter.** This would follow the same harness-swap pattern
-   as Cursor: N headless `claude -p` processes, one brief each, with cwd from
-   `paths.json`. Useful, but not required for the core contribution.
+1. **Hybrid adaptive lease plus peer fallback.** This is the strongest next
+   strategy idea. `adaptive_lease` has better granularity than `file_lock`, while
+   `peer_contract` is useful when two agents must preserve each other's intended
+   behavior. The next version should try semantic leases first, call a peer only
+   for ambiguous conflicts, require a re-read before commit, and keep short
+   obligations such as "preserve timeout behavior" visible until `done`. This
+   follows the open items in
+   [`docs/adaptive-lease-strategy-plan.md`](../docs/adaptive-lease-strategy-plan.md)
+   and
+   [`docs/peer-contract-strategy-plan.md`](../docs/peer-contract-strategy-plan.md).
 
-3. **C2 (named, unbuilt).** Do not ship a half-built single-goal track as a
-   headline result. The planner-vs-coordination confound is already documented.
+2. **Harder benchmark tasks.** The current suite isolates race modes well, but
+   many tasks are still small. Cursor C1 passing some cells where Level A
+   `naive` fails suggests that stronger worker loops may need harder seeds.
+   Good additions would include 5-8 agent chains, fan-in/fan-out migrations,
+   generated-client schema drift, and cases where one correct patch invalidates
+   another agent's previously passing tests.
 
-4. **Second model family.** Every committed grid cell uses gpt-5-mini. A second
-   model family would test whether the rankings hold across capability tiers.
-   Given the budget, Agnes should stay a targeted sensitivity check on
-   baseline/high-signal cells, not a rerun of every post-grid extension.
+3. **One mediated Level C adapter.** Level C is currently black-box scoring
+   unless an adapter emits RaceBench-compatible read, write, and coordination
+   events. Implementing one adapter with `on_read`, `on_write_intent`,
+   `decision`, `on_write_committed`, and `on_agent_done` would turn the external
+   runtime story from "we can score products" into "we can compare a product's
+   coordination boundary when it exposes the right hooks." See
+   [`docs/adding-an-external-runtime.md`](../docs/adding-an-external-runtime.md).
 
-5. **Cascade at 8+ agents.** Deferred for cost. `t04` and `rw_e` already stress
-   chains at n=4 and n=3.
+#### Priority 2: useful, but not essential
 
-6. **Lite CRDT column.** Still deferred: overlaps `git_hash` on compose-heavy
-   tasks and would need honest `always_merge` labeling.
+4. **Agnes full grid.** The targeted Agnes sensitivity run is already enough to
+   say the main baseline/high-signal conclusions were checked against a second
+   OpenAI-compatible provider. A full 480-trial Agnes grid would be nice, but it
+   is lower value than improving the strategy or task suite, and it does not need
+   to include `peer_contract`, `peer_broker`, or `adaptive_lease`.
 
-7. **Peer negotiation V2.6 / hybrid.** The targeted V2.5 smoke made
-   `peer_broker` cheaper, but the full extension grid showed poor
-   generalization: **63.8%** overall, below `naive` at **70.0%**. Keep broker as
-   an ablation, not a headline strategy. The next iteration should use adaptive
-   semantic leases first and broker only ambiguous conflicts.
+5. **More Cursor C1 repetitions.** The `results/ext-cursor/` cells are useful
+   external-validity smoke checks, not strategy rankings. More reps on t01, t03,
+   and rw_e would make the C1 story more stable if budget allows.
 
-8. **Adaptive lease v3.** The first semantic-resource pass is promising but too
-   small to claim a new winner. Next: run four more reps on the same six-task
-   slice, then add obligation-carrying leases so promises such as "preserve
-   timeout behavior" stay visible until the agent finishes.
-
-9. **Suite hardness vs stronger stacks.** Cursor C1 passes on some cells where
-   Level A `naive` scores 0/5. That suggests future tasks should be harder if we
-   want to separate stronger worker loops. Candidate additions: 5-8 agent
-   chains, fan-in/fan-out migrations, generated-client schema drift, and cases
-   where one correct patch invalidates another agent's previously passing tests.
-
-10. **Level C adapter hardening.** The MegaAgent bridge runs, but it is not
-   production-ready. Fixes would include upstream HTTP timeouts, live streaming
+6. **Level C adapter hardening.** The MegaAgent bridge runs, but it is not
+   production-ready. Useful fixes include upstream HTTP timeouts, live streaming
    of `log.txt`, fail-fast checks when agents go off-brief, and optional
    deterministic recruitment from RaceBench briefs.
+
+#### Priority 3: nice to have or deferred
+
+7. **Claude Code C1 adapter.** This would follow the same harness-swap pattern as
+   Cursor: N headless `claude -p` processes, one brief each, with cwd from
+   `paths.json`. Useful, but not required for the core contribution.
+
+8. **C2 single-goal track.** Keep this named but unbuilt for now. A single-goal
+   product run mostly measures planning and single-agent capability unless the
+   runtime exposes coordination hooks.
+
+9. **Cascade at 8+ agents.** This would be interesting, but it is cost-heavy.
+   `t04` and `rw_e` already test smaller dependency chains at n=4 and n=3.
+
+10. **Lite CRDT column.** Still deferred because it overlaps with `git_hash` on
+    compose-heavy tasks and would need honest `always_merge` labeling.
 
 ---
 
