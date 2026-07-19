@@ -356,6 +356,13 @@ def test_html_report_contains_labels_and_sections(tmp_path):
     assert "Interactive Comparison" in html
     assert "strategyChart" in html
     assert "donutChart" in html
+    assert 'class="chart-card compact"' in html
+    assert "align-items: stretch" in html
+    assert "#donutChart" in html
+    assert "min-height: 220px" in html
+    assert "donut-center-ring" in html
+    assert "donut-value" in html
+    assert "donut-caption" in html
     assert "heatmapChart" in html
     assert "heatmapMeta" in html
     assert "heatColorForScore" in html

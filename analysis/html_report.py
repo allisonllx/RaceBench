@@ -764,11 +764,15 @@ def write_html_report(
       target.innerHTML = `<div class="donut-layout">
         <div class="donut-wrap">
           <svg class="donut" viewBox="0 0 36 36" role="img" aria-label="pass fail mix">
-            <circle class="donut-bg" cx="18" cy="18" r="15.9155" pathLength="100"></circle>
+            <circle class="donut-bg" cx="18" cy="18" r="15.9155" pathLength="100"
+              transform="rotate(-90 18 18)"></circle>
             <circle class="donut-slice" cx="18" cy="18" r="15.9155" pathLength="100"
+              transform="rotate(-90 18 18)"
               stroke-dasharray="${dash} ${100 - dash}"></circle>
+            <circle class="donut-center-ring" cx="18" cy="18" r="9.6"></circle>
+            <text class="donut-value" x="18" y="16.6">${fmt(pct * 100, 0)}%</text>
+            <text class="donut-caption" x="18" y="21.4">PASS RATE</text>
           </svg>
-          <div class="donut-hole"><strong>${fmt(pct * 100, 0)}%</strong><span>pass rate</span></div>
         </div>
         <div class="legend">
           <div class="legend-row"><span class="swatch"></span><span>${passed} passed</span></div>
@@ -1368,6 +1372,7 @@ def write_html_report(
       display: grid;
       grid-template-columns: minmax(0, 1.3fr) minmax(250px, 0.7fr);
       gap: 14px;
+      align-items: stretch;
       margin: 0 0 10px;
     }}
     .chart-card {{
@@ -1378,8 +1383,11 @@ def write_html_report(
       min-width: 0;
       box-shadow: var(--shadow);
       animation: fadeUp 700ms var(--ease) both;
+      display: flex;
+      flex-direction: column;
     }}
     .chart-card.wide {{ grid-column: 1 / -1; animation-delay: 120ms; }}
+    .chart-card.compact {{ align-self: stretch; }}
     .chart-head {{
       display: flex;
       align-items: baseline;
@@ -1451,17 +1459,39 @@ def write_html_report(
     }}
     .donut-layout {{
       display: grid;
-      grid-template-columns: 150px 1fr;
+      grid-template-columns: 150px auto;
       gap: 16px;
       align-items: center;
+      justify-content: center;
+      min-height: 0;
+      width: fit-content;
+      max-width: 100%;
+      margin: 0 auto;
     }}
-    .donut-wrap {{ position: relative; width: 150px; height: 150px; }}
-    .donut {{ width: 150px; height: 150px; overflow: visible; }}
-    .donut circle {{
+    #donutChart {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1 1 auto;
+      width: 100%;
+      min-height: 220px;
+    }}
+    .donut-wrap {{
+      position: relative;
+      width: 150px;
+      height: 150px;
+      flex: 0 0 150px;
+    }}
+    .donut {{
+      display: block;
+      width: 150px;
+      height: 150px;
+      overflow: visible;
+    }}
+    .donut-bg,
+    .donut-slice {{
       fill: none;
       stroke-width: 3.4;
-      transform: rotate(-90deg);
-      transform-origin: 18px 18px;
     }}
     .donut-bg {{ stroke: #e7d4d8; }}
     .donut-slice {{
@@ -1473,29 +1503,28 @@ def write_html_report(
       from {{ stroke-dashoffset: 100; }}
       to {{ stroke-dashoffset: 0; }}
     }}
-    .donut-hole {{
-      position: absolute;
-      inset: 34px;
-      display: grid;
-      place-content: center;
-      text-align: center;
-      border-radius: 999px;
-      background: var(--panel);
-      border: 1px solid var(--line);
+    .donut-center-ring {{
+      fill: var(--panel);
+      stroke: var(--line);
+      stroke-width: 0.35;
     }}
-    .donut-hole strong {{
-      display: block;
-      font-size: 26px;
-      letter-spacing: -0.03em;
+    .donut-value {{
+      fill: var(--ink);
+      font-size: 7px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: central;
+      letter-spacing: -0.04em;
       font-variant-numeric: tabular-nums;
     }}
-    .donut-hole span {{
-      display: block;
+    .donut-caption {{
+      fill: var(--muted);
       color: var(--muted);
       font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      font-size: 2.5px;
+      text-anchor: middle;
+      dominant-baseline: central;
+      letter-spacing: 0.12em;
     }}
     .legend {{ display: grid; gap: 10px; color: var(--ink-soft); }}
     .legend-row {{
@@ -2085,7 +2114,7 @@ def write_html_report(
         </div>
         <div id="strategyChart"></div>
       </article>
-      <article class="chart-card">
+      <article class="chart-card compact">
         <div class="chart-head">
           <span class="chart-title">Pass / Fail Mix</span>
           <span class="chart-meta" id="donutMeta"></span>
