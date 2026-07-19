@@ -209,6 +209,48 @@ At n=2, by-strategy correctness ranges from **0.64** for `ast_dep` to **0.94**
 for `file_lock`. The report command also emits bootstrap confidence-interval
 tables and `results/grid-v1/report.html`.
 
+**Post-grid 9-strategy extension.** I also ran a full extension grid after the
+headline table to recognize the three new strategies on the same 16 tasks. The
+combined artifact is `results/grid-v1-plus-extensions/`, built from
+`results/grid-v1/` and `results/grid-v1-extensions-full/`.
+
+This is not the 480-trial headline grid, because the strategies were added after
+the baseline run. It is still valuable evidence. In the combined report,
+`peer_contract` scores **67/80** (**83.8%**), `adaptive_lease` scores **63/80**
+(**78.8%**), and `peer_broker` scores **51/80** (**63.8%**). That places
+`peer_contract` close to `git_hash` (**68/80**) and below `file_lock`
+(**72/80**), while `adaptive_lease` beats both AST strategies but does not
+replace file locks.
+
+**Cross-run checks.** I also generated `results/cross-run-analysis/` to compare
+the OpenAI grid with the Agnes sensitivity run and the solo calibration run.
+These are support checks, not replacements for the main grid.
+
+On the eight overlapping Agnes sensitivity tasks, `agnes-2.0-flash` scores
+**69.4%** versus **57.9%** for gpt-5-mini on the same Level A cells. It uses
+fewer tokens on average (**74.9k** vs **97.8k**) but takes much longer wall time
+(**219s** vs **81s**). The ranking is similar but not identical: `file_lock`
+stays at the top or tied at the top, `git_hash` remains strong, `notify` becomes
+stronger on Agnes, and the AST strategies stay in the lower half. I read this as
+a useful sensitivity check, not proof that rankings are model-invariant.
+
+The solo comparison is cleaner. Solo calibration succeeds on **96.2%** of
+trials, while parallel correctness drops under every strategy: `file_lock`
+**90.0%**, `git_hash` **85.0%**, `notify` **80.0%**, `naive` **70.0%**,
+`ast_scope` **61.2%**, and `ast_dep` **60.0%**. That means most tasks are
+solvable by one agent; the failures become more informative when multiple
+agents edit at once.
+
+**Condensed strategy takeaways.**
+
+| Scenario | Best current read |
+|----------|-------------------|
+| Hard lost updates or irreversible ordering | `file_lock` is the strongest safety baseline; `git_hash` is the optimistic baseline. |
+| Benign or disjoint work | `naive`, `notify`, and `adaptive_lease` avoid file-lock over-coordination. |
+| Stale reads / antidependencies | `notify` is cheap and useful when agents can re-read; `adaptive_lease` is promising but still uneven. |
+| Pure same-file syntax scope | `ast_scope` / `ast_dep` are diagnostics, not correctness leaders. They show where file locks are too coarse, but not that AST scope wins overall. |
+| Interface agreement between agents | `peer_contract` is the cleaner A2A result; `peer_broker` is an ablation after poor full-grid generalization. |
+
 **Headline finding on t02.** `t02_benign_overlap` is the "do nothing" test. All
 six baseline strategies pass the oracle 5/5, so correctness is not the signal.
 
@@ -366,10 +408,8 @@ The first V2 targeted run was **6/6** correct, with **0** false-positive stalls,
 
 I then ran `adaptive_lease` in the full post-grid extension. That gives broader
 evidence than the targeted slice, but it is still not a new headline winner.
-The extension report has **78 completed adaptive-lease trials** because two
-`t01_stale_clobber` logs are incomplete and excluded.
 
-Across those completed trials, `adaptive_lease` scored **61/78** (**78.2%**).
+Across the full extension grid, `adaptive_lease` scored **63/80** (**78.8%**).
 That is better than `naive` (**56/80**), `ast_scope` (**49/80**), and `ast_dep`
 (**48/80**), but below `file_lock` (**72/80**), `git_hash` (**68/80**), and
 `peer_contract` (**67/80**).

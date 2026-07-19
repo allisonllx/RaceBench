@@ -10,7 +10,7 @@ The novelty is not just measuring failures. It is also measuring overcoordinatio
 
 ## 2. Approach
 
-RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records reads and writes, applies a coordination strategy, runs the oracle, and writes JSONL logs plus aggregate tables. The current suite has 16 tasks and 6 Level A headline strategies: `naive`, `file_lock`, `notify`, `git_hash`, `ast_scope`, and `ast_dep`. Post-grid extensions, `peer_contract`, `peer_broker`, and `adaptive_lease`, adapt older negotiation and locking ideas to LLM agents editing shared code. They are not first-ever invention claims.
+RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records reads and writes, applies a coordination strategy, runs the oracle, and writes JSONL logs plus aggregate tables. The current suite has 16 tasks and 6 Level A headline strategies: `naive`, `file_lock`, `notify`, `git_hash`, `ast_scope`, and `ast_dep`. Post-grid extensions, `peer_contract`, `peer_broker`, and `adaptive_lease`, adapt older negotiation and locking ideas to LLM agents editing shared code.
 
 I considered three broader multi-agent coordination approaches and ruled them out for this submission. First, an auto-merge editor that rewrites two agents' patches into one final patch. I ruled it out because a pass or fail would depend on both the coordination rule and the **merge algorithm**, so the result would be harder to interpret. Second, a full CoAgent or MTPO-style saga layer. That is valuable, but requires inverse operations and workflow semantics beyond this coding benchmark. Third, direct comparison with commercial or open-source agent products like Claude Code and Cursor. However, without shared mediation hooks (e.g. tool call usage), that mostly measures each product's hidden planner, not a reusable coordination policy.
 
@@ -47,7 +47,10 @@ This appendix is supporting material and is not part of the five-pillar 1000-wor
 ### Full Results
 
 - Static results explorer: [`results/grid-v1/report.html`](../results/grid-v1/report.html)
+- Combined 9-strategy explorer: [`results/grid-v1-plus-extensions/report.html`](../results/grid-v1-plus-extensions/report.html)
+- Cross-run dashboard: [`results/cross-run-analysis/dashboard.html`](../results/cross-run-analysis/dashboard.html)
 - Main result logs and tables: [`results/grid-v1/`](../results/grid-v1/)
+- Post-grid extension logs and tables: [`results/grid-v1-extensions-full/`](../results/grid-v1-extensions-full/)
 - Cursor C1 exploratory logs: [`results/ext-cursor/`](../results/ext-cursor/)
 - Report generator code: [`analysis/html_report.py`](../analysis/html_report.py)
 
@@ -57,6 +60,14 @@ This appendix is supporting material and is not part of the five-pillar 1000-wor
 python -m analysis.validate_logs results/grid-v1 --expect-trials 480
 python -m analysis.make_report results/grid-v1
 ```
+
+### Cross-Run Findings
+
+This note is appendix material, not part of the 1000-word body.
+
+On the eight overlapping Agnes sensitivity tasks, `agnes-2.0-flash` scored 69.4 percent versus 57.9 percent for gpt-5-mini on the same Level A cells. It used fewer tokens on average but much more wall time. The broad ranking stayed recognizable: `file_lock` remained top or tied at the top, `git_hash` stayed strong, `notify` improved under Agnes, and AST strategies stayed in the lower half.
+
+Solo calibration passed 96.2 percent of trials, while parallel correctness dropped under every strategy. That is useful because it shows most tasks are solvable by one agent. The failures become informative when multiple agents edit at once.
 
 ### Level A To C
 
@@ -88,7 +99,7 @@ V1 used symbol leases for precise function/class edits, file leases for broad or
 
 V2 added declared and inferred semantic-resource leases. Agents can call `declare_scope` for resources such as `tag.normalization`, `article.summary.schema`, `article.summary.feed_output`, `api.fetch.signature`, or `datasource.parse_dataset.public_api`. The strategy also infers a small seed catalog from paths, changed symbols, and code text. This is not a general semantics engine. It is an inspectable prototype for testing whether application-level resources can make locking more granular.
 
-The first V2 targeted run was 6/6 correct with 0 false-positive stalls, 56.0s mean wall time, 104.7k mean tokens, and 1.5 stalls per trial. The later full extension grid gives broader evidence: `adaptive_lease` completed 78 trials and scored 61/78, or 78.2 percent. That beats `naive`, `ast_scope`, and `ast_dep`, but stays below `file_lock`, `git_hash`, and `peer_contract`. The honest claim is "promising hybrid", not "new winner". The next step is an obligation-carrying V3 and focused fixes for weak cells such as `t08`, `rw_b`, and `rw_d`.
+The first V2 targeted run was 6/6 correct with 0 false-positive stalls, 56.0s mean wall time, 104.7k mean tokens, and 1.5 stalls per trial. The later full extension grid gives broader evidence: `adaptive_lease` scored 63/80, or 78.8 percent. That beats `naive`, `ast_scope`, and `ast_dep`, but stays below `file_lock`, `git_hash`, and `peer_contract`. The honest claim is "promising hybrid", not "new winner". The next step is an obligation-carrying V3 and focused fixes for weak cells such as `t08`, `rw_b`, and `rw_d`.
 
 ### Peer Broker V2.5 Iteration
 

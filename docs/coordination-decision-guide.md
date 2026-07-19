@@ -15,8 +15,9 @@ RaceBench-compatible read, write, and coordination events.
 |-----------|--------|-----------|
 | Silent lost updates are unacceptable | `file_lock`, `git_hash` | `naive` |
 | Reads may go stale after another agent writes | `notify`, `adaptive_lease` | Pure locks if replanning is cheap |
-| Benign same-file overlap is common | `ast_scope`, `ast_dep`, `adaptive_lease` | `file_lock` false-positive stalls |
-| Cross-file semantic dependencies matter | `notify`, `adaptive_lease` | Same-file-only AST scopes |
+| Benign same-file overlap is common | `naive`, `notify`, `adaptive_lease` | `file_lock` false-positive stalls |
+| You need syntactic conflict diagnostics | `ast_scope`, `ast_dep` | Treat as probes, not correctness leaders |
+| Cross-file semantic dependencies matter | `notify`, `adaptive_lease`, sometimes `file_lock` | Same-file-only AST scopes |
 | Agents need to agree on an interface | `peer_contract` | Forced broker as the default |
 | You need a floor for comparison | `naive` | Removing it from the table |
 
@@ -59,16 +60,27 @@ It is not a universal repair mechanism. If the agent ignores, misunderstands, or
 cannot act on a notice, correctness can still fail. Use notifications when
 replanning is cheap and the agent loop is strong enough to self-correct.
 
-## Read AST strategies as evidence for granularity
+## Read AST strategies as diagnostics, not winners
 
-`ast_scope` and `ast_dep` show why coordination below file-level locking matters.
-They avoid benign same-file stalls that `file_lock` creates, and `ast_dep` adds
-some cross-file awareness through dependency edges.
+`ast_scope` and `ast_dep` are useful because they isolate a narrower question:
+what happens if coordination uses top-level Python symbols instead of whole
+files?
+
+They do show one real benefit: on benign same-file overlap, they avoid the
+false-positive stalls that `file_lock` creates. That is a granularity result,
+not an overall correctness win.
+
+The correctness evidence is weaker. In the combined 9-strategy report,
+`ast_scope` scores 49/80 and `ast_dep` scores 48/80, below `naive` at 56/80 and
+below `adaptive_lease` at 63/80. So the practical read is not "AST solves
+coordination." It is "pure syntax-level scope is a useful baseline, but not
+enough."
 
 Their implementation limits are visible too. The current versions are
 top-level-symbol oriented, the import resolver is best effort, and class-internal
-edits can still be over-serialized or missed. Treat them as evidence that
-finer-grained coordination helps, not as finished production coordinators.
+edits can still be over-serialized or missed. Use them to find where file-level
+locking is too coarse, then compare against richer approaches such as
+`adaptive_lease`, `git_hash`, or `file_lock`.
 
 ## Treat `adaptive_lease` as the promising extension
 
@@ -77,9 +89,9 @@ file-lock safety while recovering finer granularity through symbol leases,
 semantic-resource leases, and stale-overwrite refusal.
 
 The current evidence is broader than the first targeted smoke. In the full
-extension run, `adaptive_lease` completed 78 trials and scored 61/78, or 78.2%.
-That beats `naive`, `ast_scope`, and `ast_dep`, but it does not beat
-`file_lock`, `git_hash`, or `peer_contract`.
+extension run, `adaptive_lease` scored 63/80, or 78.8%. That beats `naive`,
+`ast_scope`, and `ast_dep`, but it does not beat `file_lock`, `git_hash`, or
+`peer_contract`.
 
 So the practical read is "promising hybrid", not "proven winner." The next
 useful step is focused improvement on weak cells such as `t08`, `rw_b`, and
