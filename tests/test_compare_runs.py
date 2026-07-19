@@ -143,6 +143,10 @@ def test_solo_tables_compare_calibration_against_parallel(tmp_path):
 
     tables = build_solo_tables(solo, parallel)
 
+    overall = tables["solo_vs_parallel_overall"]
+    assert overall["label"].tolist() == ["Solo", "Parallel pooled"]
+    assert set(overall["run_id"]) == {"grid-v1-calibration", "grid-v1"}
+
     by_cell = tables["solo_vs_parallel"]
     assert set(by_cell["strategy"]) == {"naive", "file_lock"}
     naive = by_cell[by_cell["strategy"] == "naive"].iloc[0]
@@ -178,13 +182,19 @@ def test_compare_runs_cli_writes_tables(tmp_path):
     assert rc == 0
     assert (out / "provider_comparison.csv").is_file()
     assert (out / "provider_delta_by_strategy.md").is_file()
+    assert (out / "solo_vs_parallel_overall.csv").is_file()
     assert (out / "solo_vs_parallel.csv").is_file()
     html = (out / "dashboard.html").read_text(encoding="utf-8")
     assert "Cross-Run Dashboard" in html
     assert "Provider Sensitivity" in html
     assert "Provider Advantage by Strategy" in html
     assert "Solo vs Parallel" in html
+    assert "Solo / Parallel Overview" in html
     assert "Parallel Advantage by Strategy" in html
+    assert "soloOverviewChart" in html
+    assert "solo_vs_parallel_overall" in html
+    assert "Parallel Event Overhead" not in html
+    assert "soloTurnsChart" not in html
     assert "Turns per trial" in html
     assert "Estimated USD" in html
     assert "Provider advantage" in html

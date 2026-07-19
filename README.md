@@ -12,14 +12,14 @@
   </p>
   <p>
     <img
-      src="assets/visualisation-p1.png"
+      src="assets/fig-metrics-bar.png"
       alt="RaceBench static results explorer with metric cards, filters, and strategy comparison charts"
       width="860"
     >
   </p>
   <p>
     <img
-      src="assets/visualisation-p2.png"
+      src="assets/fig-heatmap-correctness.png"
       alt="RaceBench task by strategy heatmap showing correctness by strategy"
       width="860"
     >
@@ -32,14 +32,15 @@
 
 If you are new to the repo, use this path:
 
-1. Open the static explorer: [`results/grid-v1/report.html`](results/grid-v1/report.html)
+1. Open the headline static explorer: [`results/grid-v1/report.html`](results/grid-v1/report.html)
    (regenerate with `python -m analysis.make_report results/grid-v1`)
 2. Read the practical takeaways: [`docs/coordination-decision-guide.md`](docs/coordination-decision-guide.md)
-3. Read the peer-negotiation roadmap: [`docs/peer-contract-strategy-plan.md`](docs/peer-contract-strategy-plan.md)
-4. Read the adaptive-locking roadmap: [`docs/adaptive-lease-strategy-plan.md`](docs/adaptive-lease-strategy-plan.md)
-5. Read the external-runtime boundary: [`docs/external-coordination-protocol.md`](docs/external-coordination-protocol.md)
-6. Read the benchmark claim and limits: [`writeup/writeup.md`](writeup/writeup.md)
-7. Run validation locally:
+3. Read the external-runtime boundary: [`docs/external-coordination-protocol.md`](docs/external-coordination-protocol.md)
+4. Read the submission write-up: [`writeup/writeup_1000.md`](writeup/writeup_1000.md)
+   (long-form claim and limits: [`writeup/writeup.md`](writeup/writeup.md))
+5. Optional: post-grid 9-strategy explorer (extensions on the same 16 tasks):
+   [`results/grid-v1-plus-extensions/report.html`](results/grid-v1-plus-extensions/report.html)
+6. Run validation locally:
 
 ```bash
 python -m analysis.validate_logs results/grid-v1 --expect-trials 480

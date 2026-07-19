@@ -131,6 +131,7 @@ def build_solo_tables(solo_run: Path, parallel_run: Path) -> dict[str, pd.DataFr
     solo = solo[solo["task"].isin(common_tasks)]
     parallel = parallel[parallel["task"].isin(common_tasks)]
 
+    overall = _solo_vs_parallel_overall(solo, parallel)
     solo_task = _metric_rollup(solo, ["task"])
     solo_prefixed = _prefix_metrics(solo_task, "solo")
     parallel_task_strategy = _metric_rollup(parallel, CELL_KEYS)
@@ -150,6 +151,7 @@ def build_solo_tables(solo_run: Path, parallel_run: Path) -> dict[str, pd.DataFr
 
     by_strategy = _solo_vs_parallel_by_strategy(solo, parallel)
     return {
+        "solo_vs_parallel_overall": overall,
         "solo_vs_parallel": by_cell,
         "solo_vs_parallel_by_strategy": by_strategy,
     }
@@ -322,6 +324,38 @@ def _solo_vs_parallel_by_strategy(
     return _round_table(_add_metric_deltas(df, "solo", "parallel"))
 
 
+def _solo_vs_parallel_overall(
+    solo: pd.DataFrame,
+    parallel: pd.DataFrame,
+) -> pd.DataFrame:
+    rows = []
+    solo_run_id = str(solo["run_id"].iloc[0])
+    parallel_run_id = str(parallel["run_id"].iloc[0])
+    direction = f"{parallel_run_id} vs {solo_run_id}"
+    for label, mode, frame in [
+        ("Solo", "solo", solo),
+        ("Parallel pooled", "parallel", parallel),
+    ]:
+        rollup = _metric_rollup(frame, [])
+        if rollup.empty:
+            continue
+        row = rollup.iloc[0].to_dict()
+        row.update({
+            "label": label,
+            "mode": mode,
+            "run_id": str(frame["run_id"].iloc[0]),
+            "provider": str(frame["provider"].iloc[0]),
+            "model": str(frame["model"].iloc[0]),
+            "direction": direction,
+        })
+        rows.append(row)
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    ordered = ["label", "mode", "run_id", "provider", "model", "direction"]
+    return _round_table(df[ordered + [c for c in df.columns if c not in ordered]])
+
+
 def _prefix_metrics(df: pd.DataFrame, prefix: str) -> pd.DataFrame:
     rename = {
         "n_tasks": f"{prefix}_n_tasks",
@@ -401,6 +435,7 @@ def _empty_provider_tables() -> dict[str, pd.DataFrame]:
 
 def _empty_solo_tables() -> dict[str, pd.DataFrame]:
     return {
+        "solo_vs_parallel_overall": pd.DataFrame(),
         "solo_vs_parallel": pd.DataFrame(),
         "solo_vs_parallel_by_strategy": pd.DataFrame(),
     }

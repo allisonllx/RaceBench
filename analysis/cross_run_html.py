@@ -25,7 +25,7 @@ def _card_html(tables: dict[str, pd.DataFrame]) -> str:
         "Provider Trials": (
             f"{int(provider['trials'].sum()):,}" if not provider.empty else "0"
         ),
-        "Solo Strategies": (
+        "Parallel Strategies": (
             str(solo["strategy"].nunique()) if not solo.empty else "0"
         ),
         "Solo Tasks": (
@@ -226,7 +226,7 @@ def write_cross_run_dashboard(
       gap: 14px;
       margin-bottom: 12px;
     }}
-    .provider-dashboard {{
+    .overview-dashboard {{
       grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
     }}
     .chart-card {{
@@ -239,9 +239,9 @@ def write_cross_run_dashboard(
       animation: fadeUp 700ms var(--ease) both;
     }}
     .chart-card.wide {{ grid-column: 1 / -1; }}
-    .provider-overview-card .bar-list {{ padding-right: 8px; }}
-    .provider-overview-card .bar-row {{
-      grid-template-columns: minmax(58px, 84px) minmax(80px, 1fr) minmax(58px, 72px);
+    .overview-card .bar-list {{ padding-right: 8px; }}
+    .overview-card .bar-row {{
+      grid-template-columns: minmax(112px, 140px) minmax(72px, 1fr) minmax(58px, 72px);
     }}
     .chart-head {{
       display: flex;
@@ -409,8 +409,8 @@ def write_cross_run_dashboard(
       <h2>Provider Sensitivity</h2>
       <span class="kicker">OpenAI vs Agnes</span>
     </div>
-    <section class="dashboard provider-dashboard" aria-label="provider dashboard">
-      <article class="chart-card provider-overview-card">
+    <section class="dashboard overview-dashboard" aria-label="provider dashboard">
+      <article class="chart-card overview-card">
         <div class="chart-head">
           <span class="chart-title">Provider Overview</span>
           <span class="chart-meta" id="providerOverviewMeta"></span>
@@ -431,20 +431,20 @@ def write_cross_run_dashboard(
       <h2>Solo vs Parallel</h2>
       <span class="kicker">Calibration</span>
     </div>
-    <section class="dashboard" aria-label="solo dashboard">
+    <section class="dashboard overview-dashboard" aria-label="solo dashboard">
+      <article class="chart-card overview-card">
+        <div class="chart-head">
+          <span class="chart-title">Solo / Parallel Overview</span>
+          <span class="chart-meta" id="soloOverviewMeta"></span>
+        </div>
+        <div id="soloOverviewChart"></div>
+      </article>
       <article class="chart-card">
         <div class="chart-head">
           <span class="chart-title">Parallel Advantage by Strategy</span>
           <span class="chart-meta" id="soloDeltaMeta"></span>
         </div>
         <div id="soloDeltaChart"></div>
-      </article>
-      <article class="chart-card">
-        <div class="chart-head">
-          <span class="chart-title">Parallel Event Overhead</span>
-          <span class="chart-meta" id="soloTurnsMeta"></span>
-        </div>
-        <div id="soloTurnsChart"></div>
       </article>
     </section>
     <div class="table-wrap" id="soloTable"></div>
@@ -534,7 +534,7 @@ def write_cross_run_dashboard(
       const haystack = [
         row.run_id, row.provider, row.model, row.strategy, row.task,
         row.baseline_run_id, row.compare_run_id, row.solo_run_id,
-        row.parallel_run_id
+        row.parallel_run_id, row.mode, row.label
       ].map(v => String(v ?? "")).join(" ").toLowerCase();
       return (!filters.strategy.value || !("strategy" in row) || row.strategy === filters.strategy.value)
         && (!filters.search.value || haystack.includes(filters.search.value.toLowerCase()));
@@ -625,16 +625,17 @@ def write_cross_run_dashboard(
       const metric = filters.metric.value;
       const providerOverview = filtered(data.provider_comparison || []);
       const providerDelta = filtered(data.provider_delta_by_strategy || []);
+      const soloOverview = filtered(data.solo_vs_parallel_overall || []);
       const soloDelta = filtered(data.solo_vs_parallel_by_strategy || []);
       const providerCells = filtered(data.provider_delta_by_task_strategy || []);
       renderBarChart("providerOverviewChart", "providerOverviewMeta",
         providerOverview, "provider", metric);
       renderDeltaChart("providerDeltaChart", "providerDeltaMeta",
         providerDelta, "strategy", metric, providerDirection(providerDelta));
+      renderBarChart("soloOverviewChart", "soloOverviewMeta",
+        soloOverview, "label", metric);
       renderDeltaChart("soloDeltaChart", "soloDeltaMeta",
         soloDelta, "strategy", metric, soloDirection(soloDelta));
-      renderBarChart("soloTurnsChart", "soloTurnsMeta",
-        soloDelta, "strategy", "parallel_mean_agent_turns", "warn");
       table("providerTable", [
         {{key: "run_id", label: "run"}},
         {{key: "provider", label: "provider"}},
