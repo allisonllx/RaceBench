@@ -223,6 +223,48 @@ Second, `peer_broker` needs dependency-aware triggering, likely reusing the
 `ast_dep` signal, so it can catch cross-file semantic dependencies such as
 `rw_d_tag_antidependency` without over-firing on benign same-file work.
 
+### Exploratory adaptive-lease extension
+
+The peer runs exposed a related design question: can RaceBench keep most of
+`file_lock`'s hard-race safety while recovering the granularity that
+`ast_scope` and `ast_dep` were trying to provide? We added `adaptive_lease` as
+another experimental Level A strategy after the main 480-trial grid. It is not
+part of the headline table yet.
+
+V1 was intentionally conservative. It acquired symbol leases for precise
+top-level function or class edits, fell back to a file lease for whole-file,
+module-level, non-Python, or parse-uncertain edits, and refused stale whole-file
+overwrites when the file had changed after an agent's last read. On the six-task
+targeted slice (`t01`, `t02`, `t03`, `t04`, `rw_d`, `rw_e`), V1 went **3/6**:
+it passed the stale/clobber and benign-overlap probes (`t01`, `t02`, `t03`) but
+missed `rw_d`, `rw_e`, and `t04`. That was useful evidence, not just failure:
+file/symbol leases helped with destructive writes and avoided the obvious
+benign-overlap penalty, but they still could not represent application-level
+dependencies such as tag normalization or article summary schema drift.
+
+V2 adds a small semantic-resource layer. Agents may call `declare_scope` with
+resources such as `tag.normalization`, `article.summary.schema`,
+`article.summary.feed_output`, `api.fetch.signature`, or
+`datasource.parse_dataset.public_api`. The strategy also infers a conservative
+resource catalog from paths, changed symbols, and code text. Resource leases can
+conflict across files, and semantic read/write intersections trigger notices
+telling affected readers to re-read before editing. This is not a general
+program-semantics engine. It is a hand-authored, inspectable resource catalog
+used to test whether file-lock safety can be made more granular without relying
+only on AST syntax.
+
+The first V2 targeted run is strong but early: **6/6** correct, with **0**
+false-positive stalls, **56.0s** mean wall time, **104.7k** mean tokens, and
+**1.5** stalls per trial. On the same six tasks in `results/grid-v1/`,
+`file_lock` was **26/30** correct (**86.7%**), with **201.5s** mean wall time,
+**114.6k** mean tokens, and **26.0** stalls per trial. The fair claim is not
+"adaptive lease beats file lock" yet, because V2 has only one repetition per
+task. The fair claim is that semantic leases are a promising hybrid: they
+matched file-lock-like safety on this targeted pass while using far fewer
+observable stalls. The next honest step is four more V2 repetitions on the same
+slice, then an obligation-carrying V3 that records what an agent promised to
+preserve while holding a lease.
+
 ## 4. Constraints
 
 Cost is a first-class constraint. The runner enforces **$25 / 40M-token** with
@@ -418,12 +460,18 @@ black-box runtime scoring unless a product exposes mediation hooks.
    ACK, and dependency-aware broker triggers for `peer_broker` so cross-file
    semantic dependencies such as tag normalization are negotiated.
 
-8. **Suite hardness vs stronger stacks.** Preliminary Cursor C1 passes on cells
+8. **Adaptive lease v3.** The first semantic-resource pass is promising but too
+   small to claim a new winner. Run four more reps on the same six-task targeted
+   slice, then add obligation-carrying leases so a claim such as "preserve
+   timeout behavior" stays visible in later prompts and can be checked after
+   writes.
+
+9. **Suite hardness vs stronger stacks.** Preliminary Cursor C1 passes on cells
    where Level A `naive` scores 0/5 (e.g. t01, rw_e) suggest the probe suite may
    under-challenge capable foreign worker loops; future tasks could target
    harness-agnostic collisions or higher concurrency if we want C1 to separate stacks.
 
-9. **Level C adapter hardening.** The MegaAgent vendor bridge runs but is not
+10. **Level C adapter hardening.** The MegaAgent vendor bridge runs but is not
    production-ready: t02 timed out at 900s with no file writes; t04 burned ~2M
    input tokens on a Gobang demo instead of the cascade repo. Concrete fixes:
    request timeouts on upstream HTTP, stream `log.txt` to the runner terminal,
