@@ -1,54 +1,102 @@
 # Coordination decision guide
 
-This guide turns the `results/grid-v1/` evidence into practical advice for
-building multi-agent coding systems. It is not a universal ranking; RaceBench
-shows that coordination value is selective.
+This guide turns RaceBench results into practical advice for building
+multi-agent coding systems. It is not a universal ranking. RaceBench shows that
+coordination value is selective: the right mechanism depends on the failure mode
+you are trying to prevent.
 
-If you only need the takeaway: use Level A results to compare coordination
-mechanisms, use Level C results only as black-box runtime checks, and keep
-`naive` in the table because some concurrent work should not coordinate.
+Use Level A results for strategy rankings. Use Level C results, such as Cursor
+or MegaAgent runs, as black-box runtime checks unless the external runtime emits
+RaceBench-compatible read, write, and coordination events.
 
-## Use coarse locks when correctness beats parallelism
+## Choose by failure mode
 
-`file_lock` is the safest shipped baseline on many hard clobber and ordering
-tasks. In the Level A grid it cleanly fixes the hardened whole-file races
-(`t01_stale_clobber`, `t03_fetch_clobber`) and does well on irreversible effects
-(`t11_irreversible`).
+| Situation | Prefer | Watch out |
+|-----------|--------|-----------|
+| Silent lost updates are unacceptable | `file_lock`, `git_hash` | `naive` |
+| Reads may go stale after another agent writes | `notify`, `adaptive_lease` | Pure locks if replanning is cheap |
+| Benign same-file overlap is common | `ast_scope`, `ast_dep`, `adaptive_lease` | `file_lock` false-positive stalls |
+| Cross-file semantic dependencies matter | `notify`, `adaptive_lease` | Same-file-only AST scopes |
+| Agents need to agree on an interface | `peer_contract` | Forced broker as the default |
+| You need a floor for comparison | `naive` | Removing it from the table |
 
-The cost is over-coordination. On benign same-file work (`t02_benign_overlap`,
-`rw_c_benign_overlap`) file locks pass the oracle but add false-positive stalls.
-Use this style when serializing shared files is acceptable and silent loss is
-more expensive than waiting.
+## Treat `naive` as the floor, not a strawman
 
-## Use notification-style coordination for cheap invalidation
+`naive` is important because some concurrent work should not coordinate at all.
+High `naive` correctness on benign or disjoint tasks is not a benchmark bug. It
+is the signal that coordination can be unnecessary or even harmful.
+
+If a task already passes under `naive`, the interesting metrics are overhead:
+wall clock, tokens, stalls, wasted work, and false-positive stalls.
+
+## Treat `file_lock` as the safety baseline
+
+`file_lock` is the simplest strong correctness baseline. It cleanly fixes the
+hardened whole-file races (`t01_stale_clobber`, `t03_fetch_clobber`) and does
+well on irreversible ordering tasks such as `t11_irreversible`.
+
+The tradeoff is over-coordination. On benign same-file work, file locks can pass
+the oracle while still creating false-positive stalls. Use this style when
+silent loss is worse than waiting.
+
+## Treat `git_hash` as the optimistic baseline
+
+`git_hash` is useful when agents usually edit independently, but conflicts
+should be surfaced instead of silently overwritten. It is less eager than
+`file_lock`, more protective than `naive`, and easier to reason about than a
+large semantic coordinator.
+
+In practice, this is a good default to compare against when you want optimistic
+concurrency with replayable conflict evidence.
+
+## Use `notify` for cheap invalidation
 
 `notify` lets writes land immediately, then warns agents whose read sets overlap
-the write. In this suite it is cheap on wall clock and useful on some
-antidependency cases, especially `rw_d_tag_antidependency`.
+the write. In this suite it is useful on some antidependency cases, especially
+`rw_d_tag_antidependency`.
 
 It is not a universal repair mechanism. If the agent ignores, misunderstands, or
-cannot act on a notice, correctness still fails. Use notifications when
+cannot act on a notice, correctness can still fail. Use notifications when
 replanning is cheap and the agent loop is strong enough to self-correct.
 
-## Keep `naive` as a real baseline
+## Read AST strategies as evidence for granularity
 
-High `naive` correctness on benign/disjoint tasks is not a bug. Some concurrent
-work should not coordinate at all. `naive` is the floor that reveals whether a
-coordination mechanism is buying correctness or just adding latency.
-
-If a task already passes under `naive`, the interesting metric is overhead:
-tokens, wall clock, stalls, and false-positive stalls.
-
-## Use finer granularity when false positives matter
-
-`ast_scope` and `ast_dep` show the value of moving below file-level locking.
+`ast_scope` and `ast_dep` show why coordination below file-level locking matters.
 They avoid benign same-file stalls that `file_lock` creates, and `ast_dep` adds
-cross-file awareness for dependency races.
+some cross-file awareness through dependency edges.
 
-Their limits are visible too: the implementation is top-level-symbol oriented,
-the import resolver is best effort, and class-internal edits can still be
-over-serialized or missed. Treat AST/dependency strategies as evidence for the
-shape of a better mechanism, not as a finished production coordinator.
+Their implementation limits are visible too. The current versions are
+top-level-symbol oriented, the import resolver is best effort, and class-internal
+edits can still be over-serialized or missed. Treat them as evidence that
+finer-grained coordination helps, not as finished production coordinators.
+
+## Treat `adaptive_lease` as the promising extension
+
+`adaptive_lease` is the most promising post-grid strategy. It tries to keep
+file-lock safety while recovering finer granularity through symbol leases,
+semantic-resource leases, and stale-overwrite refusal.
+
+The current evidence is encouraging but early. It should be described as a
+promising hybrid, not a proven winner. The next useful step is more repetitions
+on the targeted slice and an obligation-carrying version that keeps preservation
+promises visible until agents finish.
+
+## Use `peer_contract`, not `peer_broker`, for the A2A story
+
+`peer_contract` is the cleaner peer-negotiation result. Agents voluntarily
+declare edit intent and ACK compatible work before overlapping writes. That maps
+better to the practical A2A idea: agents should share intent when they know they
+are touching an interface or shared surface.
+
+`peer_broker` is now best treated as a diagnostic ablation. The targeted V2.5 run
+showed that forced negotiation can recover hard overlaps, but the full extension
+grid showed poor generalization: `peer_broker` scored below `naive` overall and
+was especially weak on `t04`, `t05`, `t11`, `t12`, and `rw_c`.
+
+The lesson is not "never negotiate." The lesson is that forced negotiation
+should not be the default trigger. The likely better design is hybrid: adaptive
+semantic leases first, broker only for ambiguous conflicts that need peer
+judgment, followed by a mandatory re-read before commit.
 
 ## Read Level C separately
 

@@ -265,6 +265,10 @@ python -m analysis.make_report results/grid-v1-adaptive-lease-targeted-v2 \
 targeted config first because it spends real model tokens and focuses only on
 tasks where peer negotiation should matter.
 
+The current target folder keeps the raw run label `v5`, but the docs refer to
+that broker refinement as conceptual V2.5 so V3 can remain reserved for the
+future external mediation protocol.
+
 ```bash
 python -m runner.run_grid --config runner/config.peer-targeted.yaml
 python -m analysis.validate_logs results/grid-v1-peer-targeted-v5
