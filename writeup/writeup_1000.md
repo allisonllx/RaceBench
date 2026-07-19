@@ -4,13 +4,13 @@
 
 Parallel coding agents are easy to launch but hard to trust. When two agents edit the same repository, they can clobber each other's work, read stale state, coordinate too much, or waste tokens. Existing proposals usually report gains inside one system or task distribution, making it hard to tell whether the mechanism helped or the product simply gave it easier work.
 
-RaceBench asks a narrower question: given the same repository, prompts, models, task pairs, and oracles, which coordination policies actually reduce race failures, and when do they create avoidable stalls? My success criteria were set before building the final grid: the benchmark should replay fixed race tasks, compare strategies against a naive baseline, record correctness, wall time, token use, wasted work, stalls, and false-positive stalls, and preserve enough logs for another person to audit each trial.
+RaceBench asks: given the same repository, prompts, models, task pairs, and oracles, which coordination policies reduce race failures, and when do they create avoidable stalls? It also tests new coordination ideas by asking whether they improve correctness or merely add stalls, tokens, latency, or hidden overcoordination. My pre-grid criteria were: replay fixed race tasks, compare against naive, report correctness, wall time, tokens, wasted work, stalls, and false-positive stalls, and preserve auditable logs.
 
 The novelty is not just measuring failures. It is also measuring overcoordination. False-positive stalls, where a strategy blocks safe parallelism, are rarely foregrounded in prior multi-agent coordination work, but they matter in practice because a safe agent team that serializes everything is not very useful.
 
 ## 2. Approach
 
-RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records read and write events, applies a coordination strategy, runs the task oracle, and writes JSONL logs plus aggregate tables. The current suite has 16 tasks and 6 Level A headline strategies: `naive`, `file_lock`, `notify`, `git_hash`, `ast_scope`, and `ast_dep`.
+RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records reads and writes, applies a coordination strategy, runs the oracle, and writes JSONL logs plus aggregate tables. The current suite has 16 tasks and 6 Level A headline strategies: `naive`, `file_lock`, `notify`, `git_hash`, `ast_scope`, and `ast_dep`. Post-grid extensions, `peer_contract`, `peer_broker`, and `adaptive_lease`, adapt older negotiation and locking ideas to LLM agents editing shared code. They are not first-ever invention claims.
 
 I considered three broader multi-agent coordination approaches and ruled them out for this submission. First, an auto-merge editor that rewrites two agents' patches into one final patch. I ruled it out because a pass or fail would depend on both the coordination rule and the **merge algorithm**, so the result would be harder to interpret. Second, a full CoAgent or MTPO-style saga layer. That is valuable, but requires inverse operations and workflow semantics beyond this coding benchmark. Third, direct comparison with commercial or open-source agent products like Claude Code and Cursor. However, without shared mediation hooks (e.g. tool call usage), that mostly measures each product's hidden planner, not a reusable coordination policy.
 
@@ -26,7 +26,7 @@ The evidence also shows trade-offs. In `t02_disjoint`, `file_lock` stayed correc
 
 ## 4. Constraints
 
-The biggest constraint was cost. I intentionally kept the grid small and reused the same logs for the final report instead of buying a larger sweep. I also did not run a second model family because of API and token limits. My prediction is that the relative shape of the results, for example file locks helping hard clobbers but overblocking disjoint work, would remain similar across models because those effects come from repository state and strategy semantics. Still, that is a hypothesis, not proven evidence.
+The biggest constraint was cost. I kept the grid small and reused the same logs for the final report instead of buying a larger sweep. I did run a scoped Agnes sensitivity check, but not a full second-provider grid. My prediction is that the relative shape of results, for example file locks helping hard clobbers but overblocking disjoint work, would remain similar across models because those effects come from repository state and strategy semantics. Still, that is a hypothesis, not full-grid evidence.
 
 There are also realism constraints. RaceBench currently uses a local Conduit-style in-process setup, fixed task pairs, and deterministic oracles. That makes the benchmark reproducible and cheap, but it does not capture long-horizon planning, changing user requirements, flaky external services, or heterogeneous agent products.
 
@@ -36,7 +36,7 @@ RaceBench is not a plug-and-play benchmark for arbitrary existing agents. A blac
 
 Known failure modes are specific. The AST merge strategy is still too coarse for many real refactors. The dependency graph strategy depends on simplified static observations and can miss dynamic behavior. The task suite is small enough that strategies can accidentally fit it. The benchmark mostly studies two-agent races, not larger teams. It also rewards strategies implemented inside the harness more directly than external products, which is why I separate Level A and Level C throughout the docs and report.
 
-With two more weeks, I would add a scoped Agnes sensitivity run on high-signal baseline cells, rerun the existing Cursor C1 smoke with more repetitions, refine the new strategies instead of overclaiming them, and add harder multi-agent probes. The most promising strategy path is hybrid: adaptive semantic leases first, peer negotiation only for ambiguous conflicts. The claim would still stay modest: RaceBench is a reusable, auditable benchmark for coordination mechanisms, plus a task and oracle suite for black-box runtime checks.
+With two more weeks, I would rerun the Cursor C1 smoke with more repetitions, refine the new strategies instead of overclaiming them, and add harder multi-agent probes. The most promising strategy path is hybrid: adaptive semantic leases first, peer negotiation only for ambiguous conflicts. The claim would stay modest: RaceBench is a reusable benchmark for coordination mechanisms, plus a task and oracle suite for black-box runtime checks.
 
 ---
 

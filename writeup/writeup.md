@@ -26,10 +26,12 @@ arXiv:2408.09955), and LLM-advisory notifications (CoAgent, arXiv:2606.15376).
 The problem is that each paper evaluates its own mechanism on its own tasks with
 its own metrics.
 
-RaceBench asks for a neutral comparison. The taxonomy paper
+RaceBench asks for a neutral comparison and a design testbed. The taxonomy paper
 (arXiv:2606.17182) says current agent benchmarks do not stress-test shared
 state under contention. RaceBench is my attempt to make that contention visible
-and measurable.
+and measurable, then use it to test whether new coordination ideas really help
+or only move the failure into more stalls, more tokens, slower runs, or hidden
+over-coordination.
 
 **Success criteria (defined before building):**
 
@@ -85,6 +87,14 @@ After the main grid, RaceBench adds three post-grid extensions:
 | `adaptive_lease` | Semantic adaptive locking with symbol/resource leases |
 
 Together, the project now covers **nine mechanism classes**.
+
+The extension strategies are not claimed as invented from scratch. Peer
+negotiation connects to older multi-agent negotiation work such as Contract Net
+and POANCD. Adaptive leases connect to database and systems work on lock
+granularity, semantic locking, and adaptive locks. The RaceBench contribution is
+adapting those ideas to LLM coding agents at the file-tool boundary and measuring
+their correctness, cost, latency, and false-positive stalls on the same tasks.
+The README lists the specific prior-art sources.
 
 ### Task suite: how we built it
 
