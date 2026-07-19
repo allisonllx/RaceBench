@@ -36,9 +36,10 @@ If you are new to the repo, use this path:
    (regenerate with `python -m analysis.make_report results/grid-v1`)
 2. Read the practical takeaways: [`docs/coordination-decision-guide.md`](docs/coordination-decision-guide.md)
 3. Read the peer-negotiation roadmap: [`docs/peer-contract-strategy-plan.md`](docs/peer-contract-strategy-plan.md)
-4. Read the external-runtime boundary: [`docs/external-coordination-protocol.md`](docs/external-coordination-protocol.md)
-5. Read the benchmark claim and limits: [`writeup/writeup.md`](writeup/writeup.md)
-6. Run validation locally:
+4. Read the adaptive-locking roadmap: [`docs/adaptive-lease-strategy-plan.md`](docs/adaptive-lease-strategy-plan.md)
+5. Read the external-runtime boundary: [`docs/external-coordination-protocol.md`](docs/external-coordination-protocol.md)
+6. Read the benchmark claim and limits: [`writeup/writeup.md`](writeup/writeup.md)
+7. Run validation locally:
 
 ```bash
 python -m analysis.validate_logs results/grid-v1 --expect-trials 480
@@ -117,10 +118,17 @@ systems.
    overlapping write, opens a private broker decision with affected peers, and
    applies the write only if peers ACK. Peers can also request concrete revision
    constraints, mark the write irrelevant to their subtask, or reject the write.
+9. `adaptive_lease`: conservative adaptive locking. Precise function/class
+   edits get symbol leases, uncertain module/file edits fall back to a file
+   lease, semantic resources can be declared or inferred across files, and stale
+   whole-file overwrites are refused rather than silently clobbering another
+   agent's landed work.
 
 `peer_contract` and `peer_broker` are intentionally separate, like `ast_scope`
 and `ast_dep`: they test whether voluntary negotiation is enough, and whether a
 runtime-triggered broker is worth the extra turn and token cost.
+`adaptive_lease` is a separate hybrid: it asks whether `file_lock` safety can be
+kept while recovering some `ast_scope` granularity.
 
 **Adding your strategy (Level A).** Implement `_coordinate_read` and
 `_coordinate_write`, register with `@register`, import in
@@ -228,6 +236,25 @@ python -m analysis.make_report results/grid-v1
 ```
 
 If you do not activate the virtualenv, replace `python` with `.venv/bin/python`.
+
+### Adaptive lease strategy
+
+`adaptive_lease` is an experimental Level A hybrid between `file_lock`,
+`ast_scope`, and lightweight semantic-resource claims. It uses symbol leases for
+precise edits, falls back to file leases when scope is broad or uncertain, lets
+agents call `declare_scope` for resources such as `tag.normalization`, and
+refuses stale whole-file overwrites. Use the offline smoke first, then the
+targeted live config only if you want a cheap one-rep signal. Existing
+`results/grid-v1-adaptive-lease-targeted/` logs are V1; the config now writes V2
+logs to `results/grid-v1-adaptive-lease-targeted-v2/`.
+
+```bash
+python -m runner.run_grid --config runner/config.smoke.yaml
+python -m runner.run_grid --config runner/config.adaptive-lease-targeted.yaml
+python -m analysis.validate_logs results/grid-v1-adaptive-lease-targeted-v2
+python -m analysis.make_report results/grid-v1-adaptive-lease-targeted-v2 \
+  --prices-config runner/config.adaptive-lease-targeted.yaml
+```
 
 ### Peer negotiation strategies
 

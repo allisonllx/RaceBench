@@ -61,6 +61,28 @@ def test_peer_targeted_config_includes_peer_strategies(tmp_path):
     assert {job.n for job in pending if job.task_name == "rw_e_cascade"} == {3}
 
 
+def test_adaptive_lease_targeted_config_runs_only_new_strategy(tmp_path):
+    cfg = load_config(str(ROOT / "runner" / "config.adaptive-lease-targeted.yaml"))
+    pending = collect_pending(cfg, tmp_path, calibrate=False)
+
+    assert cfg["run_id"] == "grid-v1-adaptive-lease-targeted-v2"
+    assert cfg["provider"] == "openai"
+    assert cfg["reps"] == 1
+    assert cfg["parallel"] == 2
+    assert cfg["budget"]["max_usd"] == 2
+    assert {job.strategy for job in pending} == {"adaptive_lease"}
+    assert {
+        "t01_stale_clobber",
+        "t02_benign_overlap",
+        "t03_fetch_clobber",
+        "t04_cascade",
+        "rw_d_tag_antidependency",
+        "rw_e_cascade",
+    } <= {job.task_name for job in pending}
+    assert {job.n for job in pending if job.task_name == "t04_cascade"} == {4}
+    assert {job.n for job in pending if job.task_name == "rw_e_cascade"} == {3}
+
+
 def test_resolve_agnes_provider_uses_dedicated_env(monkeypatch):
     monkeypatch.setenv("AGNES_API_KEY", "test-key")
     cfg = {

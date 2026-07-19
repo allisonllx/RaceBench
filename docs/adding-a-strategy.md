@@ -186,3 +186,4 @@ run `python -m runner.run_grid --config ...`, then
 | `ast_scope` | `ast_scope.py` | Symbol claims, AST diff |
 | `ast_dep` | `ast_dep.py` | Cross-file dependency graph |
 | `notify` | `notify.py` | Read sets, `drain_notifications` |
+| `adaptive_lease` | `adaptive_lease.py` | Conservative file fallback plus symbol leases |

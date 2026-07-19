@@ -1,0 +1,92 @@
+{"ts": 0.2821, "event": "trial_start", "task": "rw_d_tag_antidependency", "failure_mode": "antidependency_silent_invalidation", "benign": false, "strategy": "adaptive_lease", "n_agents": 2, "rep": 0, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-tag-semantics", "agent-tag-stats"]}
+{"ts": 0.32, "event": "notification_delivered", "agent": "agent-tag-semantics", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 0.3213, "event": "notification_delivered", "agent": "agent-tag-stats", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 2.5435, "event": "llm_usage", "agent": "agent-tag-semantics", "turn": 1, "prompt_tokens": 814, "completion_tokens": 89}
+{"ts": 2.5436, "event": "tool_call", "agent": "agent-tag-semantics", "turn": 1, "tool": "declare_scope", "args": {"resources": ["tag.normalization", "article.create_article.tags_lowercase", "article.list_articles.tag_filter_case_insensitive"], "path": "conduit/services/articles.py", "summary": "Normalize article tags to lowercase when creating and make list_articles tag filter case-insensitive (LOWER(t.tag) = LOWER(?)). Preserve feed tag counts not implemented here."}}
+{"ts": 2.5438, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-tag-semantics", "path": "conduit/services/articles.py", "symbols": [], "resources": ["article.create_article.tags_lowercase", "article.list_articles.tag_filter_case_insensitive", "tag.normalization"], "summary": "Normalize article tags to lowercase when creating and make list_articles tag filter case-insensitive (LOWER(t.tag) = LOWER(?)). Preserve feed tag counts not implemented here.", "exports": [], "must_preserve": []}
+{"ts": 2.5438, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-tag-semantics", "path": "conduit/services/articles.py", "lease_level": "resource", "symbols": [], "resources": ["article.create_article.tags_lowercase", "article.list_articles.tag_filter_case_insensitive", "tag.normalization"]}
+{"ts": 2.9708, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 1, "prompt_tokens": 842, "completion_tokens": 149}
+{"ts": 2.971, "event": "tool_call", "agent": "agent-tag-stats", "turn": 1, "tool": "declare_scope", "args": {"resources": ["tag.normalization", "api.feed.tags_count", "article.list.filtering", "routes.feed"], "path": "conduit/services/feed.py", "summary": "Implement tag_article_count and route GET /api/feed/tags/{tag}/count to return tag and number of articles for that tag. Preserve articles tag handling semantics."}}
+{"ts": 2.9712, "event": "coord", "strategy": "adaptive_lease", "action": "blocked", "agent": "agent-tag-stats", "path": "conduit/services/feed.py", "lease_level": "resource", "resources": ["api.feed.tags_count", "article.list.filtering", "routes.feed", "tag.normalization"], "holders": ["agent-tag-semantics"]}
+{"ts": 4.0543, "event": "llm_usage", "agent": "agent-tag-semantics", "turn": 2, "prompt_tokens": 933, "completion_tokens": 32}
+{"ts": 4.0545, "event": "tool_call", "agent": "agent-tag-semantics", "turn": 2, "tool": "grep", "args": {"pattern": "conduit/services/articles.py", "glob": "**/*"}}
+{"ts": 4.072, "event": "search", "agent": "agent-tag-semantics", "kind": "grep", "pattern": "conduit/services/articles.py", "n": 0}
+{"ts": 5.1163, "event": "llm_usage", "agent": "agent-tag-semantics", "turn": 3, "prompt_tokens": 972, "completion_tokens": 19}
+{"ts": 5.1165, "event": "tool_call", "agent": "agent-tag-semantics", "turn": 3, "tool": "list_files", "args": {}}
+{"ts": 6.2568, "event": "llm_usage", "agent": "agent-tag-semantics", "turn": 4, "prompt_tokens": 1232, "completion_tokens": 21}
+{"ts": 6.2569, "event": "tool_call", "agent": "agent-tag-semantics", "turn": 4, "tool": "read_file", "args": {"path": "conduit/services/articles.py"}}
+{"ts": 6.2578, "event": "read", "agent": "agent-tag-semantics", "path": "conduit/services/articles.py", "found": true, "size": 2338}
+{"ts": 13.0202, "event": "llm_usage", "agent": "agent-tag-semantics", "turn": 5, "prompt_tokens": 1863, "completion_tokens": 546}
+{"ts": 13.0204, "event": "tool_call", "agent": "agent-tag-semantics", "turn": 5, "tool": "edit_file", "args": {"path": "conduit/services/articles.py", "old_string": "    for tag in tag_list or []:\n        conn.execute(\n            \"INSERT OR IGNORE INTO tags (article_id, tag) VALUES (?, ?)\",\n            (article_id, tag),\n        )\n    return get_article_by_slug(c", "new_string": "    for tag in tag_list or []:\n        t = tag.lower()\n        conn.execute(\n            \"INSERT OR IGNORE INTO tags (article_id, tag) VALUES (?, ?)\",\n            (article_id, t),\n        )\n    return"}}
+{"ts": 13.0239, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-tag-semantics", "path": "conduit/services/articles.py", "lease_level": "resource", "symbols": ["create_article"], "resources": ["article.create_article.tags_lowercase", "article.list_articles.tag_filter_case_insensitive", "tag.normalization"]}
+{"ts": 13.0272, "event": "write", "agent": "agent-tag-semantics", "path": "conduit/services/articles.py", "kind": "replace", "status": "applied", "waited_s": 0.007, "changed_symbols": ["create_article"], "message": ""}
+{"ts": 14.0669, "event": "llm_usage", "agent": "agent-tag-semantics", "turn": 6, "prompt_tokens": 2035, "completion_tokens": 21}
+{"ts": 14.0671, "event": "tool_call", "agent": "agent-tag-semantics", "turn": 6, "tool": "read_file", "args": {"path": "conduit/services/articles.py"}}
+{"ts": 14.0692, "event": "read", "agent": "agent-tag-semantics", "path": "conduit/services/articles.py", "found": true, "size": 2360}
+{"ts": 16.2441, "event": "llm_usage", "agent": "agent-tag-semantics", "turn": 7, "prompt_tokens": 2672, "completion_tokens": 148}
+{"ts": 16.2442, "event": "tool_call", "agent": "agent-tag-semantics", "turn": 7, "tool": "edit_file", "args": {"path": "conduit/services/articles.py", "old_string": "            \"WHERE t.tag = ? ORDER BY a.created_at DESC\",\n            (tag,),\n        )", "new_string": "            \"WHERE LOWER(t.tag) = LOWER(?) ORDER BY a.created_at DESC\",\n            (tag,),\n        )"}}
+{"ts": 16.2456, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-tag-semantics", "path": "conduit/services/articles.py", "lease_level": "resource", "symbols": ["list_articles"], "resources": ["article.create_article.tags_lowercase", "article.list_articles.tag_filter_case_insensitive", "tag.normalization"]}
+{"ts": 16.247, "event": "write", "agent": "agent-tag-semantics", "path": "conduit/services/articles.py", "kind": "replace", "status": "applied", "waited_s": 0.003, "changed_symbols": ["list_articles"], "message": ""}
+{"ts": 17.4679, "event": "llm_usage", "agent": "agent-tag-semantics", "turn": 8, "prompt_tokens": 2766, "completion_tokens": 21}
+{"ts": 17.468, "event": "tool_call", "agent": "agent-tag-semantics", "turn": 8, "tool": "read_file", "args": {"path": "conduit/services/articles.py"}}
+{"ts": 17.4689, "event": "read", "agent": "agent-tag-semantics", "path": "conduit/services/articles.py", "found": true, "size": 2374}
+{"ts": 18.4669, "event": "llm_usage", "agent": "agent-tag-semantics", "turn": 9, "prompt_tokens": 3406, "completion_tokens": 13}
+{"ts": 18.4669, "event": "tool_call", "agent": "agent-tag-semantics", "turn": 9, "tool": "run_tests", "args": {}}
+{"ts": 19.4602, "event": "run_tests", "agent": "agent-tag-semantics", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 20.8253, "event": "llm_usage", "agent": "agent-tag-semantics", "turn": 10, "prompt_tokens": 3577, "completion_tokens": 42}
+{"ts": 20.8256, "event": "tool_call", "agent": "agent-tag-semantics", "turn": 10, "tool": "done", "args": {"summary": "Normalize tags to lowercase on create and make list_articles tag filter case-insensitive using LOWER(t.tag) = LOWER(?). Ran tests."}}
+{"ts": 20.8257, "event": "agent_done_coord", "agent": "agent-tag-semantics"}
+{"ts": 20.8258, "event": "agent_done", "agent": "agent-tag-semantics", "status": "done", "turns": 10, "prompt_tokens": 20270, "completion_tokens": 952}
+{"ts": 20.826, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-tag-stats", "path": "conduit/services/feed.py", "symbols": [], "resources": ["api.feed.tags_count", "article.list.filtering", "routes.feed", "tag.normalization"], "summary": "Implement tag_article_count and route GET /api/feed/tags/{tag}/count to return tag and number of articles for that tag. Preserve articles tag handling semantics.", "exports": [], "must_preserve": []}
+{"ts": 20.8261, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-tag-stats", "path": "conduit/services/feed.py", "lease_level": "resource", "symbols": [], "resources": ["api.feed.tags_count", "article.list.filtering", "routes.feed", "tag.normalization"]}
+{"ts": 23.1823, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 2, "prompt_tokens": 954, "completion_tokens": 88}
+{"ts": 23.1825, "event": "tool_call", "agent": "agent-tag-stats", "turn": 2, "tool": "glob", "args": {"pattern": "**/*.py"}}
+{"ts": 23.201, "event": "search", "agent": "agent-tag-stats", "kind": "glob", "pattern": "**/*.py", "n": 32}
+{"ts": 24.2856, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 3, "prompt_tokens": 1210, "completion_tokens": 21}
+{"ts": 24.2857, "event": "tool_call", "agent": "agent-tag-stats", "turn": 3, "tool": "read_file", "args": {"path": "conduit/services/feed.py"}}
+{"ts": 24.2863, "event": "read", "agent": "agent-tag-stats", "path": "conduit/services/feed.py", "found": true, "size": 1002}
+{"ts": 25.6375, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 4, "prompt_tokens": 1458, "completion_tokens": 22}
+{"ts": 25.6376, "event": "tool_call", "agent": "agent-tag-stats", "turn": 4, "tool": "read_file", "args": {"path": "conduit/api/routes_feed.py"}}
+{"ts": 25.6396, "event": "read", "agent": "agent-tag-stats", "path": "conduit/api/routes_feed.py", "found": true, "size": 1231}
+{"ts": 27.0707, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 5, "prompt_tokens": 1782, "completion_tokens": 21}
+{"ts": 27.0708, "event": "tool_call", "agent": "agent-tag-stats", "turn": 5, "tool": "read_file", "args": {"path": "conduit/services/articles.py"}}
+{"ts": 27.0721, "event": "read", "agent": "agent-tag-stats", "path": "conduit/services/articles.py", "found": true, "size": 2374}
+{"ts": 29.0187, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 6, "prompt_tokens": 2422, "completion_tokens": 91}
+{"ts": 29.0188, "event": "tool_call", "agent": "agent-tag-stats", "turn": 6, "tool": "read_file", "args": {"path": "conduit/db/store.py"}}
+{"ts": 29.021, "event": "read", "agent": "agent-tag-stats", "path": "conduit/db/store.py", "found": true, "size": 687}
+{"ts": 30.0385, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 7, "prompt_tokens": 2625, "completion_tokens": 22}
+{"ts": 30.0385, "event": "tool_call", "agent": "agent-tag-stats", "turn": 7, "tool": "read_file", "args": {"path": "conduit/api/routes_articles.py"}}
+{"ts": 30.0395, "event": "read", "agent": "agent-tag-stats", "path": "conduit/api/routes_articles.py", "found": true, "size": 2294}
+{"ts": 31.1055, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 8, "prompt_tokens": 3175, "completion_tokens": 21}
+{"ts": 31.1057, "event": "tool_call", "agent": "agent-tag-stats", "turn": 8, "tool": "read_file", "args": {"path": "conduit/services/feed.py"}}
+{"ts": 31.1067, "event": "read", "agent": "agent-tag-stats", "path": "conduit/services/feed.py", "found": true, "size": 1002}
+{"ts": 34.5962, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 9, "prompt_tokens": 3423, "completion_tokens": 220}
+{"ts": 34.5963, "event": "tool_call", "agent": "agent-tag-stats", "turn": 9, "tool": "read_file", "args": {"path": "conduit/services/favorites.py"}}
+{"ts": 34.5971, "event": "read", "agent": "agent-tag-stats", "path": "conduit/services/favorites.py", "found": true, "size": 1035}
+{"ts": 35.7407, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 10, "prompt_tokens": 3701, "completion_tokens": 24}
+{"ts": 35.7409, "event": "tool_call", "agent": "agent-tag-stats", "turn": 10, "tool": "grep", "args": {"pattern": "tag", "glob": "**/*.py"}}
+{"ts": 35.7503, "event": "search", "agent": "agent-tag-stats", "kind": "grep", "pattern": "tag", "n": 37}
+{"ts": 36.7256, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 11, "prompt_tokens": 4514, "completion_tokens": 21}
+{"ts": 36.7258, "event": "tool_call", "agent": "agent-tag-stats", "turn": 11, "tool": "read_file", "args": {"path": "conduit/db/schema.py"}}
+{"ts": 36.7266, "event": "read", "agent": "agent-tag-stats", "path": "conduit/db/schema.py", "found": true, "size": 1407}
+{"ts": 37.7891, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 12, "prompt_tokens": 4850, "completion_tokens": 24}
+{"ts": 37.7892, "event": "tool_call", "agent": "agent-tag-stats", "turn": 12, "tool": "read_file", "args": {"path": "conduit/serializers/article_format.py"}}
+{"ts": 37.7901, "event": "read", "agent": "agent-tag-stats", "path": "conduit/serializers/article_format.py", "found": true, "size": 946}
+{"ts": 39.0092, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 13, "prompt_tokens": 5107, "completion_tokens": 21}
+{"ts": 39.0094, "event": "tool_call", "agent": "agent-tag-stats", "turn": 13, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 39.0104, "event": "read", "agent": "agent-tag-stats", "path": "tests/test_smoke.py", "found": true, "size": 961}
+{"ts": 43.6745, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 14, "prompt_tokens": 5379, "completion_tokens": 348}
+{"ts": 43.6745, "event": "tool_call", "agent": "agent-tag-stats", "turn": 14, "tool": "read_file", "args": {"path": "conduit/api/deps.py"}}
+{"ts": 43.6759, "event": "read", "agent": "agent-tag-stats", "path": "conduit/api/deps.py", "found": true, "size": 1287}
+{"ts": 54.1523, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 15, "prompt_tokens": 5710, "completion_tokens": 1048}
+{"ts": 54.1524, "event": "tool_call", "agent": "agent-tag-stats", "turn": 15, "tool": "edit_file", "args": {"path": "conduit/services/feed.py", "old_string": "\"\"\"Feed / reading-time helpers — stubs for agent tasks.\"\"\"\nfrom __future__ import annotations\n\nimport sqlite3\n\n\ndef reading_time_for_slug(conn: sqlite3.Connection, slug: str) -> dict:\n    \"\"\"Return {s", "new_string": "\"\"\"Feed / reading-time helpers — stubs for agent tasks.\"\"\"\nfrom __future__ import annotations\n\nimport sqlite3\n\nfrom conduit.db.store import fetch_one\n\n\ndef reading_time_for_slug(conn: sqlite3.Connecti"}}
+{"ts": 54.1543, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-tag-stats", "path": "conduit/services/feed.py", "lease_level": "file", "symbols": ["<module>", "tag_article_count"], "resources": ["api.feed.tags_count", "article.list.filtering", "article.summary", "article.summary.feed_output", "routes.feed", "tag.normalization"]}
+{"ts": 54.1553, "event": "write", "agent": "agent-tag-stats", "path": "conduit/services/feed.py", "kind": "replace", "status": "applied", "waited_s": 0.003, "changed_symbols": ["<module>", "tag_article_count"], "message": ""}
+{"ts": 55.3321, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 16, "prompt_tokens": 6384, "completion_tokens": 13}
+{"ts": 55.3321, "event": "tool_call", "agent": "agent-tag-stats", "turn": 16, "tool": "run_tests", "args": {}}
+{"ts": 56.0185, "event": "run_tests", "agent": "agent-tag-stats", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 57.533, "event": "llm_usage", "agent": "agent-tag-stats", "turn": 17, "prompt_tokens": 6555, "completion_tokens": 50}
+{"ts": 57.5331, "event": "tool_call", "agent": "agent-tag-stats", "turn": 17, "tool": "done", "args": {"summary": "Implemented tag_article_count in conduit/services/feed.py to match list_articles tag filtering and wired GET /api/feed/tags/{tag}/count (route already present). Ran tests."}}
+{"ts": 57.5332, "event": "agent_done_coord", "agent": "agent-tag-stats"}
+{"ts": 57.5332, "event": "agent_done", "agent": "agent-tag-stats", "status": "done", "turns": 17, "prompt_tokens": 60091, "completion_tokens": 2204}
+{"ts": 58.4356, "event": "trial_end", "correct": true, "oracle_passed": 3, "oracle_total": 3, "wall_clock_s": 57.21, "prompt_tokens": 80361, "completion_tokens": 3156, "agent_statuses": {"agent-tag-semantics": "done", "agent-tag-stats": "done"}, "oracle_output": "...                                                                      [100%]\n=============================== warnings summary ===============================\n../../.venv/lib/python3.13/site-packages/fastapi/testclient.py:1\n  /Users/allisonlawlixuan/Documents/repos/ai-launchpad/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n3 passed, 1 warning in 0.07s\n"}

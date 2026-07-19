@@ -1,0 +1,47 @@
+{"ts": 0.142, "event": "trial_start", "task": "t03_fetch_clobber", "failure_mode": "write_write_clobber", "benign": false, "strategy": "adaptive_lease", "n_agents": 2, "rep": 0, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 0.1799, "event": "notification_delivered", "agent": "agent-timeout", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 0.1812, "event": "notification_delivered", "agent": "agent-retries", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 2.2942, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 881, "completion_tokens": 81}
+{"ts": 2.2943, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "declare_scope", "args": {"resources": ["api.fetch.signature"], "path": "api.py", "symbols": ["fetch", "TransportError"], "summary": "Replace fetch function to add retries=3 keyword param and retry transport on TransportError up to retries additional times, re-raising last TransportError if all attempts fail. Preserve other behavior"}}
+{"ts": 2.2943, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-retries", "path": "api.py", "symbols": ["TransportError", "fetch"], "resources": ["api.fetch.retry_behavior", "api.fetch.signature"], "summary": "Replace fetch function to add retries=3 keyword param and retry transport on TransportError up to retries additional times, re-raising last TransportError if all attempts fail. Preserve other behavior.", "exports": [], "must_preserve": []}
+{"ts": 2.2944, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-retries", "path": "api.py", "lease_level": "resource", "symbols": ["TransportError", "fetch"], "resources": ["api.fetch.retry_behavior", "api.fetch.signature"]}
+{"ts": 2.7962, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 854, "completion_tokens": 130}
+{"ts": 2.7964, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "declare_scope", "args": {"resources": ["api.fetch.signature", "api.fetch.behavior"], "path": "api.py", "summary": "Modify fetch signature to accept keyword timeout=10 and call transport(url, timeout=timeout). Preserve TransportError and existing behavior."}}
+{"ts": 2.7966, "event": "coord", "strategy": "adaptive_lease", "action": "blocked", "agent": "agent-timeout", "path": "api.py", "lease_level": "resource", "resources": ["api.fetch.behavior", "api.fetch.signature", "api.fetch.timeout_behavior"], "holders": ["agent-retries"]}
+{"ts": 3.7892, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 981, "completion_tokens": 24}
+{"ts": 3.7893, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 3.7898, "event": "read", "agent": "agent-retries", "path": "api.py", "found": true, "size": 551}
+{"ts": 12.5345, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 1126, "completion_tokens": 783}
+{"ts": 12.5346, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "write_file", "args": {"path": "api.py", "content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents "}}
+{"ts": 12.5352, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-retries", "path": "api.py", "lease_level": "resource", "symbols": ["fetch"], "resources": ["api.fetch.retry_behavior", "api.fetch.signature"]}
+{"ts": 12.5359, "event": "write", "agent": "agent-retries", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.001, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 13.4714, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 1471, "completion_tokens": 13}
+{"ts": 13.4715, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 13.7402, "event": "run_tests", "agent": "agent-retries", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 15.2503, "event": "llm_usage", "agent": "agent-retries", "turn": 5, "prompt_tokens": 1510, "completion_tokens": 42}
+{"ts": 15.2504, "event": "tool_call", "agent": "agent-retries", "turn": 5, "tool": "done", "args": {"summary": "Implement fetch(url, transport, *, retries=3) with retry logic on TransportError; re-raise last TransportError after retries."}}
+{"ts": 15.2506, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 15.2506, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 5, "prompt_tokens": 5969, "completion_tokens": 943}
+{"ts": 15.2507, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-timeout", "path": "api.py", "symbols": [], "resources": ["api.fetch.behavior", "api.fetch.signature", "api.fetch.timeout_behavior"], "summary": "Modify fetch signature to accept keyword timeout=10 and call transport(url, timeout=timeout). Preserve TransportError and existing behavior.", "exports": [], "must_preserve": []}
+{"ts": 15.2508, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-timeout", "path": "api.py", "lease_level": "resource", "symbols": [], "resources": ["api.fetch.behavior", "api.fetch.signature", "api.fetch.timeout_behavior"]}
+{"ts": 16.5285, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 944, "completion_tokens": 18}
+{"ts": 16.5286, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "read_file", "args": {"path": "api.py"}}
+{"ts": 16.5291, "event": "read", "agent": "agent-timeout", "path": "api.py", "found": true, "size": 1241}
+{"ts": 19.8433, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 1242, "completion_tokens": 157}
+{"ts": 19.8434, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "grep", "args": {"pattern": "fetch(", "glob": "**/*"}}
+{"ts": 19.8492, "event": "search", "agent": "agent-timeout", "kind": "grep", "pattern": "fetch(", "n": 3}
+{"ts": 21.0746, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 1344, "completion_tokens": 20}
+{"ts": 21.0748, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "read_file", "args": {"path": "tests/test_api.py"}}
+{"ts": 21.0757, "event": "read", "agent": "agent-timeout", "path": "tests/test_api.py", "found": true, "size": 146}
+{"ts": 29.3889, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 1415, "completion_tokens": 739}
+{"ts": 29.389, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "write_file", "args": {"path": "api.py", "content": "\"\"\"A tiny client over a pluggable transport (no real network involved).\n\nA transport is any callable taking (url, **kwargs) and returning a response\nobject, raising TransportError on failure.\n\nAgents "}}
+{"ts": 29.3896, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-timeout", "path": "api.py", "lease_level": "resource", "symbols": ["fetch"], "resources": ["api.fetch.behavior", "api.fetch.retry_behavior", "api.fetch.signature", "api.fetch.timeout_behavior"]}
+{"ts": 29.3904, "event": "write", "agent": "agent-timeout", "path": "api.py", "kind": "overwrite", "status": "applied", "waited_s": 0.001, "changed_symbols": ["fetch"], "message": ""}
+{"ts": 30.3546, "event": "llm_usage", "agent": "agent-timeout", "turn": 6, "prompt_tokens": 1780, "completion_tokens": 13}
+{"ts": 30.3548, "event": "tool_call", "agent": "agent-timeout", "turn": 6, "tool": "run_tests", "args": {}}
+{"ts": 30.6683, "event": "run_tests", "agent": "agent-timeout", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 32.004, "event": "llm_usage", "agent": "agent-timeout", "turn": 7, "prompt_tokens": 1819, "completion_tokens": 40}
+{"ts": 32.0041, "event": "tool_call", "agent": "agent-timeout", "turn": 7, "tool": "done", "args": {"summary": "Update fetch signature to include keyword timeout=10 and call transport(url, timeout=timeout), preserving retries and TransportError behavior."}}
+{"ts": 32.0041, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 32.0042, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 7, "prompt_tokens": 9398, "completion_tokens": 1117}
+{"ts": 32.2556, "event": "trial_end", "correct": true, "oracle_passed": 5, "oracle_total": 5, "wall_clock_s": 31.82, "prompt_tokens": 15367, "completion_tokens": 2060, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": ".....                                                                    [100%]\n5 passed in 0.01s\n"}

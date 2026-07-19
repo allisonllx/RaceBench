@@ -1,0 +1,29 @@
+# Targeted live-model run for the adaptive_lease strategy.
+#
+# This is intentionally low-spend: it only runs the new strategy, then compares
+# against existing grid-v1 baselines for file_lock, git_hash, ast_scope, and
+# ast_dep. Raise reps only if the one-rep signal is interesting.
+run_id: grid-v1-adaptive-lease-targeted-v2
+mode: openai
+provider: openai
+model: gpt-5-mini
+tasks:
+  - t01_stale_clobber
+  - t02_benign_overlap
+  - t03_fetch_clobber
+  - t04_cascade
+  - rw_d_tag_antidependency
+  - rw_e_cascade
+strategies:
+  - adaptive_lease
+agent_counts: [2, 3, 4]
+reps: 1
+max_turns: 40
+lock_timeout_s: 30
+trial_timeout_s: 900
+parallel: 2
+budget:
+  max_usd: 2
+  max_total_tokens: 4000000
+prices:
+  gpt-5-mini: {input: 0.25, output: 2.00}

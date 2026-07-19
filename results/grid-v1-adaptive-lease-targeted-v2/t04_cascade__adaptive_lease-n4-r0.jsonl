@@ -1,0 +1,236 @@
+{"ts": 0.3658, "event": "trial_start", "task": "t04_cascade", "failure_mode": "causal_cascade", "benign": false, "strategy": "adaptive_lease", "n_agents": 4, "rep": 0, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-datasource", "agent-pipeline", "agent-report", "agent-cli"]}
+{"ts": 0.4993, "event": "notification_delivered", "agent": "agent-datasource", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 0.502, "event": "notification_delivered", "agent": "agent-pipeline", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 0.5033, "event": "notification_delivered", "agent": "agent-report", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 0.5048, "event": "notification_delivered", "agent": "agent-cli", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 2.2356, "event": "llm_usage", "agent": "agent-cli", "turn": 1, "prompt_tokens": 785, "completion_tokens": 66}
+{"ts": 2.2357, "event": "tool_call", "agent": "agent-cli", "turn": 1, "tool": "declare_scope", "args": {"resources": ["cli.build_report", "report.report_from_text"], "path": "cli/main.py", "summary": "Implement build_report in cli/main.py to reuse report.report_from_text; preserve CLI behavior and use existing input/output handling."}}
+{"ts": 2.2358, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-cli", "path": "cli/main.py", "symbols": [], "resources": ["cli.build_report", "report.report_from_text"], "summary": "Implement build_report in cli/main.py to reuse report.report_from_text; preserve CLI behavior and use existing input/output handling.", "exports": [], "must_preserve": []}
+{"ts": 2.2358, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-cli", "path": "cli/main.py", "lease_level": "resource", "symbols": [], "resources": ["cli.build_report", "report.report_from_text"]}
+{"ts": 2.3941, "event": "llm_usage", "agent": "agent-pipeline", "turn": 1, "prompt_tokens": 826, "completion_tokens": 77}
+{"ts": 2.3946, "event": "tool_call", "agent": "agent-pipeline", "turn": 1, "tool": "declare_scope", "args": {"resources": ["pipeline.summarize_behavior", "pipeline.text.summarize_text", "datasource.parse_record.public_api"], "path": "pipeline/aggregate.py", "summary": "Implement summarize functions in pipeline/aggregate.py and pipeline/text.py per docstrings; must reuse datasource record parsing function."}}
+{"ts": 2.3947, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-pipeline", "path": "pipeline/aggregate.py", "symbols": [], "resources": ["datasource.parse_record.public_api", "pipeline.summarize_behavior", "pipeline.text.summarize_text"], "summary": "Implement summarize functions in pipeline/aggregate.py and pipeline/text.py per docstrings; must reuse datasource record parsing function.", "exports": [], "must_preserve": []}
+{"ts": 2.395, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-pipeline", "path": "pipeline/aggregate.py", "lease_level": "resource", "symbols": [], "resources": ["datasource.parse_record.public_api", "pipeline.summarize_behavior", "pipeline.text.summarize_text"]}
+{"ts": 2.8319, "event": "llm_usage", "agent": "agent-datasource", "turn": 1, "prompt_tokens": 820, "completion_tokens": 95}
+{"ts": 2.8321, "event": "tool_call", "agent": "agent-datasource", "turn": 1, "tool": "declare_scope", "args": {"resources": ["datasource.parse_dataset.public_api", "datasource.parse_records.removal", "datasource.parser.parse_behavior", "datasource.filters"], "path": "datasource/parser.py", "symbols": ["parse_records", "parse_dataset"], "summary": "Rename parse_records to parse_dataset, remove old alias, skip blank and comment lines while parsing, return same format; adjust filters as needed."}}
+{"ts": 2.8323, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-datasource", "path": "datasource/parser.py", "symbols": ["parse_dataset", "parse_records"], "resources": ["datasource.filters", "datasource.parse_dataset.public_api", "datasource.parse_records.removal", "datasource.parser.parse_behavior"], "summary": "Rename parse_records to parse_dataset, remove old alias, skip blank and comment lines while parsing, return same format; adjust filters as needed.", "exports": [], "must_preserve": []}
+{"ts": 2.8324, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-datasource", "path": "datasource/parser.py", "lease_level": "resource", "symbols": ["parse_dataset", "parse_records"], "resources": ["datasource.filters", "datasource.parse_dataset.public_api", "datasource.parse_records.removal", "datasource.parser.parse_behavior"]}
+{"ts": 3.1982, "event": "llm_usage", "agent": "agent-report", "turn": 1, "prompt_tokens": 805, "completion_tokens": 72}
+{"ts": 3.1982, "event": "tool_call", "agent": "agent-report", "turn": 1, "tool": "declare_scope", "args": {"resources": ["report.format_report", "report.report_from_text", "pipeline.summarize_text"], "path": "report", "summary": "Implement format_report and report_from_text functions in report package; preserve existing behaviors and use pipeline.summarize_text in report_from_text."}}
+{"ts": 3.1983, "event": "coord", "strategy": "adaptive_lease", "action": "blocked", "agent": "agent-report", "path": "report", "lease_level": "resource", "resources": ["pipeline.summarize_text", "report.format_report", "report.report_from_text"], "holders": ["agent-cli"]}
+{"ts": 3.2898, "event": "llm_usage", "agent": "agent-pipeline", "turn": 2, "prompt_tokens": 932, "completion_tokens": 13}
+{"ts": 3.2898, "event": "tool_call", "agent": "agent-pipeline", "turn": 2, "tool": "list_files", "args": {}}
+{"ts": 3.2954, "event": "llm_usage", "agent": "agent-cli", "turn": 2, "prompt_tokens": 870, "completion_tokens": 23}
+{"ts": 3.2954, "event": "tool_call", "agent": "agent-cli", "turn": 2, "tool": "grep", "args": {"pattern": "build_report", "glob": "**/*"}}
+{"ts": 3.2981, "event": "search", "agent": "agent-cli", "kind": "grep", "pattern": "build_report", "n": 5}
+{"ts": 4.3799, "event": "llm_usage", "agent": "agent-datasource", "turn": 2, "prompt_tokens": 945, "completion_tokens": 24}
+{"ts": 4.38, "event": "tool_call", "agent": "agent-datasource", "turn": 2, "tool": "grep", "args": {"pattern": "parse_records", "glob": "**/*.py"}}
+{"ts": 4.3825, "event": "search", "agent": "agent-datasource", "kind": "grep", "pattern": "parse_records", "n": 3}
+{"ts": 4.5266, "event": "llm_usage", "agent": "agent-cli", "turn": 3, "prompt_tokens": 986, "completion_tokens": 19}
+{"ts": 4.5267, "event": "tool_call", "agent": "agent-cli", "turn": 3, "tool": "read_file", "args": {"path": "cli/main.py"}}
+{"ts": 4.5274, "event": "read", "agent": "agent-cli", "path": "cli/main.py", "found": true, "size": 175}
+{"ts": 4.5465, "event": "llm_usage", "agent": "agent-pipeline", "turn": 3, "prompt_tokens": 1038, "completion_tokens": 20}
+{"ts": 4.5467, "event": "tool_call", "agent": "agent-pipeline", "turn": 3, "tool": "read_file", "args": {"path": "pipeline/aggregate.py"}}
+{"ts": 4.5473, "event": "read", "agent": "agent-pipeline", "path": "pipeline/aggregate.py", "found": true, "size": 233}
+{"ts": 5.5047, "event": "llm_usage", "agent": "agent-datasource", "turn": 3, "prompt_tokens": 1023, "completion_tokens": 20}
+{"ts": 5.5048, "event": "tool_call", "agent": "agent-datasource", "turn": 3, "tool": "read_file", "args": {"path": "datasource/parser.py"}}
+{"ts": 5.5056, "event": "read", "agent": "agent-datasource", "path": "datasource/parser.py", "found": true, "size": 420}
+{"ts": 5.5528, "event": "llm_usage", "agent": "agent-cli", "turn": 4, "prompt_tokens": 1053, "completion_tokens": 18}
+{"ts": 5.5529, "event": "tool_call", "agent": "agent-cli", "turn": 4, "tool": "read_file", "args": {"path": "report.py"}}
+{"ts": 5.553, "event": "read", "agent": "agent-cli", "path": "report.py", "found": false, "size": 0}
+{"ts": 5.6144, "event": "llm_usage", "agent": "agent-pipeline", "turn": 4, "prompt_tokens": 1131, "completion_tokens": 19}
+{"ts": 5.6144, "event": "tool_call", "agent": "agent-pipeline", "turn": 4, "tool": "read_file", "args": {"path": "pipeline/text.py"}}
+{"ts": 5.6148, "event": "read", "agent": "agent-pipeline", "path": "pipeline/text.py", "found": true, "size": 277}
+{"ts": 6.426, "event": "llm_usage", "agent": "agent-datasource", "turn": 4, "prompt_tokens": 1144, "completion_tokens": 21}
+{"ts": 6.426, "event": "tool_call", "agent": "agent-datasource", "turn": 4, "tool": "read_file", "args": {"path": "datasource/filters.py"}}
+{"ts": 6.4263, "event": "read", "agent": "agent-datasource", "path": "datasource/filters.py", "found": true, "size": 197}
+{"ts": 6.6148, "event": "llm_usage", "agent": "agent-cli", "turn": 5, "prompt_tokens": 1094, "completion_tokens": 13}
+{"ts": 6.615, "event": "tool_call", "agent": "agent-cli", "turn": 5, "tool": "list_files", "args": {}}
+{"ts": 6.7365, "event": "llm_usage", "agent": "agent-pipeline", "turn": 5, "prompt_tokens": 1211, "completion_tokens": 20}
+{"ts": 6.7367, "event": "tool_call", "agent": "agent-pipeline", "turn": 5, "tool": "read_file", "args": {"path": "datasource/parser.py"}}
+{"ts": 6.738, "event": "read", "agent": "agent-pipeline", "path": "datasource/parser.py", "found": true, "size": 420}
+{"ts": 7.8407, "event": "llm_usage", "agent": "agent-pipeline", "turn": 6, "prompt_tokens": 1332, "completion_tokens": 22}
+{"ts": 7.8409, "event": "tool_call", "agent": "agent-pipeline", "turn": 6, "tool": "read_file", "args": {"path": "datasource/__init__.py"}}
+{"ts": 7.8418, "event": "read", "agent": "agent-pipeline", "path": "datasource/__init__.py", "found": true, "size": 134}
+{"ts": 7.8597, "event": "llm_usage", "agent": "agent-cli", "turn": 6, "prompt_tokens": 1200, "completion_tokens": 21}
+{"ts": 7.8598, "event": "tool_call", "agent": "agent-cli", "turn": 6, "tool": "read_file", "args": {"path": "report/__init__.py"}}
+{"ts": 7.8605, "event": "read", "agent": "agent-cli", "path": "report/__init__.py", "found": true, "size": 185}
+{"ts": 8.8626, "event": "llm_usage", "agent": "agent-datasource", "turn": 5, "prompt_tokens": 1220, "completion_tokens": 92}
+{"ts": 8.8627, "event": "tool_call", "agent": "agent-datasource", "turn": 5, "tool": "read_file", "args": {"path": "datasource/__init__.py"}}
+{"ts": 8.8635, "event": "read", "agent": "agent-datasource", "path": "datasource/__init__.py", "found": true, "size": 134}
+{"ts": 8.8752, "event": "llm_usage", "agent": "agent-cli", "turn": 7, "prompt_tokens": 1271, "completion_tokens": 20}
+{"ts": 8.8753, "event": "tool_call", "agent": "agent-cli", "turn": 7, "tool": "read_file", "args": {"path": "report/from_text.py"}}
+{"ts": 8.8759, "event": "read", "agent": "agent-cli", "path": "report/from_text.py", "found": true, "size": 273}
+{"ts": 8.9063, "event": "llm_usage", "agent": "agent-pipeline", "turn": 7, "prompt_tokens": 1392, "completion_tokens": 21}
+{"ts": 8.9064, "event": "tool_call", "agent": "agent-pipeline", "turn": 7, "tool": "read_file", "args": {"path": "pipeline/__init__.py"}}
+{"ts": 8.9071, "event": "read", "agent": "agent-pipeline", "path": "pipeline/__init__.py", "found": true, "size": 178}
+{"ts": 9.8895, "event": "llm_usage", "agent": "agent-cli", "turn": 8, "prompt_tokens": 1358, "completion_tokens": 20}
+{"ts": 9.8896, "event": "tool_call", "agent": "agent-cli", "turn": 8, "tool": "read_file", "args": {"path": "report/format.py"}}
+{"ts": 9.8904, "event": "read", "agent": "agent-cli", "path": "report/format.py", "found": true, "size": 236}
+{"ts": 9.8984, "event": "llm_usage", "agent": "agent-pipeline", "turn": 8, "prompt_tokens": 1462, "completion_tokens": 21}
+{"ts": 9.8985, "event": "tool_call", "agent": "agent-pipeline", "turn": 8, "tool": "read_file", "args": {"path": "tests/test_pipeline_chain.py"}}
+{"ts": 9.8992, "event": "read", "agent": "agent-pipeline", "path": "tests/test_pipeline_chain.py", "found": true, "size": 503}
+{"ts": 10.9114, "event": "llm_usage", "agent": "agent-cli", "turn": 9, "prompt_tokens": 1444, "completion_tokens": 21}
+{"ts": 10.9115, "event": "tool_call", "agent": "agent-cli", "turn": 9, "tool": "read_file", "args": {"path": "pipeline/__init__.py"}}
+{"ts": 10.9122, "event": "read", "agent": "agent-cli", "path": "pipeline/__init__.py", "found": true, "size": 178}
+{"ts": 12.2413, "event": "llm_usage", "agent": "agent-pipeline", "turn": 9, "prompt_tokens": 1625, "completion_tokens": 89}
+{"ts": 12.2414, "event": "tool_call", "agent": "agent-pipeline", "turn": 9, "tool": "read_file", "args": {"path": "cli/main.py"}}
+{"ts": 12.2417, "event": "read", "agent": "agent-pipeline", "path": "cli/main.py", "found": true, "size": 175}
+{"ts": 12.2458, "event": "llm_usage", "agent": "agent-cli", "turn": 10, "prompt_tokens": 1514, "completion_tokens": 19}
+{"ts": 12.2459, "event": "tool_call", "agent": "agent-cli", "turn": 10, "tool": "read_file", "args": {"path": "pipeline/text.py"}}
+{"ts": 12.2461, "event": "read", "agent": "agent-cli", "path": "pipeline/text.py", "found": true, "size": 277}
+{"ts": 13.4638, "event": "llm_usage", "agent": "agent-cli", "turn": 11, "prompt_tokens": 1594, "completion_tokens": 20}
+{"ts": 13.4639, "event": "tool_call", "agent": "agent-cli", "turn": 11, "tool": "read_file", "args": {"path": "pipeline/aggregate.py"}}
+{"ts": 13.4644, "event": "read", "agent": "agent-cli", "path": "pipeline/aggregate.py", "found": true, "size": 233}
+{"ts": 13.5757, "event": "llm_usage", "agent": "agent-pipeline", "turn": 10, "prompt_tokens": 1692, "completion_tokens": 20}
+{"ts": 13.5759, "event": "tool_call", "agent": "agent-pipeline", "turn": 10, "tool": "read_file", "args": {"path": "report/from_text.py"}}
+{"ts": 13.5769, "event": "read", "agent": "agent-pipeline", "path": "report/from_text.py", "found": true, "size": 273}
+{"ts": 14.4966, "event": "llm_usage", "agent": "agent-cli", "turn": 12, "prompt_tokens": 1687, "completion_tokens": 20}
+{"ts": 14.4968, "event": "tool_call", "agent": "agent-cli", "turn": 12, "tool": "read_file", "args": {"path": "datasource/parser.py"}}
+{"ts": 14.4977, "event": "read", "agent": "agent-cli", "path": "datasource/parser.py", "found": true, "size": 420}
+{"ts": 14.5668, "event": "llm_usage", "agent": "agent-pipeline", "turn": 11, "prompt_tokens": 1779, "completion_tokens": 20}
+{"ts": 14.5669, "event": "tool_call", "agent": "agent-pipeline", "turn": 11, "tool": "read_file", "args": {"path": "report/format.py"}}
+{"ts": 14.5676, "event": "read", "agent": "agent-pipeline", "path": "report/format.py", "found": true, "size": 236}
+{"ts": 15.684, "event": "llm_usage", "agent": "agent-cli", "turn": 13, "prompt_tokens": 1808, "completion_tokens": 21}
+{"ts": 15.6842, "event": "tool_call", "agent": "agent-cli", "turn": 13, "tool": "read_file", "args": {"path": "datasource/filters.py"}}
+{"ts": 15.6846, "event": "read", "agent": "agent-cli", "path": "datasource/filters.py", "found": true, "size": 197}
+{"ts": 16.7623, "event": "llm_usage", "agent": "agent-cli", "turn": 14, "prompt_tokens": 1884, "completion_tokens": 22}
+{"ts": 16.7624, "event": "tool_call", "agent": "agent-cli", "turn": 14, "tool": "read_file", "args": {"path": "datasource/__init__.py"}}
+{"ts": 16.763, "event": "read", "agent": "agent-cli", "path": "datasource/__init__.py", "found": true, "size": 134}
+{"ts": 17.8605, "event": "llm_usage", "agent": "agent-cli", "turn": 15, "prompt_tokens": 1944, "completion_tokens": 19}
+{"ts": 17.8606, "event": "tool_call", "agent": "agent-cli", "turn": 15, "tool": "read_file", "args": {"path": "shared/types.py"}}
+{"ts": 17.8615, "event": "read", "agent": "agent-cli", "path": "shared/types.py", "found": true, "size": 132}
+{"ts": 19.2055, "event": "llm_usage", "agent": "agent-datasource", "turn": 6, "prompt_tokens": 1280, "completion_tokens": 921}
+{"ts": 19.2056, "event": "tool_call", "agent": "agent-datasource", "turn": 6, "tool": "edit_file", "args": {"path": "datasource/parser.py", "old_string": "\"\"\"Record parsing for the reporting pipeline.\"\"\"\nfrom datasource.filters import is_skippable\n\n\ndef parse_records(text):\n    \"\"\"Parse 'name,value' lines into a list of (name, float_value) tuples.\"\"\"\n  ", "new_string": "\"\"\"Record parsing for the reporting pipeline.\"\"\"\nfrom datasource.filters import is_skippable\n\n\ndef parse_dataset(text):\n    \"\"\"Parse 'name,value' lines into a list of (name, float_value) tuples.\n\n    "}}
+{"ts": 19.2061, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-datasource", "path": "datasource/parser.py", "lease_level": "resource", "symbols": ["parse_dataset", "parse_records"], "resources": ["datasource.filters", "datasource.parse_dataset.public_api", "datasource.parse_records.removal", "datasource.parser.parse_behavior"]}
+{"ts": 19.2061, "event": "coord", "strategy": "adaptive_lease", "action": "read_write_intersection", "writer": "agent-datasource", "reader": "agent-cli", "path": "datasource/parser.py", "symbols": ["parse_records"]}
+{"ts": 19.2061, "event": "coord", "strategy": "adaptive_lease", "action": "semantic_read_write_intersection", "writer": "agent-datasource", "reader": "agent-cli", "path": "datasource/parser.py", "resources": ["datasource.parse_dataset.public_api"]}
+{"ts": 19.2062, "event": "coord", "strategy": "adaptive_lease", "action": "read_write_intersection", "writer": "agent-datasource", "reader": "agent-pipeline", "path": "datasource/parser.py", "symbols": ["parse_records"]}
+{"ts": 19.2062, "event": "coord", "strategy": "adaptive_lease", "action": "semantic_read_write_intersection", "writer": "agent-datasource", "reader": "agent-pipeline", "path": "datasource/parser.py", "resources": ["datasource.parse_dataset.public_api"]}
+{"ts": 19.2067, "event": "write", "agent": "agent-datasource", "path": "datasource/parser.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["parse_dataset", "parse_records"], "message": ""}
+{"ts": 19.2101, "event": "llm_usage", "agent": "agent-cli", "turn": 16, "prompt_tokens": 2004, "completion_tokens": 21}
+{"ts": 19.2102, "event": "tool_call", "agent": "agent-cli", "turn": 16, "tool": "read_file", "args": {"path": "tests/test_pipeline_chain.py"}}
+{"ts": 19.2104, "event": "read", "agent": "agent-cli", "path": "tests/test_pipeline_chain.py", "found": true, "size": 503}
+{"ts": 19.2105, "event": "notification_delivered", "agent": "agent-cli", "turn": 17, "note": "[adaptive-lease notice] agent-datasource changed semantic resources datasource.parse_dataset.public_api in datasource/parser.py. Re-read affected files before editing and preserve this behavior in your own changes."}
+{"ts": 21.885, "event": "llm_usage", "agent": "agent-datasource", "turn": 7, "prompt_tokens": 1635, "completion_tokens": 188}
+{"ts": 21.8851, "event": "tool_call", "agent": "agent-datasource", "turn": 7, "tool": "edit_file", "args": {"path": "datasource/filters.py", "old_string": "\"\"\"Line filters for raw datasource text.\"\"\"\n\n\ndef is_skippable(line: str) -> bool:\n    \"\"\"Return True for blank lines. Comment handling is added by the parser agent.\"\"\"\n    return not line.strip()\n", "new_string": "\"\"\"Line filters for raw datasource text.\"\"\"\n\n\ndef is_skippable(line: str) -> bool:\n    \"\"\"Return True for blank/whitespace-only lines.\n\n    Comment handling (lines starting with '#') is intentionally "}}
+{"ts": 21.886, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-datasource", "path": "datasource/filters.py", "lease_level": "resource", "symbols": ["is_skippable"], "resources": ["datasource.filters", "datasource.parse_dataset.public_api", "datasource.parse_records.removal", "datasource.parser.parse_behavior"]}
+{"ts": 21.8862, "event": "coord", "strategy": "adaptive_lease", "action": "read_write_intersection", "writer": "agent-datasource", "reader": "agent-cli", "path": "datasource/filters.py", "symbols": ["is_skippable"]}
+{"ts": 21.8862, "event": "coord", "strategy": "adaptive_lease", "action": "semantic_read_write_intersection", "writer": "agent-datasource", "reader": "agent-cli", "path": "datasource/filters.py", "resources": ["datasource.parse_dataset.public_api"]}
+{"ts": 21.8863, "event": "coord", "strategy": "adaptive_lease", "action": "semantic_read_write_intersection", "writer": "agent-datasource", "reader": "agent-pipeline", "path": "datasource/filters.py", "resources": ["datasource.parse_dataset.public_api"]}
+{"ts": 21.8871, "event": "write", "agent": "agent-datasource", "path": "datasource/filters.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["is_skippable"], "message": ""}
+{"ts": 22.2314, "event": "llm_usage", "agent": "agent-pipeline", "turn": 12, "prompt_tokens": 1865, "completion_tokens": 631}
+{"ts": 22.2314, "event": "tool_call", "agent": "agent-pipeline", "turn": 12, "tool": "edit_file", "args": {"path": "pipeline/aggregate.py", "old_string": "\"\"\"Aggregation over parsed records.\"\"\"\n\n\ndef summarize(records):\n    \"\"\"Return {\"count\": n, \"total\": sum_of_values, \"mean\": total / count}.\n    mean is 0.0 when records is empty (count 0, total 0.0).\"", "new_string": "\"\"\"Aggregation over parsed records.\"\"\"\n\n\ndef summarize(records):\n    \"\"\"Return {\"count\": n, \"total\": sum_of_values, \"mean\": total / count}.\n    mean is 0.0 when records is empty (count 0, total 0.0).\""}}
+{"ts": 22.2319, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-pipeline", "path": "pipeline/aggregate.py", "lease_level": "resource", "symbols": ["summarize"], "resources": ["datasource.parse_record.public_api", "pipeline.summarize_behavior", "pipeline.text.summarize_text"]}
+{"ts": 22.2319, "event": "coord", "strategy": "adaptive_lease", "action": "read_write_intersection", "writer": "agent-pipeline", "reader": "agent-cli", "path": "pipeline/aggregate.py", "symbols": ["summarize"]}
+{"ts": 22.2323, "event": "write", "agent": "agent-pipeline", "path": "pipeline/aggregate.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["summarize"], "message": ""}
+{"ts": 22.2324, "event": "notification_delivered", "agent": "agent-pipeline", "turn": 13, "note": "[adaptive-lease notice] agent-datasource changed semantic resources datasource.parse_dataset.public_api in datasource/parser.py. Re-read affected files before editing and preserve this behavior in your own changes."}
+{"ts": 22.2324, "event": "notification_delivered", "agent": "agent-pipeline", "turn": 13, "note": "[adaptive-lease notice] agent-datasource changed semantic resources datasource.parse_dataset.public_api in datasource/filters.py. Re-read affected files before editing and preserve this behavior in your own changes."}
+{"ts": 23.4278, "event": "llm_usage", "agent": "agent-pipeline", "turn": 13, "prompt_tokens": 2207, "completion_tokens": 21}
+{"ts": 23.4279, "event": "tool_call", "agent": "agent-pipeline", "turn": 13, "tool": "read_file", "args": {"path": "datasource/filters.py"}}
+{"ts": 23.4281, "event": "read", "agent": "agent-pipeline", "path": "datasource/filters.py", "found": true, "size": 397}
+{"ts": 24.1329, "event": "llm_usage", "agent": "agent-datasource", "turn": 8, "prompt_tokens": 1839, "completion_tokens": 102}
+{"ts": 24.1331, "event": "tool_call", "agent": "agent-datasource", "turn": 8, "tool": "edit_file", "args": {"path": "datasource/__init__.py", "old_string": "\"\"\"Datasource package — re-exports the public parser API.\"\"\"\nfrom datasource.parser import parse_records\n\n__all__ = [\"parse_records\"]\n", "new_string": "\"\"\"Datasource package — re-exports the public parser API.\"\"\"\nfrom datasource.parser import parse_dataset\n\n__all__ = [\"parse_dataset\"]\n"}}
+{"ts": 24.134, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-datasource", "path": "datasource/__init__.py", "lease_level": "file", "symbols": ["<module>"], "resources": ["datasource.filters", "datasource.parse_dataset.public_api", "datasource.parse_records.removal", "datasource.parser.parse_behavior"]}
+{"ts": 24.1341, "event": "coord", "strategy": "adaptive_lease", "action": "read_write_intersection", "writer": "agent-datasource", "reader": "agent-cli", "path": "datasource/__init__.py", "symbols": ["<module>"]}
+{"ts": 24.1342, "event": "coord", "strategy": "adaptive_lease", "action": "semantic_read_write_intersection", "writer": "agent-datasource", "reader": "agent-cli", "path": "datasource/__init__.py", "resources": ["datasource.parse_dataset.public_api"]}
+{"ts": 24.1342, "event": "coord", "strategy": "adaptive_lease", "action": "read_write_intersection", "writer": "agent-datasource", "reader": "agent-pipeline", "path": "datasource/__init__.py", "symbols": ["<module>"]}
+{"ts": 24.1342, "event": "coord", "strategy": "adaptive_lease", "action": "semantic_read_write_intersection", "writer": "agent-datasource", "reader": "agent-pipeline", "path": "datasource/__init__.py", "resources": ["datasource.parse_dataset.public_api"]}
+{"ts": 24.1353, "event": "write", "agent": "agent-datasource", "path": "datasource/__init__.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 24.6386, "event": "llm_usage", "agent": "agent-pipeline", "turn": 14, "prompt_tokens": 2325, "completion_tokens": 20}
+{"ts": 24.6387, "event": "tool_call", "agent": "agent-pipeline", "turn": 14, "tool": "read_file", "args": {"path": "datasource/parser.py"}}
+{"ts": 24.6396, "event": "read", "agent": "agent-pipeline", "path": "datasource/parser.py", "found": true, "size": 770}
+{"ts": 24.6397, "event": "notification_delivered", "agent": "agent-pipeline", "turn": 15, "note": "[adaptive-lease notice] agent-datasource changed semantic resources datasource.parse_dataset.public_api in datasource/__init__.py. Re-read affected files before editing and preserve this behavior in your own changes."}
+{"ts": 25.2445, "event": "llm_usage", "agent": "agent-datasource", "turn": 9, "prompt_tokens": 1957, "completion_tokens": 24}
+{"ts": 25.2446, "event": "tool_call", "agent": "agent-datasource", "turn": 9, "tool": "grep", "args": {"pattern": "parse_dataset", "glob": "**/*.py"}}
+{"ts": 25.2486, "event": "search", "agent": "agent-datasource", "kind": "grep", "pattern": "parse_dataset", "n": 3}
+{"ts": 25.3083, "event": "llm_usage", "agent": "agent-cli", "turn": 17, "prompt_tokens": 2209, "completion_tokens": 463}
+{"ts": 25.3084, "event": "tool_call", "agent": "agent-cli", "turn": 17, "tool": "edit_file", "args": {"path": "cli/main.py", "old_string": "\"\"\"Command-line entry point.\"\"\"\nimport report\n\n\ndef build_report(text):\n    \"\"\"Return report.report_from_text(text) prefixed with 'REPORT: '.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Command-line entry point.\"\"\"\nimport report\n\n\ndef build_report(text):\n    \"\"\"Return report.report_from_text(text) prefixed with 'REPORT: '.\"\"\"\n    return \"REPORT: \" + report.report_from_text(text)\n"}}
+{"ts": 25.3086, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-cli", "path": "cli/main.py", "lease_level": "resource", "symbols": ["build_report"], "resources": ["cli.build_report", "report.report_from_text"]}
+{"ts": 25.3087, "event": "coord", "strategy": "adaptive_lease", "action": "read_write_intersection", "writer": "agent-cli", "reader": "agent-pipeline", "path": "cli/main.py", "symbols": ["build_report"]}
+{"ts": 25.309, "event": "write", "agent": "agent-cli", "path": "cli/main.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["build_report"], "message": ""}
+{"ts": 25.3091, "event": "notification_delivered", "agent": "agent-cli", "turn": 18, "note": "[adaptive-lease notice] agent-datasource changed semantic resources datasource.parse_dataset.public_api in datasource/filters.py. Re-read affected files before editing and preserve this behavior in your own changes."}
+{"ts": 25.3091, "event": "notification_delivered", "agent": "agent-cli", "turn": 18, "note": "[adaptive-lease notice] agent-datasource changed semantic resources datasource.parse_dataset.public_api in datasource/__init__.py. Re-read affected files before editing and preserve this behavior in your own changes."}
+{"ts": 25.7602, "event": "llm_usage", "agent": "agent-pipeline", "turn": 15, "prompt_tokens": 2563, "completion_tokens": 22}
+{"ts": 25.7603, "event": "tool_call", "agent": "agent-pipeline", "turn": 15, "tool": "read_file", "args": {"path": "datasource/__init__.py"}}
+{"ts": 25.7608, "event": "read", "agent": "agent-pipeline", "path": "datasource/__init__.py", "found": true, "size": 134}
+{"ts": 26.3524, "event": "llm_usage", "agent": "agent-cli", "turn": 18, "prompt_tokens": 2449, "completion_tokens": 13}
+{"ts": 26.3525, "event": "tool_call", "agent": "agent-cli", "turn": 18, "tool": "run_tests", "args": {}}
+{"ts": 26.6208, "event": "run_tests", "agent": "agent-cli", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 26.8882, "event": "llm_usage", "agent": "agent-datasource", "turn": 10, "prompt_tokens": 2035, "completion_tokens": 13}
+{"ts": 26.8882, "event": "tool_call", "agent": "agent-datasource", "turn": 10, "tool": "run_tests", "args": {}}
+{"ts": 27.1447, "event": "run_tests", "agent": "agent-datasource", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 27.9416, "event": "llm_usage", "agent": "agent-cli", "turn": 19, "prompt_tokens": 2492, "completion_tokens": 45}
+{"ts": 27.9417, "event": "tool_call", "agent": "agent-cli", "turn": 19, "tool": "done", "args": {"summary": "Implemented build_report in cli/main.py to return 'REPORT: ' + report.report_from_text(text). Ran tests (1 passed, 1 skipped)."}}
+{"ts": 27.9417, "event": "agent_done_coord", "agent": "agent-cli"}
+{"ts": 27.9417, "event": "agent_done", "agent": "agent-cli", "status": "done", "turns": 19, "prompt_tokens": 29646, "completion_tokens": 884}
+{"ts": 27.9418, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-report", "path": "report", "symbols": [], "resources": ["pipeline.summarize_text", "report.format_report", "report.report_from_text"], "summary": "Implement format_report and report_from_text functions in report package; preserve existing behaviors and use pipeline.summarize_text in report_from_text.", "exports": [], "must_preserve": []}
+{"ts": 27.9418, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-report", "path": "report", "lease_level": "resource", "symbols": [], "resources": ["pipeline.summarize_text", "report.format_report", "report.report_from_text"]}
+{"ts": 28.3928, "event": "llm_usage", "agent": "agent-datasource", "turn": 11, "prompt_tokens": 2078, "completion_tokens": 20}
+{"ts": 28.3929, "event": "tool_call", "agent": "agent-datasource", "turn": 11, "tool": "read_file", "args": {"path": "tests/test_parser.py"}}
+{"ts": 28.3931, "event": "read", "agent": "agent-datasource", "path": "tests/test_parser.py", "found": false, "size": 0}
+{"ts": 29.0378, "event": "llm_usage", "agent": "agent-report", "turn": 2, "prompt_tokens": 903, "completion_tokens": 24}
+{"ts": 29.038, "event": "tool_call", "agent": "agent-report", "turn": 2, "tool": "grep", "args": {"pattern": "format_report", "glob": "**/*.py"}}
+{"ts": 29.0453, "event": "search", "agent": "agent-report", "kind": "grep", "pattern": "format_report", "n": 5}
+{"ts": 29.3446, "event": "llm_usage", "agent": "agent-datasource", "turn": 12, "prompt_tokens": 2123, "completion_tokens": 13}
+{"ts": 29.3447, "event": "tool_call", "agent": "agent-datasource", "turn": 12, "tool": "list_files", "args": {}}
+{"ts": 30.0667, "event": "llm_usage", "agent": "agent-report", "turn": 3, "prompt_tokens": 1010, "completion_tokens": 20}
+{"ts": 30.0668, "event": "tool_call", "agent": "agent-report", "turn": 3, "tool": "read_file", "args": {"path": "report/format.py"}}
+{"ts": 30.0676, "event": "read", "agent": "agent-report", "path": "report/format.py", "found": true, "size": 236}
+{"ts": 30.4983, "event": "llm_usage", "agent": "agent-datasource", "turn": 13, "prompt_tokens": 2229, "completion_tokens": 21}
+{"ts": 30.4985, "event": "tool_call", "agent": "agent-datasource", "turn": 13, "tool": "read_file", "args": {"path": "tests/test_pipeline_chain.py"}}
+{"ts": 30.4991, "event": "read", "agent": "agent-datasource", "path": "tests/test_pipeline_chain.py", "found": true, "size": 503}
+{"ts": 31.1663, "event": "llm_usage", "agent": "agent-report", "turn": 4, "prompt_tokens": 1096, "completion_tokens": 20}
+{"ts": 31.1664, "event": "tool_call", "agent": "agent-report", "turn": 4, "tool": "read_file", "args": {"path": "report/from_text.py"}}
+{"ts": 31.1667, "event": "read", "agent": "agent-report", "path": "report/from_text.py", "found": true, "size": 273}
+{"ts": 32.1093, "event": "llm_usage", "agent": "agent-datasource", "turn": 14, "prompt_tokens": 2392, "completion_tokens": 55}
+{"ts": 32.9098, "event": "llm_usage", "agent": "agent-pipeline", "turn": 16, "prompt_tokens": 2623, "completion_tokens": 558}
+{"ts": 32.9101, "event": "tool_call", "agent": "agent-pipeline", "turn": 16, "tool": "edit_file", "args": {"path": "pipeline/text.py", "old_string": "\"\"\"Text-to-summary entry points.\"\"\"\nimport datasource\n\nfrom pipeline.aggregate import summarize\n\n\ndef summarize_text(text):\n    \"\"\"Parse raw text using the record-parsing function datasource provides,", "new_string": "\"\"\"Text-to-summary entry points.\"\"\"\nimport datasource\n\nfrom pipeline.aggregate import summarize\n\n\ndef summarize_text(text):\n    \"\"\"Parse raw text using the record-parsing function datasource provides,"}}
+{"ts": 32.9111, "event": "coord", "strategy": "adaptive_lease", "action": "blocked", "agent": "agent-pipeline", "path": "pipeline/text.py", "lease_level": "resource", "symbols": ["summarize_text"], "resources": ["datasource.parse_dataset.public_api", "datasource.parse_record.public_api", "pipeline.summarize_behavior", "pipeline.text.summarize_text"], "holders": ["agent-datasource"]}
+{"ts": 34.3588, "event": "llm_usage", "agent": "agent-report", "turn": 5, "prompt_tokens": 1183, "completion_tokens": 24}
+{"ts": 34.3589, "event": "tool_call", "agent": "agent-report", "turn": 5, "tool": "read_file", "args": {"path": "pipeline.py"}}
+{"ts": 34.359, "event": "read", "agent": "agent-report", "path": "pipeline.py", "found": false, "size": 0}
+{"ts": 34.596, "event": "llm_usage", "agent": "agent-datasource", "turn": 15, "prompt_tokens": 2463, "completion_tokens": 132}
+{"ts": 34.5961, "event": "tool_call", "agent": "agent-datasource", "turn": 15, "tool": "done", "args": {"summary": "Renamed datasource.parser.parse_records to parse_dataset, updated datasource/__init__.py to export parse_dataset only, updated parser to skip blank lines and lines starting with '#', clarified filters"}}
+{"ts": 34.5962, "event": "agent_done_coord", "agent": "agent-datasource"}
+{"ts": 34.5962, "event": "agent_done", "agent": "agent-datasource", "status": "done", "turns": 15, "prompt_tokens": 25183, "completion_tokens": 1741}
+{"ts": 34.597, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-pipeline", "path": "pipeline/text.py", "lease_level": "resource", "symbols": ["summarize_text"], "resources": ["datasource.parse_dataset.public_api", "datasource.parse_record.public_api", "pipeline.summarize_behavior", "pipeline.text.summarize_text"]}
+{"ts": 34.5978, "event": "write", "agent": "agent-pipeline", "path": "pipeline/text.py", "kind": "replace", "status": "applied", "waited_s": 1.688, "changed_symbols": ["summarize_text"], "message": ""}
+{"ts": 35.4872, "event": "llm_usage", "agent": "agent-report", "turn": 6, "prompt_tokens": 1224, "completion_tokens": 26}
+{"ts": 35.4874, "event": "tool_call", "agent": "agent-report", "turn": 6, "tool": "grep", "args": {"pattern": "summarize_text", "glob": "**/*.py"}}
+{"ts": 35.4901, "event": "search", "agent": "agent-report", "kind": "grep", "pattern": "summarize_text", "n": 4}
+{"ts": 35.6504, "event": "llm_usage", "agent": "agent-pipeline", "turn": 17, "prompt_tokens": 2807, "completion_tokens": 13}
+{"ts": 35.6505, "event": "tool_call", "agent": "agent-pipeline", "turn": 17, "tool": "run_tests", "args": {}}
+{"ts": 35.9034, "event": "run_tests", "agent": "agent-pipeline", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 36.5584, "event": "llm_usage", "agent": "agent-report", "turn": 7, "prompt_tokens": 1332, "completion_tokens": 21}
+{"ts": 36.5585, "event": "tool_call", "agent": "agent-report", "turn": 7, "tool": "read_file", "args": {"path": "pipeline/__init__.py"}}
+{"ts": 36.559, "event": "read", "agent": "agent-report", "path": "pipeline/__init__.py", "found": true, "size": 178}
+{"ts": 37.0952, "event": "llm_usage", "agent": "agent-pipeline", "turn": 18, "prompt_tokens": 2850, "completion_tokens": 40}
+{"ts": 37.0954, "event": "tool_call", "agent": "agent-pipeline", "turn": 18, "tool": "done", "args": {"summary": "Implemented summarize in pipeline/aggregate.py and summarize_text in pipeline/text.py to use datasource.parse_dataset; preserved datasource parse API."}}
+{"ts": 37.0955, "event": "agent_done_coord", "agent": "agent-pipeline"}
+{"ts": 37.0956, "event": "agent_done", "agent": "agent-pipeline", "status": "done", "turns": 18, "prompt_tokens": 31660, "completion_tokens": 1647}
+{"ts": 37.5806, "event": "llm_usage", "agent": "agent-report", "turn": 8, "prompt_tokens": 1402, "completion_tokens": 19}
+{"ts": 37.5807, "event": "tool_call", "agent": "agent-report", "turn": 8, "tool": "read_file", "args": {"path": "pipeline/text.py"}}
+{"ts": 37.581, "event": "read", "agent": "agent-report", "path": "pipeline/text.py", "found": true, "size": 322}
+{"ts": 38.6624, "event": "llm_usage", "agent": "agent-report", "turn": 9, "prompt_tokens": 1489, "completion_tokens": 20}
+{"ts": 38.6626, "event": "tool_call", "agent": "agent-report", "turn": 9, "tool": "read_file", "args": {"path": "pipeline/aggregate.py"}}
+{"ts": 38.6636, "event": "read", "agent": "agent-report", "path": "pipeline/aggregate.py", "found": true, "size": 407}
+{"ts": 39.6541, "event": "llm_usage", "agent": "agent-report", "turn": 10, "prompt_tokens": 1636, "completion_tokens": 21}
+{"ts": 39.6542, "event": "tool_call", "agent": "agent-report", "turn": 10, "tool": "read_file", "args": {"path": "report/__init__.py"}}
+{"ts": 39.6546, "event": "read", "agent": "agent-report", "path": "report/__init__.py", "found": true, "size": 185}
+{"ts": 45.8767, "event": "llm_usage", "agent": "agent-report", "turn": 11, "prompt_tokens": 1707, "completion_tokens": 524}
+{"ts": 45.8768, "event": "tool_call", "agent": "agent-report", "turn": 11, "tool": "edit_file", "args": {"path": "report/format.py", "old_string": "\"\"\"Human-readable report formatting.\"\"\"\n\n\ndef format_report(summary):\n    \"\"\"Return the string 'count=<count> total=<total:.1f> mean=<mean:.2f>'\n    for a summary dict as produced by pipeline.summariz", "new_string": "\"\"\"Human-readable report formatting.\"\"\"\n\n\ndef format_report(summary):\n    \"\"\"Return the string 'count=<count> total=<total:.1f> mean=<mean:.2f>'\n    for a summary dict as produced by pipeline.summariz"}}
+{"ts": 45.8773, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-report", "path": "report/format.py", "lease_level": "resource", "symbols": ["format_report"], "resources": ["pipeline.summarize_text", "report.format_report", "report.report_from_text"]}
+{"ts": 45.8777, "event": "write", "agent": "agent-report", "path": "report/format.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["format_report"], "message": ""}
+{"ts": 48.8718, "event": "llm_usage", "agent": "agent-report", "turn": 12, "prompt_tokens": 1985, "completion_tokens": 182}
+{"ts": 48.8719, "event": "tool_call", "agent": "agent-report", "turn": 12, "tool": "edit_file", "args": {"path": "report/from_text.py", "old_string": "\"\"\"Build a report from raw text via the pipeline.\"\"\"\nimport pipeline\n\nfrom report.format import format_report\n\n\ndef report_from_text(text):\n    \"\"\"Summarize raw text via pipeline.summarize_text and fo", "new_string": "\"\"\"Build a report from raw text via the pipeline.\"\"\"\nimport pipeline\n\nfrom report.format import format_report\n\n\ndef report_from_text(text):\n    \"\"\"Summarize raw text via pipeline.summarize_text and fo"}}
+{"ts": 48.8729, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-report", "path": "report/from_text.py", "lease_level": "resource", "symbols": ["report_from_text"], "resources": ["pipeline.summarize_text", "report.format_report", "report.report_from_text"]}
+{"ts": 48.8737, "event": "write", "agent": "agent-report", "path": "report/from_text.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["report_from_text"], "message": ""}
+{"ts": 49.8241, "event": "llm_usage", "agent": "agent-report", "turn": 13, "prompt_tokens": 2183, "completion_tokens": 13}
+{"ts": 49.8244, "event": "tool_call", "agent": "agent-report", "turn": 13, "tool": "run_tests", "args": {}}
+{"ts": 50.2692, "event": "run_tests", "agent": "agent-report", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 51.7521, "event": "llm_usage", "agent": "agent-report", "turn": 14, "prompt_tokens": 2222, "completion_tokens": 41}
+{"ts": 51.7522, "event": "tool_call", "agent": "agent-report", "turn": 14, "tool": "done", "args": {"summary": "Implemented report.format.format_report and report.from_text.report_from_text per docstrings; report_from_text uses pipeline.summarize_text."}}
+{"ts": 51.7522, "event": "agent_done_coord", "agent": "agent-report"}
+{"ts": 51.7522, "event": "agent_done", "agent": "agent-report", "status": "done", "turns": 14, "prompt_tokens": 20177, "completion_tokens": 1027}
+{"ts": 52.0143, "event": "trial_end", "correct": true, "oracle_passed": 7, "oracle_total": 7, "wall_clock_s": 51.25, "prompt_tokens": 106666, "completion_tokens": 5299, "agent_statuses": {"agent-datasource": "done", "agent-pipeline": "done", "agent-report": "done", "agent-cli": "done"}, "oracle_output": ".......                                                                  [100%]\n7 passed in 0.02s\n"}
