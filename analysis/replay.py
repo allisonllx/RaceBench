@@ -57,7 +57,7 @@ def build_replay_payload(
     *,
     default_run_dir: Path,
 ) -> dict[str, dict[str, Any]]:
-    """Return compact replay data keyed by each trial log filename."""
+    """Return compact replay data keyed by each trial's replay key."""
     if trials is None or trials.empty:
         return {}
 
@@ -66,10 +66,11 @@ def build_replay_payload(
         log = str(row.get("log") or "")
         if not log:
             continue
+        key = str(row.get("replay_key") or log)
         run_dir = Path(str(row.get("run_dir") or default_run_dir))
-        replay = trial_replay(run_dir / log, log_name=log)
+        replay = trial_replay(run_dir / log, log_name=str(row.get("log_label") or log))
         if replay is not None:
-            payload[log] = replay
+            payload[key] = replay
     return payload
 
 

@@ -1,7 +1,11 @@
-# Real grid. Requires OPENAI_API_KEY in .env (repo root) or the environment.
+# Real baseline grid. Requires OPENAI_API_KEY in .env (repo root) or the environment.
 #
-# Budget guardrails stop the run (resumably) when exceeded. Prices are USD per
-# 1M tokens — update to current rates before a big run.
+# Budget guardrails stop the run when exceeded. Prices are USD per 1M tokens.
+# Update to current rates before a big run.
+#
+# Keep this config stable for the committed grid-v1 baseline. To run the newer
+# peer_contract, peer_broker, and adaptive_lease strategies across the same
+# tasks, use runner/config.extensions-full.yaml instead of appending them here.
 #
 # Recommended flow:
 #   1. python -m runner.run_grid --config runner/config.example.yaml --calibrate
@@ -38,7 +42,7 @@ max_turns: 40
 lock_timeout_s: 30
 trial_timeout_s: 900
 # Concurrent trials (agents within a trial already run in parallel).
-# Start at 2–4; bump carefully — OpenAI rate limits + cost burn faster.
+# Start at 2 to 4; bump carefully because OpenAI rate limits and cost burn faster.
 parallel: 4
 budget:
   max_usd: 25

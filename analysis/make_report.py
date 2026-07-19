@@ -10,6 +10,7 @@ Writes:
 Usage:
     python -m analysis.make_report results/<run_id>
     python -m analysis.make_report results/<run_id> --prices-config runner/config.example.yaml
+    python -m analysis.make_report results/grid-v1 results/grid-v1-extensions-full --out results/grid-v1-plus-extensions
 
 USD is derived from prompt/completion token counts on each trial_end event and
 the price table (run_meta.json in the run dir, --prices-config, or defaults).
@@ -50,6 +51,12 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run_dirs", nargs="+", help="results/<run_id> directories")
     parser.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="output directory for combined tables/report (default: first run dir)",
+    )
+    parser.add_argument(
         "--prices-config",
         type=Path,
         default=None,
@@ -57,13 +64,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    out_dir = Path(args.run_dirs[0])
+    source_dirs = [Path(d) for d in args.run_dirs]
+    out_dir = args.out or source_dirs[0]
+    out_dir.mkdir(parents=True, exist_ok=True)
     if args.prices_config is not None:
         prices = load_prices_from_config(args.prices_config)
     else:
-        prices = load_prices(out_dir)
+        prices = load_prices(source_dirs[0])
 
-    frames = [run_dataframe(Path(d), prices=prices) for d in args.run_dirs]
+    frames = [run_dataframe(d, prices=prices) for d in source_dirs]
     df = pd.concat([f for f in frames if not f.empty], ignore_index=True) \
         if any(not f.empty for f in frames) else pd.DataFrame()
     if df.empty:
@@ -71,7 +80,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     # Persist prices used for this report (backfills runs started before meta).
-    if args.run_dirs:
+    if source_dirs:
         meta_path = out_dir / "run_meta.json"
         existing_meta = (
             json.loads(meta_path.read_text(encoding="utf-8"))
@@ -97,7 +106,7 @@ def main(argv: list[str] | None = None) -> int:
     by_strategy = aggregate_by_strategy(level_a)
     event_by_strategy = event_profile_by_strategy(level_a)
     event_by_task_strategy = event_profile_by_task_strategy(level_a)
-    agent_frames = [agent_activity_dataframe(Path(d)) for d in args.run_dirs]
+    agent_frames = [agent_activity_dataframe(d) for d in source_dirs]
     agent_activity = (
         pd.concat([f for f in agent_frames if not f.empty], ignore_index=True)
         if any(not f.empty for f in agent_frames) else pd.DataFrame()

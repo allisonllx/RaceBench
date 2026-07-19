@@ -10,7 +10,7 @@ The novelty is not just measuring failures. It is also measuring overcoordinatio
 
 ## 2. Approach
 
-RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records read and write events, applies a coordination strategy, runs the task oracle, and writes JSONL logs plus aggregate tables. The current suite has 16 tasks and 6 Level A strategies: `naive`, `file_lock`, `notify`, `optimistic`, `ast_merge`, and `dependency_graph`.
+RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records read and write events, applies a coordination strategy, runs the task oracle, and writes JSONL logs plus aggregate tables. The current suite has 16 tasks and 6 Level A headline strategies: `naive`, `file_lock`, `notify`, `git_hash`, `ast_scope`, and `ast_dep`.
 
 I considered three broader multi-agent coordination approaches and ruled them out for this submission. First, an auto-merge editor that rewrites two agents' patches into one final patch. I ruled it out because a pass or fail would depend on both the coordination rule and the **merge algorithm**, so the result would be harder to interpret. Second, a full CoAgent or MTPO-style saga layer. That is valuable, but requires inverse operations and workflow semantics beyond this coding benchmark. Third, direct comparison with commercial or open-source agent products like Claude Code and Cursor. However, without shared mediation hooks (e.g. tool call usage), that mostly measures each product's hidden planner, not a reusable coordination policy.
 
@@ -36,7 +36,7 @@ RaceBench is not a plug-and-play benchmark for arbitrary existing agents. A blac
 
 Known failure modes are specific. The AST merge strategy is still too coarse for many real refactors. The dependency graph strategy depends on simplified static observations and can miss dynamic behavior. The task suite is small enough that strategies can accidentally fit it. The benchmark mostly studies two-agent races, not larger teams. It also rewards strategies implemented inside the harness more directly than external products, which is why I separate Level A and Level C throughout the docs and report.
 
-With two more weeks, I would add a small second-model run on the highest-signal tasks, rerun the existing Cursor C1 smoke with more repetitions, add read/write intent hooks for one external adapter so it can be compared as a true strategy, and improve AST/dependency granularity. The claim would still stay modest: RaceBench is a reusable, auditable benchmark for coordination mechanisms, plus a task and oracle suite for black-box runtime checks.
+With two more weeks, I would add a scoped Agnes sensitivity run on high-signal baseline cells, rerun the existing Cursor C1 smoke with more repetitions, refine the new strategies instead of overclaiming them, and add harder multi-agent probes. The most promising strategy path is hybrid: adaptive semantic leases first, peer negotiation only for ambiguous conflicts. The claim would still stay modest: RaceBench is a reusable, auditable benchmark for coordination mechanisms, plus a task and oracle suite for black-box runtime checks.
 
 ---
 
@@ -66,6 +66,18 @@ python -m analysis.make_report results/grid-v1
 
 In short: use Level A for strategy rankings, Level B for reusable benchmark tasks, and Level C for external-validity checks against real agent stacks.
 
+### Agnes Sensitivity Scope
+
+This note is appendix material, not part of the 1000-word body.
+
+The Agnes run is intentionally a small provider-sensitivity check, not a second full strategy grid. Its purpose is to ask whether the broad baseline findings survive another OpenAI-compatible model provider on selected high-signal cells. I do not need to rerun `peer_contract`, `peer_broker`, or `adaptive_lease` on Agnes for the current submission because those strategies are post-grid extensions and still being interpreted. The main comparison remains the full gpt-5-mini Level A grid.
+
+### Strategy Class Framing
+
+This note is appendix material, not part of the 1000-word body.
+
+The committed `grid-v1` headline table uses six baseline Level A strategies. The post-grid extensions add three more: `peer_contract`, `peer_broker`, and `adaptive_lease`. Together, RaceBench covers nine mechanism classes: no coordination, coarse pessimistic locking, optimistic merge, syntactic scope, static dependency scope, advisory notification, voluntary negotiation, forced negotiation, and semantic adaptive locking. I kept it at nine because each row answers a distinct coordination question; adding a tenth only for symmetry would make the taxonomy less crisp.
+
 ### Adaptive Lease Iteration
 
 This note is appendix material, not part of the 1000-word body.
@@ -77,3 +89,23 @@ V1 used symbol leases for precise function/class edits, file leases for broad or
 V2 added declared and inferred semantic-resource leases. Agents can call `declare_scope` for resources such as `tag.normalization`, `article.summary.schema`, `article.summary.feed_output`, `api.fetch.signature`, or `datasource.parse_dataset.public_api`. The strategy also infers a small seed catalog from paths, changed symbols, and code text. This is not a general semantics engine. It is an inspectable prototype for testing whether application-level resources can make locking more granular.
 
 The first V2 targeted run was 6/6 correct with 0 false-positive stalls, 56.0s mean wall time, 104.7k mean tokens, and 1.5 stalls per trial. On the same six tasks in `grid-v1`, `file_lock` was 26/30 correct, with 201.5s mean wall time and 26.0 stalls per trial. Since V2 has only one repetition per task, the honest claim is "promising hybrid", not "new winner". The next step is four more repetitions and an obligation-carrying V3 that keeps promises such as "preserve timeout behavior" visible until the agent finishes.
+
+### Peer Broker V5 Iteration
+
+This note is appendix material, not part of the 1000-word body.
+
+The peer-negotiation experiments tested two Level A strategies: voluntary `peer_contract` and forced `peer_broker`. V4 showed why raw forced negotiation can be expensive. `peer_broker` reached 4/5, but its `rw_e_cascade` pass took 376s, used 898k tokens, produced 17 stalls, and refused 22 writes. The oracle passed, but the process was unhealthy.
+
+V5 changed `ack_with_constraints` from "refuse and retry" into "record a persistent obligation". It also reused adaptive-lease semantic-resource inference so broker sessions are triggered by resources such as `article.summary.*`, `tag.normalization`, `api.fetch.*`, and `datasource.parse_dataset.public_api`, rather than every broad overlap.
+
+The V5 targeted run improved `peer_broker` from 4/5 to 5/5. Mean wall time fell from 122s to 71s, mean tokens from 237k to 140k, stalls from 4.6 to 2.4, and refused writes from 5.6 to 0.6. On `rw_e_cascade`, V5 dropped to 124s, 303k tokens, 5 stalls, and 0 refused writes.
+
+The full 16-task extension grid changed the interpretation. In `results/grid-v1-plus-extensions/`, `peer_broker` scored 51/80, or 63.8 percent, below `naive` at 56/80 and far below `peer_contract` at 67/80. Its weakest cells were exactly the worrying ones: `t04_cascade`, `t05_cross_file`, `t11_irreversible`, `t12_split_view`, and `rw_c_benign_overlap`.
+
+The honest conclusion is that peer broker should not be a headline success. It is a useful failed ablation: forcing agents to negotiate on broad overlap can convert easy work into stale obligations. The likely next design is hybrid: adaptive semantic leases first, peer broker only when an ambiguous conflict needs agent judgment, followed by a mandatory re-read before commit.
+
+### Harder Task Suite Extension
+
+This note is appendix material, not part of the 1000-word body.
+
+The current task suite is still useful because it separates destructive races, benign overlap, antidependencies, cascades, and black-box runtime checks. If I had more time, I would add harder probes rather than just more repetitions: 5-8 agent dependency chains, fan-in/fan-out migrations, generated-client schema drift, and cases where one agent's correct patch invalidates another agent's previously passing tests. Those tasks would test whether the benchmark still separates strategies when coordination pressure is closer to real multi-agent development.

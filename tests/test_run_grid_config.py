@@ -41,7 +41,7 @@ def test_peer_targeted_config_includes_peer_strategies(tmp_path):
     cfg = load_config(str(ROOT / "runner" / "config.peer-targeted.yaml"))
     pending = collect_pending(cfg, tmp_path, calibrate=False)
 
-    assert cfg["run_id"] == "grid-v1-peer-targeted-v4"
+    assert cfg["run_id"] == "grid-v1-peer-targeted-v5"
     assert cfg["provider"] == "openai"
     assert cfg["reps"] == 1
     assert cfg["parallel"] == 2
@@ -81,6 +81,27 @@ def test_adaptive_lease_targeted_config_runs_only_new_strategy(tmp_path):
     } <= {job.task_name for job in pending}
     assert {job.n for job in pending if job.task_name == "t04_cascade"} == {4}
     assert {job.n for job in pending if job.task_name == "rw_e_cascade"} == {3}
+
+
+def test_extensions_full_config_runs_new_strategies_on_full_task_set(tmp_path):
+    cfg = load_config(str(ROOT / "runner" / "config.extensions-full.yaml"))
+    pending = collect_pending(cfg, tmp_path, calibrate=False)
+
+    assert cfg["run_id"] == "grid-v1-extensions-full"
+    assert cfg["provider"] == "openai"
+    assert cfg["reps"] == 5
+    assert cfg["parallel"] == 2
+    assert cfg["budget"]["max_usd"] == 18
+    assert cfg["budget"]["max_total_tokens"] == 30000000
+    assert len(pending) == 240
+    assert {job.strategy for job in pending} == {
+        "peer_contract",
+        "peer_broker",
+        "adaptive_lease",
+    }
+    assert {job.n for job in pending if job.task_name == "t04_cascade"} == {4}
+    assert {job.n for job in pending if job.task_name == "rw_e_cascade"} == {3}
+    assert {job.n for job in pending if job.task_name == "t01_stale_clobber"} == {2}
 
 
 def test_resolve_agnes_provider_uses_dedicated_env(monkeypatch):

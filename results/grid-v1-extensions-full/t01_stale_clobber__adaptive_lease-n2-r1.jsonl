@@ -1,0 +1,41 @@
+{"ts": 0.1697, "event": "trial_start", "task": "t01_stale_clobber", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "adaptive_lease", "n_agents": 2, "rep": 1, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 0.2073, "event": "notification_delivered", "agent": "agent-timeout", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 0.2087, "event": "notification_delivered", "agent": "agent-retries", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 2.0218, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 877, "completion_tokens": 57}
+{"ts": 2.024, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "declare_scope", "args": {"resources": ["config.defaults", "config.validate"], "path": "config.py", "summary": "Add 'retries' default and validation; preserve all existing keys and validation rules in config.py"}}
+{"ts": 2.0245, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-retries", "path": "config.py", "symbols": [], "resources": ["config.defaults", "config.validate"], "summary": "Add 'retries' default and validation; preserve all existing keys and validation rules in config.py", "exports": [], "must_preserve": []}
+{"ts": 2.0245, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-retries", "path": "config.py", "lease_level": "resource", "symbols": [], "resources": ["config.defaults", "config.validate"]}
+{"ts": 2.4319, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 875, "completion_tokens": 131}
+{"ts": 2.432, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "declare_scope", "args": {"resources": ["config.defaults", "config.validation", "api.configuration.schema"], "path": "config.py", "summary": "Modify DEFAULTS to add 'timeout' and extend validate() to enforce timeout >0 numeric, preserve other keys and validation."}}
+{"ts": 2.4321, "event": "coord", "strategy": "adaptive_lease", "action": "blocked", "agent": "agent-timeout", "path": "config.py", "lease_level": "resource", "resources": ["api.configuration.schema", "config.defaults", "config.validation"], "holders": ["agent-retries"]}
+{"ts": 3.0953, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 950, "completion_tokens": 18}
+{"ts": 3.0956, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 3.1018, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 1056}
+{"ts": 10.159, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 1221, "completion_tokens": 626}
+{"ts": 10.1592, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 10.1601, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-retries", "path": "config.py", "lease_level": "file", "symbols": ["<module>", "validate"], "resources": ["config.defaults", "config.validate"]}
+{"ts": 10.1619, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.003, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 11.2391, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 1601, "completion_tokens": 13}
+{"ts": 11.2393, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 11.5885, "event": "run_tests", "agent": "agent-retries", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 12.8244, "event": "llm_usage", "agent": "agent-retries", "turn": 5, "prompt_tokens": 1640, "completion_tokens": 37}
+{"ts": 12.8246, "event": "tool_call", "agent": "agent-retries", "turn": 5, "tool": "done", "args": {"summary": "Added 'retries' default to DEFAULTS and extended validate() to check non-negative int, preserving existing behavior"}}
+{"ts": 12.8248, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 12.8248, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 5, "prompt_tokens": 6289, "completion_tokens": 751}
+{"ts": 12.8251, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-timeout", "path": "config.py", "symbols": [], "resources": ["api.configuration.schema", "config.defaults", "config.validation"], "summary": "Modify DEFAULTS to add 'timeout' and extend validate() to enforce timeout >0 numeric, preserve other keys and validation.", "exports": [], "must_preserve": []}
+{"ts": 12.8252, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-timeout", "path": "config.py", "lease_level": "resource", "symbols": [], "resources": ["api.configuration.schema", "config.defaults", "config.validation"]}
+{"ts": 14.2248, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 962, "completion_tokens": 18}
+{"ts": 14.2249, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 14.2258, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 1218}
+{"ts": 24.6133, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 1278, "completion_tokens": 933}
+{"ts": 24.6134, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 24.6145, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-timeout", "path": "config.py", "lease_level": "file", "symbols": ["<module>", "validate"], "resources": ["api.configuration.schema", "config.defaults", "config.validation"]}
+{"ts": 24.616, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.003, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 25.6243, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 1709, "completion_tokens": 13}
+{"ts": 25.6244, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 25.9966, "event": "run_tests", "agent": "agent-timeout", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 27.3885, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 1748, "completion_tokens": 41}
+{"ts": 27.3886, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "done", "args": {"summary": "Added 'timeout' default to DEFAULTS and extended validate() to require timeout > 0 numeric; preserved existing keys and validation."}}
+{"ts": 27.3886, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 27.3886, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 5, "prompt_tokens": 6572, "completion_tokens": 1136}
+{"ts": 27.6462, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 27.18, "prompt_tokens": 12861, "completion_tokens": 1887, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from html import escape
 from pathlib import Path
 
@@ -14,6 +15,28 @@ def _records(df: pd.DataFrame) -> list[dict]:
     if df is None or df.empty:
         return []
     return json.loads(df.to_json(orient="records"))
+
+
+def _with_log_links(df: pd.DataFrame, out_dir: Path) -> pd.DataFrame:
+    if df is None or df.empty or "log" not in df.columns:
+        return df
+    out = df.copy()
+    log_hrefs: list[str] = []
+    log_labels: list[str] = []
+    replay_keys: list[str] = []
+    for row in out.to_dict(orient="records"):
+        log = str(row.get("log") or "")
+        run_dir = Path(str(row.get("run_dir") or out_dir))
+        run_id = str(row.get("run_id") or run_dir.name)
+        href = os.path.relpath(run_dir / log, start=out_dir).replace(os.sep, "/")
+        label = log if run_id == out_dir.name else f"{run_id}/{log}"
+        log_hrefs.append(href)
+        log_labels.append(label)
+        replay_keys.append(href)
+    out["log_href"] = log_hrefs
+    out["log_label"] = log_labels
+    out["replay_key"] = replay_keys
+    return out
 
 
 def _fmt_num(value: float, digits: int = 2) -> str:
@@ -56,6 +79,13 @@ def write_html_report(
 ) -> Path:
     """Write a dependency-free HTML report next to the CSV/Markdown tables."""
     out_dir = Path(out_dir)
+    trials = _with_log_links(trials, out_dir)
+    level_a_trials = _with_log_links(level_a_trials, out_dir)
+    external_trials = _with_log_links(external_trials, out_dir)
+    agent_activity = _with_log_links(
+        agent_activity if agent_activity is not None else pd.DataFrame(),
+        out_dir,
+    )
     cards = _metric_cards(level_a_trials)
     all_data = {
         "trials": _records(trials),
@@ -71,8 +101,7 @@ def write_html_report(
         "eventByTaskStrategy": _records(
             event_by_task_strategy
             if event_by_task_strategy is not None else pd.DataFrame()),
-        "agentActivity": _records(
-            agent_activity if agent_activity is not None else pd.DataFrame()),
+        "agentActivity": _records(agent_activity),
         "replays": build_replay_payload(trials, default_run_dir=out_dir),
     }
     payload = json.dumps(all_data, ensure_ascii=False)
@@ -148,13 +177,17 @@ def write_html_report(
       return fmt(value);
     }
     function logLink(row) {
-      const log = String(row.log ?? "");
-      return `<a href="${attr(log)}">${esc(log)}</a>`;
+      const href = String(row.log_href || row.log || "");
+      const label = String(row.log_label || row.log || "");
+      return `<a href="${attr(href)}">${esc(label)}</a>`;
+    }
+    function replayKey(row) {
+      return String(row.replay_key || row.log || "");
     }
     function replayButton(row) {
-      const log = String(row.log ?? "");
-      if (!data.replays || !data.replays[log]) return "";
-      return `<button type="button" class="replay-btn" data-log="${attr(log)}">Replay</button>`;
+      const key = replayKey(row);
+      if (!data.replays || !data.replays[key]) return "";
+      return `<button type="button" class="replay-btn" data-log="${attr(key)}">Replay</button>`;
     }
 
     const replayEls = {
@@ -253,16 +286,17 @@ def write_html_report(
     }
     function replayLabel(row) {
       const status = row.correct ? "pass" : "fail";
-      return `${row.task} | ${row.strategy} | n${row.n_agents} r${row.rep} | ${status} | ${row.log}`;
+      return `${row.task} | ${row.strategy} | n${row.n_agents} r${row.rep} | ${status} | ${row.log_label || row.log}`;
     }
     function replaySearchText(row) {
       return [
-        row.task, row.strategy, row.failure_mode, row.log, row.model,
+        row.task, row.strategy, row.failure_mode, row.log_label, row.log,
+        row.run_id, row.model,
         row.n_agents, row.rep, row.correct ? "pass" : "fail",
       ].map(value => String(value ?? "")).join(" ").toLowerCase();
     }
     function updateReplayPicker(rows) {
-      const allPlayable = rows.filter(row => data.replays && data.replays[row.log]);
+      const allPlayable = rows.filter(row => data.replays && data.replays[replayKey(row)]);
       const term = replayEls.search.value.trim().toLowerCase();
       const playable = term
         ? allPlayable.filter(row => replaySearchText(row).includes(term))
@@ -283,12 +317,12 @@ def write_html_report(
         replayEls.picker.disabled = true;
         return;
       }
-      if (!playable.some(row => row.log === replayState.log)) {
-        selectReplay(playable[0].log, {scroll: false});
+      if (!playable.some(row => replayKey(row) === replayState.log)) {
+        selectReplay(replayKey(playable[0]), {scroll: false});
       }
       replayEls.picker.disabled = false;
       replayEls.picker.innerHTML = playable.map(row => `
-        <option value="${attr(row.log)}"${row.log === replayState.log ? " selected" : ""}>
+        <option value="${attr(replayKey(row))}"${replayKey(row) === replayState.log ? " selected" : ""}>
           ${esc(replayLabel(row))}
         </option>
       `).join("");
@@ -447,15 +481,15 @@ def write_html_report(
       if (scroll) replayEls.section.scrollIntoView({behavior: "smooth", block: "start"});
     }
     function ensureReplaySelection(rows) {
-      const playable = rows.filter(row => data.replays && data.replays[row.log]);
+      const playable = rows.filter(row => data.replays && data.replays[replayKey(row)]);
       if (!playable.length) {
         replayState.log = "";
         stopReplay();
         renderReplay();
         return;
       }
-      if (!replayState.log || !playable.some(row => row.log === replayState.log)) {
-        selectReplay(playable[0].log, {scroll: false});
+      if (!replayState.log || !playable.some(row => replayKey(row) === replayState.log)) {
+        selectReplay(replayKey(playable[0]), {scroll: false});
       }
     }
     function setReplayTime(value) {
@@ -583,7 +617,7 @@ def write_html_report(
     function matches(row) {
       const haystack = [
         row.task, row.strategy, row.failure_mode, row.log, row.model, row.mode,
-        row.adapter, row.n_agents, row.agent, row.status
+        row.run_id, row.log_label, row.adapter, row.n_agents, row.agent, row.status
       ].map(v => String(v ?? "")).join(" ").toLowerCase();
       return (!filters.task.value || row.task === filters.task.value)
         && (!filters.strategy.value || row.strategy === filters.strategy.value)

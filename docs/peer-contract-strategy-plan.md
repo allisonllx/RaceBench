@@ -98,6 +98,29 @@ hard veto loops.
 - [ ] Compare against V1 to see whether forced negotiation is worth the extra
       runtime and token cost.
 
+## V5: Cached Obligation Broker
+
+Implemented after targeted V4 showed that `peer_broker` could recover hard
+cases, but sometimes bought correctness through too many revision loops. The
+worst example was `rw_e_cascade`: the oracle passed, but the run used many
+broker requests, refused writes, and tokens.
+
+- [x] Reuse adaptive-lease semantic-resource inference as a narrower broker
+      trigger. Same-file symbol overlap still triggers, but broad read overlap
+      is now a fallback when no semantic resource is available.
+- [x] Record semantic resources read by each peer so cross-file dependencies
+      such as `article.summary.*`, `tag.normalization`, `api.fetch.*`, and
+      `datasource.parse_dataset.public_api` can trigger a broker session.
+- [x] Cache broker decisions by writer, peer, and conflict key so later writes
+      to the same semantic resource do not repeatedly ask the same peer.
+- [x] Treat `ack_with_constraints` as an obligation instead of an immediate
+      refused write. Hard `conflict` still refuses.
+- [x] Inject obligation notes into the writer's future context and log
+      `broker_obligation_recorded` / `broker_constraints_recorded`.
+- [x] Trim broker write previews to reduce private-negotiation prompt cost.
+- [ ] Run the targeted V5 live config and compare against V4, `peer_contract`,
+      and `adaptive_lease`.
+
 ## V3: External Mediation Protocol
 
 - [ ] Convert the protocol into adapter-facing hooks:

@@ -1,0 +1,48 @@
+{"ts": 0.3112, "event": "trial_start", "task": "t02_benign_overlap", "failure_mode": "benign_overlap_false_positive", "benign": true, "strategy": "adaptive_lease", "n_agents": 2, "rep": 0, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-slugify", "agent-truncate"]}
+{"ts": 0.4187, "event": "notification_delivered", "agent": "agent-slugify", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 0.4232, "event": "notification_delivered", "agent": "agent-truncate", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 4.6396, "event": "llm_usage", "agent": "agent-truncate", "turn": 1, "prompt_tokens": 846, "completion_tokens": 59}
+{"ts": 4.6397, "event": "tool_call", "agent": "agent-truncate", "turn": 1, "tool": "declare_scope", "args": {"resources": ["stringutils.truncate behavior"], "path": "stringutils.py", "summary": "Implement truncate(text, max_len, suffix) according to docstring; preserve other functions and behavior."}}
+{"ts": 4.7059, "event": "llm_usage", "agent": "agent-slugify", "turn": 1, "prompt_tokens": 824, "completion_tokens": 145}
+{"ts": 4.706, "event": "tool_call", "agent": "agent-slugify", "turn": 1, "tool": "declare_scope", "args": {"resources": ["string.slugify", "stringutils.slugify"], "path": "stringutils.py", "symbols": ["slugify"], "summary": "Implement slugify to lowercase, replace non a-z0-9 runs with single hyphen, strip leading/trailing hyphens; preserve other functions in file."}}
+{"ts": 4.7061, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-slugify", "path": "stringutils.py", "symbols": ["slugify"], "resources": ["string.slugify", "stringutils.slugify"], "summary": "Implement slugify to lowercase, replace non a-z0-9 runs with single hyphen, strip leading/trailing hyphens; preserve other functions in file.", "exports": [], "must_preserve": []}
+{"ts": 4.7061, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-slugify", "path": "stringutils.py", "lease_level": "resource", "symbols": ["slugify"], "resources": ["string.slugify", "stringutils.slugify"]}
+{"ts": 5.9192, "event": "llm_usage", "agent": "agent-slugify", "turn": 2, "prompt_tokens": 924, "completion_tokens": 18}
+{"ts": 5.9193, "event": "tool_call", "agent": "agent-slugify", "turn": 2, "tool": "glob", "args": {"pattern": "**/*.py"}}
+{"ts": 5.9213, "event": "search", "agent": "agent-slugify", "kind": "glob", "pattern": "**/*.py", "n": 1}
+{"ts": 6.3707, "event": "llm_usage", "agent": "agent-truncate", "turn": 2, "prompt_tokens": 920, "completion_tokens": 51}
+{"ts": 6.3708, "event": "tool_call", "agent": "agent-truncate", "turn": 2, "tool": "declare_scope", "args": {"resources": ["stringutils.truncate"], "path": "stringutils.py", "summary": "Implement truncate(text, max_len, suffix) according to docstring; preserve other functions and behavior."}}
+{"ts": 6.3709, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-truncate", "path": "stringutils.py", "symbols": [], "resources": ["stringutils.truncate"], "summary": "Implement truncate(text, max_len, suffix) according to docstring; preserve other functions and behavior.", "exports": [], "must_preserve": []}
+{"ts": 6.3709, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-truncate", "path": "stringutils.py", "lease_level": "resource", "symbols": [], "resources": ["stringutils.truncate"]}
+{"ts": 7.4891, "event": "llm_usage", "agent": "agent-slugify", "turn": 3, "prompt_tokens": 957, "completion_tokens": 19}
+{"ts": 7.4892, "event": "tool_call", "agent": "agent-slugify", "turn": 3, "tool": "read_file", "args": {"path": "stringutils.py"}}
+{"ts": 7.4897, "event": "read", "agent": "agent-slugify", "path": "stringutils.py", "found": true, "size": 795}
+{"ts": 7.9766, "event": "llm_usage", "agent": "agent-truncate", "turn": 3, "prompt_tokens": 993, "completion_tokens": 13}
+{"ts": 7.9767, "event": "tool_call", "agent": "agent-truncate", "turn": 3, "tool": "list_files", "args": {}}
+{"ts": 9.728, "event": "llm_usage", "agent": "agent-truncate", "turn": 4, "prompt_tokens": 1034, "completion_tokens": 19}
+{"ts": 9.7281, "event": "tool_call", "agent": "agent-truncate", "turn": 4, "tool": "read_file", "args": {"path": "stringutils.py"}}
+{"ts": 9.7285, "event": "read", "agent": "agent-truncate", "path": "stringutils.py", "found": true, "size": 795}
+{"ts": 12.0652, "event": "llm_usage", "agent": "agent-slugify", "turn": 4, "prompt_tokens": 1172, "completion_tokens": 499}
+{"ts": 12.0653, "event": "tool_call", "agent": "agent-slugify", "turn": 4, "tool": "edit_file", "args": {"path": "stringutils.py", "old_string": "def slugify(text):\n    \"\"\"Return a URL slug: lowercase, every run of characters outside a-z0-9\n    replaced by a single hyphen, leading/trailing hyphens stripped.\n\n    slugify(\"Hello, World!\") == \"hel", "new_string": "def slugify(text):\n    \"\"\"Return a URL slug: lowercase, every run of characters outside a-z0-9\n    replaced by a single hyphen, leading/trailing hyphens stripped.\n\n    slugify(\"Hello, World!\") == \"hel"}}
+{"ts": 12.0663, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-slugify", "path": "stringutils.py", "lease_level": "resource", "symbols": ["slugify"], "resources": ["string.slugify", "stringutils.slugify"]}
+{"ts": 12.0663, "event": "coord", "strategy": "adaptive_lease", "action": "read_write_intersection", "writer": "agent-slugify", "reader": "agent-truncate", "path": "stringutils.py", "symbols": ["slugify"]}
+{"ts": 12.0676, "event": "write", "agent": "agent-slugify", "path": "stringutils.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["slugify"], "message": ""}
+{"ts": 13.6902, "event": "llm_usage", "agent": "agent-slugify", "turn": 5, "prompt_tokens": 1425, "completion_tokens": 13}
+{"ts": 13.6903, "event": "tool_call", "agent": "agent-slugify", "turn": 5, "tool": "run_tests", "args": {}}
+{"ts": 13.9944, "event": "run_tests", "agent": "agent-slugify", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 15.5994, "event": "llm_usage", "agent": "agent-slugify", "turn": 6, "prompt_tokens": 1464, "completion_tokens": 51}
+{"ts": 15.5995, "event": "tool_call", "agent": "agent-slugify", "turn": 6, "tool": "done", "args": {"summary": "Implemented slugify in stringutils.py to lowercase, replace runs of non a-z0-9 with hyphens, and strip leading/trailing hyphens; tests pass."}}
+{"ts": 15.5996, "event": "agent_done_coord", "agent": "agent-slugify"}
+{"ts": 15.5996, "event": "agent_done", "agent": "agent-slugify", "status": "done", "turns": 6, "prompt_tokens": 6766, "completion_tokens": 745}
+{"ts": 17.5611, "event": "llm_usage", "agent": "agent-truncate", "turn": 5, "prompt_tokens": 1249, "completion_tokens": 833}
+{"ts": 17.5612, "event": "tool_call", "agent": "agent-truncate", "turn": 5, "tool": "edit_file", "args": {"path": "stringutils.py", "old_string": "def truncate(text, max_len, suffix=\"...\"):\n    \"\"\"Truncate text so the result is at most max_len characters INCLUDING the\n    suffix. Return text unchanged when len(text) <= max_len. When truncation\n ", "new_string": "def truncate(text, max_len, suffix=\"...\"):\n    \"\"\"Truncate text so the result is at most max_len characters INCLUDING the\n    suffix. Return text unchanged when len(text) <= max_len. When truncation\n "}}
+{"ts": 17.5622, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-truncate", "path": "stringutils.py", "lease_level": "resource", "symbols": ["truncate"], "resources": ["stringutils.truncate"]}
+{"ts": 17.5632, "event": "write", "agent": "agent-truncate", "path": "stringutils.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["truncate"], "message": ""}
+{"ts": 18.9817, "event": "llm_usage", "agent": "agent-truncate", "turn": 6, "prompt_tokens": 1644, "completion_tokens": 13}
+{"ts": 18.9818, "event": "tool_call", "agent": "agent-truncate", "turn": 6, "tool": "run_tests", "args": {}}
+{"ts": 19.2528, "event": "run_tests", "agent": "agent-truncate", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 20.8523, "event": "llm_usage", "agent": "agent-truncate", "turn": 7, "prompt_tokens": 1683, "completion_tokens": 31}
+{"ts": 20.8525, "event": "tool_call", "agent": "agent-truncate", "turn": 7, "tool": "done", "args": {"summary": "Implemented truncate in stringutils.py to meet docstring behavior; all tests pass."}}
+{"ts": 20.8525, "event": "agent_done_coord", "agent": "agent-truncate"}
+{"ts": 20.8526, "event": "agent_done", "agent": "agent-truncate", "status": "done", "turns": 7, "prompt_tokens": 8369, "completion_tokens": 1019}
+{"ts": 21.2056, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 20.44, "prompt_tokens": 15135, "completion_tokens": 1764, "agent_statuses": {"agent-slugify": "done", "agent-truncate": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.02s\n"}

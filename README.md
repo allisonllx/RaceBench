@@ -99,7 +99,9 @@ Early one-pass smokes (`results/ext-cursor/`) are documented in `writeup/writeup
 
 All strategies implement the same interface (`harness/strategies/base.py`) and are
 labeled "X-style": faithful-but-minimal reimplementations, not the original authors'
-systems.
+systems. RaceBench currently covers **nine coordination mechanism classes**. The
+first six make up the committed `grid-v1` baseline; the last three are post-grid
+extensions evaluated in targeted and extension runs.
 
 1. `naive`: direct writes, last write wins. The floor.
 2. `file_lock`: file-level lock on first touch, held until the agent finishes.
@@ -116,8 +118,9 @@ systems.
    notice. Overlapping writes wait for peer ACK; disjoint declared edits can proceed.
 8. `peer_broker`: forced mediated peer negotiation. The runtime detects an
    overlapping write, opens a private broker decision with affected peers, and
-   applies the write only if peers ACK. Peers can also request concrete revision
-   constraints, mark the write irrelevant to their subtask, or reject the write.
+   applies the write unless peers report a true conflict. Peers can request
+   concrete constraints that are cached as obligations, mark the write irrelevant
+   to their subtask, or reject the write.
 9. `adaptive_lease`: conservative adaptive locking. Precise function/class
    edits get symbol leases, uncertain module/file edits fall back to a file
    lease, semantic resources can be declared or inferred across files, and stale
@@ -264,9 +267,27 @@ tasks where peer negotiation should matter.
 
 ```bash
 python -m runner.run_grid --config runner/config.peer-targeted.yaml
-python -m analysis.validate_logs results/grid-v1-peer-targeted-v4
-python -m analysis.make_report results/grid-v1-peer-targeted-v4 \
+python -m analysis.validate_logs results/grid-v1-peer-targeted-v5
+python -m analysis.make_report results/grid-v1-peer-targeted-v5 \
   --prices-config runner/config.peer-targeted.yaml
+```
+
+### Full extension grid
+
+After the targeted runs look stable, run the three experimental Level A
+strategies across the same 16 tasks and 5 reps as `grid-v1`. This keeps the
+original baseline folder stable and writes a separate 240-trial extension run.
+
+```bash
+python -m runner.run_grid --config runner/config.extensions-full.yaml
+python -m analysis.validate_logs results/grid-v1-extensions-full --expect-trials 240
+python -m analysis.make_report results/grid-v1-extensions-full \
+  --prices-config runner/config.extensions-full.yaml
+
+# combined 9-strategy explorer, preserving both source result folders
+python -m analysis.make_report results/grid-v1 results/grid-v1-extensions-full \
+  --out results/grid-v1-plus-extensions \
+  --prices-config runner/config.example.yaml
 ```
 
 ### Agnes model sensitivity
@@ -289,7 +310,11 @@ python -m analysis.make_report results/grid-v1-agnes \
 Use `results/grid-v1-agnes-sensitivity/` as a model-sensitivity check, not as a
 replacement for the Level A OpenAI grid. If the sensitivity ranking agrees with
 `grid-v1`, the writeup can claim the main coordination conclusions were checked
-against a second OpenAI-compatible model provider.
+against a second OpenAI-compatible model provider. The Agnes run is intentionally
+scoped to the baseline/high-signal strategy set. It does not need to rerun
+`peer_contract`, `peer_broker`, or `adaptive_lease`, since those are post-grid
+exploratory strategies and the marginal value of a second-provider rerun is lower
+than finishing the primary analysis.
 The Agnes configs include a conservative request-per-minute cap and rerun
 temporary provider-error logs so `429` throttles are not counted as benchmark
 failures.

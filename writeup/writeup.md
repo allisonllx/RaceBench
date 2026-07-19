@@ -43,7 +43,8 @@ only ~26% of reads on SWE-bench workloads.
 ### Coordination strategies
 
 Each strategy is ~100 lines and labeled "X-style" (our reimplementations, not
-the authors' systems):
+the authors' systems). The headline `grid-v1` table uses six baseline mechanism
+classes:
 
 | Strategy | Mechanism |
 |----------|-----------|
@@ -58,6 +59,14 @@ AST-level claims are prior art (Grit, Phantom, Weave, arXiv:2603.24284), but
 none has been measured against alternatives on fixed tasks. That neutral
 measurement is our contribution. We keep `ast_scope` and `ast_dep` as separate
 columns to measure the incremental value of the dependency graph.
+
+After the main grid, RaceBench adds three post-grid extensions:
+`peer_contract` (voluntary negotiation), `peer_broker` (forced negotiation with
+cached obligations), and `adaptive_lease` (semantic adaptive locking). Together,
+the project now covers **nine mechanism classes** rather than padding the table
+to a round number: no coordination, coarse pessimistic locking, optimistic
+merge, syntactic scope, static dependency scope, advisory notification,
+voluntary negotiation, forced negotiation, and semantic adaptive locking.
 
 ### Task suite: how we built it
 
@@ -207,21 +216,51 @@ retries, as irreconcilable conflict. In v4, we clarified that conflict means no
 final implementation can satisfy both subtasks, not merely that two agents
 touched the same file or function.
 
-The latest targeted result is v4: both strategies reached **4/5** correctness.
-But the process metrics still favor `peer_contract`: mean wall clock **79s vs
-122s**, mean tokens **155k vs 237k**, mean stalls **2.2 vs 4.6**, and mean
-refused writes **1.6 vs 5.6**. The broker's `rw_e_cascade` pass is especially
-important to interpret honestly: the oracle passed, but the run took **376s**,
-used **898k** tokens, had **17** stalls, and all three agents ended at
-`max_turns`. That is correct, but not healthy.
+In v4, both strategies reached **4/5** correctness, but the process metrics
+still favored `peer_contract`: mean wall clock **79s vs 122s**, mean tokens
+**155k vs 237k**, mean stalls **2.2 vs 4.6**, and mean refused writes **1.6 vs
+5.6**. The broker's `rw_e_cascade` pass was especially important to interpret
+honestly: the oracle passed, but the run took **376s**, used **898k** tokens,
+had **17** stalls, and all three agents ended at `max_turns`. That was correct,
+but not healthy.
 
-Interpretation: peer negotiation is promising, but forced negotiation is not
-automatically better. RaceBench exposed two concrete future extensions. First,
-`peer_contract` needs persistent obligations: when an agent ACKs an intent, that
-commitment should be injected into later prompts until the agent finishes.
-Second, `peer_broker` needs dependency-aware triggering, likely reusing the
-`ast_dep` signal, so it can catch cross-file semantic dependencies such as
-`rw_d_tag_antidependency` without over-firing on benign same-file work.
+V5 changed the broker semantics. Instead of treating every
+`ack_with_constraints` as a refused write, the broker records those constraints
+as cached obligations and injects them into the writer's later context. Only a
+true `conflict` refuses immediately. V5 also reuses the adaptive-lease
+semantic-resource detector as a narrower trigger, so cross-file resources such
+as `article.summary.*`, `tag.normalization`, `api.fetch.*`, and
+`datasource.parse_dataset.public_api` can trigger negotiation without asking
+peers on every broad read/write overlap.
+
+The V5 targeted result was the first peer run where forced negotiation looked competitive:
+`peer_broker` reached **5/5** while `peer_contract` reached **4/5**. Broker mean
+wall clock fell from **122s** to **71s**, mean tokens from **237k** to **140k**,
+stalls from **4.6** to **2.4**, and refused writes from **5.6** to **0.6**. On
+`rw_e_cascade`, broker dropped from **376s / 898k tokens / 17 stalls / 22 refused
+writes** in v4 to **124s / 303k tokens / 5 stalls / 0 refused writes** in v5.
+
+The later full extension grid is more humbling
+(`results/grid-v1-plus-extensions/`; peer-broker cells complete). Across the
+16-task suite, `peer_broker` scored **51/80** (**63.8%**), below Level A
+`naive` at **56/80** (**70.0%**) and far below `peer_contract` at **67/80**
+(**83.8%**). The failures
+are especially concerning because they occur on tasks where a negotiation layer
+should help or at least stay out of the way: `t05_cross_file` (**20%**),
+`t12_split_view` (**20%**), `rw_c_benign_overlap` (**60%**), `t04_cascade`
+(**20%**), and `t11_irreversible` (**20%**). In other words, the targeted V5 run
+showed that broker can recover a hard overlap, but the full grid showed that
+forced negotiation over-generalizes and can turn easy work into stale
+obligations.
+
+Interpretation: `peer_broker` is no longer a headline success. It is a useful
+ablation because it falsifies a tempting idea: "when agents overlap, force them
+to negotiate." The better lesson is narrower. Constraints should become
+persistent obligations, not retry loops, and negotiation should be a fallback,
+not the default conflict detector. Given two more weeks, the next design would
+be hybrid: use adaptive semantic leases first, invoke broker only for ambiguous
+resource conflicts that need peer judgment, require a re-read after negotiation,
+and cap the exchange to one compact decision per peer.
 
 ### Exploratory adaptive-lease extension
 
@@ -445,7 +484,12 @@ black-box runtime scoring unless a product exposes mediation hooks.
 
 4. **Second model family.** Every committed grid cell uses gpt-5-mini. Re-running
    the same 480-trial matrix on a stronger or cheaper model would test whether
-   coordination rankings and FP-stall gaps hold across capability tiers.
+   coordination rankings and FP-stall gaps hold across capability tiers. Given
+   the cost and time budget, the Agnes run should stay a targeted sensitivity
+   check on baseline/high-signal cells, not a rerun of every post-grid
+   extension. `peer_contract`, `peer_broker`, and `adaptive_lease` are still
+   being interpreted and refined, so a second-provider rerun would add less
+   evidence than finishing the primary gpt-5-mini analysis.
 
 5. **Cascade at 8+ agents.** Deferred for cost; `t04` / `rw_e` already stress
    chains at n=4 and n=3.
@@ -453,12 +497,15 @@ black-box runtime scoring unless a product exposes mediation hooks.
 6. **Lite CRDT column.** Still deferred: overlaps `git_hash` on compose-heavy
    tasks and would need honest `always_merge` labeling.
 
-7. **Peer negotiation v5.** The latest targeted smoke is v4, not v2:
-   `peer_contract` and `peer_broker` both reach 4/5, but `peer_contract` is
-   cheaper and cleaner. The next iteration should not be "more prompting" in
-   general. It should add persistent obligations for `peer_contract` after an
-   ACK, and dependency-aware broker triggers for `peer_broker` so cross-file
-   semantic dependencies such as tag normalization are negotiated.
+7. **Peer negotiation v6 / hybrid.** The targeted v5 smoke made `peer_broker`
+   much cheaper than v4, but the full extension grid exposed poor
+   generalization: **63.8%** overall, below `naive` at **70.0%**, with especially
+   bad results on `t04`, `t05`, `t11`, `t12`, and `rw_c`. I would keep broker as
+   an ablation, not a headline strategy. The next iteration should use adaptive
+   semantic leases as the default detector, then invoke broker only for
+   ambiguous conflicts that need peer judgment. It should also require a re-read
+   after negotiation and add persistent obligations to `peer_contract` after an
+   ACK.
 
 8. **Adaptive lease v3.** The first semantic-resource pass is promising but too
    small to claim a new winner. Run four more reps on the same six-task targeted
@@ -469,7 +516,10 @@ black-box runtime scoring unless a product exposes mediation hooks.
 9. **Suite hardness vs stronger stacks.** Preliminary Cursor C1 passes on cells
    where Level A `naive` scores 0/5 (e.g. t01, rw_e) suggest the probe suite may
    under-challenge capable foreign worker loops; future tasks could target
-   harness-agnostic collisions or higher concurrency if we want C1 to separate stacks.
+   harness-agnostic collisions or higher concurrency if we want C1 to separate
+   stacks. Candidate additions: 5-8 agent dependency chains, fan-in/fan-out
+   migrations, shared schema changes with generated clients, and cases where one
+   agent's correct patch invalidates another agent's previously passing tests.
 
 10. **Level C adapter hardening.** The MegaAgent vendor bridge runs but is not
    production-ready: t02 timed out at 900s with no file writes; t04 burned ~2M

@@ -236,7 +236,7 @@ async def test_peer_broker_irrelevant_decision_allows_write(tmp_path):
         _finish(ws, logger)
 
 
-async def test_peer_broker_constraints_request_revision_not_hard_conflict(tmp_path):
+async def test_peer_broker_constraints_record_obligation_and_allow_write(tmp_path):
     ws, logger, strategy = _broker_workspace(
         tmp_path, "t01_stale_clobber", ["agent-timeout", "agent-retries"],
         timeout=1.0,
@@ -262,15 +262,25 @@ async def test_peer_broker_constraints_request_revision_not_hard_conflict(tmp_pa
                      new_string=T1_TIMEOUT_DEFAULT),
         )
 
-        assert not outcome.ok
-        assert outcome.status == "conflict"
-        assert "revise before writing" in outcome.message
-        assert "preserve retries key" in outcome.message
-        assert "timeout and retries" in outcome.message
+        assert outcome.ok
+        notifications = strategy.drain_notifications("agent-timeout")
+        assert any("preserve retries key" in note for note in notifications)
+        assert any("timeout and retries" in note for note in notifications)
         events = read_events(logger.path)
         assert any(
             event.get("event") == "coord"
-            and event.get("action") == "broker_revision_requested"
+            and event.get("action") == "broker_constraints_recorded"
+            for event in events
+        )
+        assert any(
+            event.get("event") == "coord"
+            and event.get("action") == "broker_obligation_recorded"
+            for event in events
+        )
+        assert any(
+            event.get("event") == "coord"
+            and event.get("action") == "broker_write_allowed"
+            and event.get("obligations_recorded") is True
             for event in events
         )
         assert not any(
@@ -278,6 +288,59 @@ async def test_peer_broker_constraints_request_revision_not_hard_conflict(tmp_pa
             and event.get("action") == "broker_conflict"
             for event in events
         )
+    finally:
+        _finish(ws, logger)
+
+
+async def test_peer_broker_reuses_cached_obligation_without_second_request(tmp_path):
+    ws, logger, strategy = _broker_workspace(
+        tmp_path, "t03_fetch_clobber", ["agent-timeout", "agent-retries"],
+        timeout=1.0,
+    )
+    calls = 0
+    try:
+        await strategy.read("agent-retries", "api.py")
+
+        async def revise(request):
+            nonlocal calls
+            calls += 1
+            assert "api.fetch.signature" in request["resources"]
+            return {
+                "decision": "ack_with_constraints",
+                "constraints": ["fetch must keep timeout and retries"],
+                "contract": "final fetch supports both behaviors",
+            }
+
+        strategy.register_negotiator("agent-retries", revise)
+        first = await strategy.write(
+            "agent-timeout",
+            "api.py",
+            Mutation(
+                kind="replace",
+                old_string="def fetch(url, transport):\n",
+                new_string="def fetch(url, transport, timeout=10):\n",
+            ),
+        )
+        second = await strategy.write(
+            "agent-timeout",
+            "api.py",
+            Mutation(
+                kind="replace",
+                old_string="    return transport(url)\n",
+                new_string="    return transport(url, timeout=timeout)\n",
+            ),
+        )
+
+        assert first.ok
+        assert second.ok
+        assert calls == 1
+        events = read_events(logger.path)
+        requests = [
+            event for event in events
+            if event.get("event") == "coord"
+            and event.get("action") == "broker_request"
+        ]
+        assert len(requests) == 1
     finally:
         _finish(ws, logger)
 

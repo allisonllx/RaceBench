@@ -1,0 +1,125 @@
+{"ts": 0.1983, "event": "trial_start", "task": "t05_cross_file", "failure_mode": "cross_file_dependency", "benign": false, "strategy": "adaptive_lease", "n_agents": 2, "rep": 2, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-models", "agent-services"]}
+{"ts": 0.242, "event": "notification_delivered", "agent": "agent-models", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 0.2433, "event": "notification_delivered", "agent": "agent-services", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 2.4904, "event": "llm_usage", "agent": "agent-services", "turn": 1, "prompt_tokens": 823, "completion_tokens": 87}
+{"ts": 2.4907, "event": "tool_call", "agent": "agent-services", "turn": 1, "tool": "declare_scope", "args": {"resources": ["services.registration.register", "services.queries.active_users", "models.user_factory", "db.append_user", "services package behavior"], "path": "services/registration.py", "summary": "Implement register to create user via models factory and persist with db.append_user; implement active_users to return users with last_seen within days using db.get_users."}}
+{"ts": 2.4909, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-services", "path": "services/registration.py", "symbols": [], "resources": ["db.append_user", "models.user_factory", "services.queries.active_users", "services.registration.register"], "summary": "Implement register to create user via models factory and persist with db.append_user; implement active_users to return users with last_seen within days using db.get_users.", "exports": [], "must_preserve": []}
+{"ts": 2.491, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-services", "path": "services/registration.py", "lease_level": "resource", "symbols": [], "resources": ["db.append_user", "models.user_factory", "services.queries.active_users", "services.registration.register"]}
+{"ts": 2.9338, "event": "llm_usage", "agent": "agent-models", "turn": 1, "prompt_tokens": 840, "completion_tokens": 105}
+{"ts": 2.9339, "event": "tool_call", "agent": "agent-models", "turn": 1, "tool": "declare_scope", "args": {"resources": ["models.user.create_user", "models.user.make_user_removed", "models.__init__.user_exports_changed", "models.validators.email_validation"], "path": "models/user.py", "symbols": ["create_user", "make_user"], "summary": "Replace make_user(name) with create_user(name,email) validating email contains '@' and returning dict with name,email,active. Remove old make_user and update package exports accordingly. Preserve othe"}}
+{"ts": 2.934, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-models", "path": "models/user.py", "symbols": ["create_user", "make_user"], "resources": ["models.__init__.user_exports_changed", "models.user.create_user", "models.user.make_user_removed", "models.validators.email_validation"], "summary": "Replace make_user(name) with create_user(name,email) validating email contains '@' and returning dict with name,email,active. Remove old make_user and update package exports accordingly. Preserve other models exports.", "exports": [], "must_preserve": []}
+{"ts": 2.934, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-models", "path": "models/user.py", "lease_level": "resource", "symbols": ["create_user", "make_user"], "resources": ["models.__init__.user_exports_changed", "models.user.create_user", "models.user.make_user_removed", "models.validators.email_validation"]}
+{"ts": 3.5471, "event": "llm_usage", "agent": "agent-services", "turn": 2, "prompt_tokens": 938, "completion_tokens": 22}
+{"ts": 3.5472, "event": "tool_call", "agent": "agent-services", "turn": 2, "tool": "grep", "args": {"pattern": "services", "glob": "**/*"}}
+{"ts": 3.5553, "event": "search", "agent": "agent-services", "kind": "grep", "pattern": "services", "n": 6}
+{"ts": 4.4061, "event": "llm_usage", "agent": "agent-models", "turn": 2, "prompt_tokens": 980, "completion_tokens": 19}
+{"ts": 4.4063, "event": "tool_call", "agent": "agent-models", "turn": 2, "tool": "list_files", "args": {}}
+{"ts": 4.5751, "event": "llm_usage", "agent": "agent-services", "turn": 3, "prompt_tokens": 1071, "completion_tokens": 20}
+{"ts": 4.5753, "event": "tool_call", "agent": "agent-services", "turn": 3, "tool": "read_file", "args": {"path": "services/registration.py"}}
+{"ts": 4.5761, "event": "read", "agent": "agent-services", "path": "services/registration.py", "found": true, "size": 248}
+{"ts": 5.5013, "event": "llm_usage", "agent": "agent-models", "turn": 3, "prompt_tokens": 1059, "completion_tokens": 19}
+{"ts": 5.5014, "event": "tool_call", "agent": "agent-models", "turn": 3, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 5.5023, "event": "read", "agent": "agent-models", "path": "models/user.py", "found": true, "size": 127}
+{"ts": 5.6866, "event": "llm_usage", "agent": "agent-services", "turn": 4, "prompt_tokens": 1155, "completion_tokens": 20}
+{"ts": 5.6867, "event": "tool_call", "agent": "agent-services", "turn": 4, "tool": "read_file", "args": {"path": "services/queries.py"}}
+{"ts": 5.687, "event": "read", "agent": "agent-services", "path": "services/queries.py", "found": true, "size": 190}
+{"ts": 6.5051, "event": "llm_usage", "agent": "agent-models", "turn": 4, "prompt_tokens": 1119, "completion_tokens": 21}
+{"ts": 6.5054, "event": "tool_call", "agent": "agent-models", "turn": 4, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 6.5063, "event": "read", "agent": "agent-models", "path": "models/__init__.py", "found": true, "size": 118}
+{"ts": 6.8837, "event": "llm_usage", "agent": "agent-services", "turn": 5, "prompt_tokens": 1226, "completion_tokens": 21}
+{"ts": 6.8839, "event": "tool_call", "agent": "agent-services", "turn": 5, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 6.8846, "event": "read", "agent": "agent-services", "path": "models/__init__.py", "found": true, "size": 118}
+{"ts": 7.8951, "event": "llm_usage", "agent": "agent-models", "turn": 5, "prompt_tokens": 1178, "completion_tokens": 20}
+{"ts": 7.8952, "event": "tool_call", "agent": "agent-models", "turn": 5, "tool": "read_file", "args": {"path": "models/validators.py"}}
+{"ts": 7.8959, "event": "read", "agent": "agent-models", "path": "models/validators.py", "found": true, "size": 127}
+{"ts": 7.9274, "event": "llm_usage", "agent": "agent-services", "turn": 6, "prompt_tokens": 1285, "completion_tokens": 19}
+{"ts": 7.9275, "event": "tool_call", "agent": "agent-services", "turn": 6, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 7.9278, "event": "read", "agent": "agent-services", "path": "models/user.py", "found": true, "size": 127}
+{"ts": 9.0013, "event": "llm_usage", "agent": "agent-services", "turn": 7, "prompt_tokens": 1345, "completion_tokens": 18}
+{"ts": 9.0014, "event": "tool_call", "agent": "agent-services", "turn": 7, "tool": "read_file", "args": {"path": "db.py"}}
+{"ts": 9.0025, "event": "read", "agent": "agent-services", "path": "db.py", "found": false, "size": 0}
+{"ts": 10.0837, "event": "llm_usage", "agent": "agent-services", "turn": 8, "prompt_tokens": 1386, "completion_tokens": 20}
+{"ts": 10.0838, "event": "tool_call", "agent": "agent-services", "turn": 8, "tool": "glob", "args": {"pattern": "**/db*.py"}}
+{"ts": 10.0863, "event": "search", "agent": "agent-services", "kind": "glob", "pattern": "**/db*.py", "n": 0}
+{"ts": 11.1781, "event": "llm_usage", "agent": "agent-services", "turn": 9, "prompt_tokens": 1419, "completion_tokens": 23}
+{"ts": 11.1782, "event": "tool_call", "agent": "agent-services", "turn": 9, "tool": "grep", "args": {"pattern": "append_user", "glob": "**/*"}}
+{"ts": 11.181, "event": "search", "agent": "agent-services", "kind": "grep", "pattern": "append_user", "n": 4}
+{"ts": 12.28, "event": "llm_usage", "agent": "agent-services", "turn": 10, "prompt_tokens": 1517, "completion_tokens": 21}
+{"ts": 12.2801, "event": "tool_call", "agent": "agent-services", "turn": 10, "tool": "read_file", "args": {"path": "db/__init__.py"}}
+{"ts": 12.2805, "event": "read", "agent": "agent-services", "path": "db/__init__.py", "found": true, "size": 118}
+{"ts": 13.3269, "event": "llm_usage", "agent": "agent-services", "turn": 11, "prompt_tokens": 1580, "completion_tokens": 19}
+{"ts": 13.327, "event": "tool_call", "agent": "agent-services", "turn": 11, "tool": "read_file", "args": {"path": "db/store.py"}}
+{"ts": 13.3274, "event": "read", "agent": "agent-services", "path": "db/store.py", "found": true, "size": 183}
+{"ts": 14.1117, "event": "llm_usage", "agent": "agent-models", "turn": 6, "prompt_tokens": 1239, "completion_tokens": 482}
+{"ts": 14.1118, "event": "tool_call", "agent": "agent-models", "turn": 6, "tool": "edit_file", "args": {"path": "models/user.py", "old_string": "\"\"\"User factory functions.\"\"\"\n\n\ndef make_user(name):\n    \"\"\"Create a user record.\"\"\"\n    return {\"name\": name, \"active\": True}\n", "new_string": "\"\"\"User factory functions.\"\"\"\n\nfrom models.validators import looks_like_email\n\n\ndef create_user(name, email):\n    \"\"\"Create a user record with validated email.\"\"\"\n    if not looks_like_email(email):\n "}}
+{"ts": 14.1122, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-models", "path": "models/user.py", "lease_level": "file", "symbols": ["<module>", "create_user", "make_user"], "resources": ["models.__init__.user_exports_changed", "models.user.create_user", "models.user.make_user_removed", "models.validators.email_validation"]}
+{"ts": 14.1123, "event": "coord", "strategy": "adaptive_lease", "action": "read_write_intersection", "writer": "agent-models", "reader": "agent-services", "path": "models/user.py", "symbols": ["<module>", "make_user"]}
+{"ts": 14.1127, "event": "write", "agent": "agent-models", "path": "models/user.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["<module>", "create_user", "make_user"], "message": ""}
+{"ts": 14.4375, "event": "llm_usage", "agent": "agent-services", "turn": 12, "prompt_tokens": 1656, "completion_tokens": 21}
+{"ts": 14.4376, "event": "tool_call", "agent": "agent-services", "turn": 12, "tool": "read_file", "args": {"path": "services/__init__.py"}}
+{"ts": 14.4382, "event": "read", "agent": "agent-services", "path": "services/__init__.py", "found": true, "size": 312}
+{"ts": 16.1971, "event": "llm_usage", "agent": "agent-models", "turn": 7, "prompt_tokens": 1411, "completion_tokens": 101}
+{"ts": 16.1973, "event": "tool_call", "agent": "agent-models", "turn": 7, "tool": "edit_file", "args": {"path": "models/__init__.py", "old_string": "\"\"\"Models package — re-exports the public user factory.\"\"\"\nfrom models.user import make_user\n\n__all__ = [\"make_user\"]\n", "new_string": "\"\"\"Models package — re-exports the public user factory.\"\"\"\nfrom models.user import create_user\n\n__all__ = [\"create_user\"]\n"}}
+{"ts": 16.1978, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-models", "path": "models/__init__.py", "lease_level": "file", "symbols": ["<module>"], "resources": ["models.__init__.user_exports_changed", "models.user.create_user", "models.user.make_user_removed", "models.validators.email_validation"]}
+{"ts": 16.1978, "event": "coord", "strategy": "adaptive_lease", "action": "read_write_intersection", "writer": "agent-models", "reader": "agent-services", "path": "models/__init__.py", "symbols": ["<module>"]}
+{"ts": 16.1982, "event": "write", "agent": "agent-models", "path": "models/__init__.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 16.334, "event": "llm_usage", "agent": "agent-services", "turn": 13, "prompt_tokens": 1758, "completion_tokens": 28}
+{"ts": 16.3341, "event": "tool_call", "agent": "agent-services", "turn": 13, "tool": "read_file", "args": {"path": "tests/test_services_smoke.py"}}
+{"ts": 16.3347, "event": "read", "agent": "agent-services", "path": "tests/test_services_smoke.py", "found": true, "size": 474}
+{"ts": 17.5642, "event": "llm_usage", "agent": "agent-models", "turn": 8, "prompt_tokens": 1528, "completion_tokens": 13}
+{"ts": 17.5644, "event": "tool_call", "agent": "agent-models", "turn": 8, "tool": "run_tests", "args": {}}
+{"ts": 17.8188, "event": "run_tests", "agent": "agent-models", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 18.9825, "event": "llm_usage", "agent": "agent-models", "turn": 9, "prompt_tokens": 1571, "completion_tokens": 23}
+{"ts": 18.9826, "event": "tool_call", "agent": "agent-models", "turn": 9, "tool": "grep", "args": {"pattern": "make_user", "glob": "**/*"}}
+{"ts": 18.9862, "event": "search", "agent": "agent-models", "kind": "grep", "pattern": "make_user", "n": 0}
+{"ts": 20.4221, "event": "llm_usage", "agent": "agent-models", "turn": 10, "prompt_tokens": 1607, "completion_tokens": 53}
+{"ts": 20.4223, "event": "tool_call", "agent": "agent-models", "turn": 10, "tool": "done", "args": {"summary": "Replaced make_user with create_user(name,email) in models/user.py and updated models/__init__.py; added email validation using models.validators.looks_like_email; removed old make_user."}}
+{"ts": 20.4225, "event": "agent_done_coord", "agent": "agent-models"}
+{"ts": 20.4226, "event": "agent_done", "agent": "agent-models", "status": "done", "turns": 10, "prompt_tokens": 12532, "completion_tokens": 856}
+{"ts": 22.6947, "event": "llm_usage", "agent": "agent-services", "turn": 14, "prompt_tokens": 1902, "completion_tokens": 486}
+{"ts": 22.6949, "event": "tool_call", "agent": "agent-services", "turn": 14, "tool": "edit_file", "args": {"path": "services/registration.py", "old_string": "\"\"\"Create a user via the user-factory function models provides, append it\n    to the store, and return it.\"\"\"\n    raise NotImplementedError", "new_string": "\"\"\"Create a user via the user-factory function models provides, append it\n    to the store, and return it.\"\"\"\n    # Use the models package's factory to create a base user record.\n    user = models.mak"}}
+{"ts": 22.6958, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-services", "path": "services/registration.py", "lease_level": "resource", "symbols": ["register"], "resources": ["db.append_user", "models.user_factory", "services.queries.active_users", "services.registration.register"]}
+{"ts": 22.6968, "event": "write", "agent": "agent-services", "path": "services/registration.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["register"], "message": ""}
+{"ts": 24.7069, "event": "llm_usage", "agent": "agent-services", "turn": 15, "prompt_tokens": 2078, "completion_tokens": 106}
+{"ts": 24.7071, "event": "tool_call", "agent": "agent-services", "turn": 15, "tool": "edit_file", "args": {"path": "services/queries.py", "old_string": "\"\"\"Return the list of stored users whose \"active\" value is True.\"\"\"\n    raise NotImplementedError", "new_string": "\"\"\"Return the list of stored users whose \"active\" value is True.\"\"\"\n    # Filter the current list of users to those marked active.\n    return [u for u in all_users() if u.get(\"active\") is True]"}}
+{"ts": 24.7083, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-services", "path": "services/queries.py", "lease_level": "resource", "symbols": ["active_users"], "resources": ["db.append_user", "models.user_factory", "services.queries.active_users", "services.registration.register"]}
+{"ts": 24.7097, "event": "write", "agent": "agent-services", "path": "services/queries.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["active_users"], "message": ""}
+{"ts": 25.9731, "event": "llm_usage", "agent": "agent-services", "turn": 16, "prompt_tokens": 2200, "completion_tokens": 13}
+{"ts": 25.9732, "event": "tool_call", "agent": "agent-services", "turn": 16, "tool": "run_tests", "args": {}}
+{"ts": 26.2383, "event": "run_tests", "agent": "agent-services", "passed": 1, "failed": 1, "errored": 0}
+{"ts": 32.5523, "event": "llm_usage", "agent": "agent-services", "turn": 17, "prompt_tokens": 2343, "completion_tokens": 477}
+{"ts": 32.5525, "event": "tool_call", "agent": "agent-services", "turn": 17, "tool": "grep", "args": {"pattern": "make_user", "glob": "**/*"}}
+{"ts": 32.5596, "event": "search", "agent": "agent-services", "kind": "grep", "pattern": "make_user", "n": 1}
+{"ts": 35.2459, "event": "llm_usage", "agent": "agent-services", "turn": 18, "prompt_tokens": 2391, "completion_tokens": 147}
+{"ts": 35.2461, "event": "tool_call", "agent": "agent-services", "turn": 18, "tool": "list_files", "args": {}}
+{"ts": 48.9767, "event": "llm_usage", "agent": "agent-services", "turn": 19, "prompt_tokens": 2470, "completion_tokens": 1310}
+{"ts": 48.977, "event": "tool_call", "agent": "agent-services", "turn": 19, "tool": "grep", "args": {"pattern": "import models.user", "glob": "**/*"}}
+{"ts": 48.99, "event": "search", "agent": "agent-services", "kind": "grep", "pattern": "import models.user", "n": 0}
+{"ts": 63.9158, "event": "llm_usage", "agent": "agent-services", "turn": 20, "prompt_tokens": 2507, "completion_tokens": 1359}
+{"ts": 63.9161, "event": "tool_call", "agent": "agent-services", "turn": 20, "tool": "edit_file", "args": {"path": "services/registration.py", "old_string": "import models\nfrom db import append_user\n\n\ndef register(name, email):\n    \"\"\"Create a user via the user-factory function models provides, append it\n    to the store, and return it.\"\"\"\n    # Use the mo", "new_string": "from models.user import make_user\nfrom db import append_user\n\n\ndef register(name, email):\n    \"\"\"Create a user via the user-factory function models provides, append it\n    to the store, and return it."}}
+{"ts": 63.9178, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-services", "path": "services/registration.py", "lease_level": "file", "symbols": ["<module>", "register"], "resources": ["db.append_user", "models.user_factory", "services.queries.active_users", "services.registration.register"]}
+{"ts": 63.9187, "event": "write", "agent": "agent-services", "path": "services/registration.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["<module>", "register"], "message": ""}
+{"ts": 64.9389, "event": "llm_usage", "agent": "agent-services", "turn": 21, "prompt_tokens": 2788, "completion_tokens": 13}
+{"ts": 64.939, "event": "tool_call", "agent": "agent-services", "turn": 21, "tool": "run_tests", "args": {}}
+{"ts": 65.2864, "event": "run_tests", "agent": "agent-services", "passed": 0, "failed": 2, "errored": 0}
+{"ts": 71.6883, "event": "llm_usage", "agent": "agent-services", "turn": 22, "prompt_tokens": 3148, "completion_tokens": 473}
+{"ts": 71.6885, "event": "tool_call", "agent": "agent-services", "turn": 22, "tool": "read_file", "args": {"path": "models/user.py"}}
+{"ts": 71.6896, "event": "read", "agent": "agent-services", "path": "models/user.py", "found": true, "size": 299}
+{"ts": 73.8833, "event": "llm_usage", "agent": "agent-services", "turn": 23, "prompt_tokens": 3241, "completion_tokens": 91}
+{"ts": 73.8835, "event": "tool_call", "agent": "agent-services", "turn": 23, "tool": "read_file", "args": {"path": "models/__init__.py"}}
+{"ts": 73.8855, "event": "read", "agent": "agent-services", "path": "models/__init__.py", "found": true, "size": 122}
+{"ts": 76.4081, "event": "llm_usage", "agent": "agent-services", "turn": 24, "prompt_tokens": 3300, "completion_tokens": 154}
+{"ts": 76.4082, "event": "tool_call", "agent": "agent-services", "turn": 24, "tool": "read_file", "args": {"path": "services/registration.py"}}
+{"ts": 76.4096, "event": "read", "agent": "agent-services", "path": "services/registration.py", "found": true, "size": 530}
+{"ts": 83.8686, "event": "llm_usage", "agent": "agent-services", "turn": 25, "prompt_tokens": 3443, "completion_tokens": 596}
+{"ts": 83.8691, "event": "tool_call", "agent": "agent-services", "turn": 25, "tool": "edit_file", "args": {"path": "services/registration.py", "old_string": "\"\"\"Registration service stubs.\"\"\"\nfrom models.user import make_user\nfrom db import append_user\n\n\ndef register(name, email):\n    \"\"\"Create a user via the user-factory function models provides, append i", "new_string": "\"\"\"Registration service stubs.\"\"\"\nimport models\nfrom db import append_user\n\n\ndef register(name, email):\n    \"\"\"Create a user via the user-factory function models provides, append it\n    to the store, "}}
+{"ts": 83.8717, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-services", "path": "services/registration.py", "lease_level": "file", "symbols": ["<module>", "register"], "resources": ["db.append_user", "models.user_factory", "services.queries.active_users", "services.registration.register"]}
+{"ts": 83.874, "event": "write", "agent": "agent-services", "path": "services/registration.py", "kind": "replace", "status": "applied", "waited_s": 0.005, "changed_symbols": ["<module>", "register"], "message": ""}
+{"ts": 85.0186, "event": "llm_usage", "agent": "agent-services", "turn": 26, "prompt_tokens": 3729, "completion_tokens": 13}
+{"ts": 85.0188, "event": "tool_call", "agent": "agent-services", "turn": 26, "tool": "run_tests", "args": {}}
+{"ts": 85.3623, "event": "run_tests", "agent": "agent-services", "passed": 2, "failed": 0, "errored": 0}
+{"ts": 86.77, "event": "llm_usage", "agent": "agent-services", "turn": 27, "prompt_tokens": 3768, "completion_tokens": 41}
+{"ts": 86.7701, "event": "tool_call", "agent": "agent-services", "turn": 27, "tool": "done", "args": {"summary": "Implemented services.register to use models.create_user and db.append_user; implemented services.active_users to return active users from db.all_users."}}
+{"ts": 86.7702, "event": "agent_done_coord", "agent": "agent-services"}
+{"ts": 86.7702, "event": "agent_done", "agent": "agent-services", "status": "done", "turns": 27, "prompt_tokens": 56467, "completion_tokens": 5618}
+{"ts": 87.0375, "event": "trial_end", "correct": true, "oracle_passed": 5, "oracle_total": 5, "wall_clock_s": 86.53, "prompt_tokens": 68999, "completion_tokens": 6474, "agent_statuses": {"agent-models": "done", "agent-services": "done"}, "oracle_output": ".....                                                                    [100%]\n5 passed in 0.01s\n"}

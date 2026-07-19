@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from analysis.confidence import bootstrap_ci
+from analysis.make_report import main as make_report_main
 from analysis.html_report import write_html_report
 from analysis.metrics import (
     aggregate,
@@ -301,6 +302,26 @@ def test_build_replay_payload_keys_by_log_and_handles_missing_fields(tmp_path):
     assert any(e["event"] == "tool_call" for e in payload["minimal.jsonl"]["events"])
 
 
+def test_build_replay_payload_uses_replay_key_when_present(tmp_path):
+    _write_log(tmp_path / "minimal.jsonl", [
+        _start(agent_ids=["agent-a"]),
+        {"ts": 1.0, "event": "tool_call", "agent": "agent-a",
+         "tool": "list_files"},
+        _end(agent_statuses={"agent-a": "done"}),
+    ])
+    df = pd.DataFrame([{
+        "log": "minimal.jsonl",
+        "run_dir": str(tmp_path),
+        "replay_key": "../source/minimal.jsonl",
+        "log_label": "source/minimal.jsonl",
+    }])
+
+    payload = build_replay_payload(df, default_run_dir=tmp_path)
+
+    assert set(payload) == {"../source/minimal.jsonl"}
+    assert payload["../source/minimal.jsonl"]["log"] == "source/minimal.jsonl"
+
+
 def test_html_report_contains_labels_and_sections(tmp_path):
     _write_log(tmp_path / "ok.jsonl", [_start(), _end()])
     _write_log(tmp_path / "cascade.jsonl", [
@@ -368,3 +389,57 @@ def test_html_report_contains_labels_and_sections(tmp_path):
     assert "racebench-data" in html
     assert html.index("Observable Event Replay") < html.index("Agent Activity")
     assert html.index("Observable Event Replay") < html.index("Trial Logs")
+
+
+def test_html_report_links_combined_run_logs_relatively(tmp_path):
+    out_dir = tmp_path / "combined"
+    run_a = tmp_path / "run-a"
+    run_b = tmp_path / "run-b"
+    out_dir.mkdir()
+    run_a.mkdir()
+    run_b.mkdir()
+    _write_log(run_a / "a.jsonl", [_start(strategy="naive"), _end()])
+    _write_log(run_b / "b.jsonl", [_start(strategy="adaptive_lease"), _end()])
+    df = pd.concat([
+        run_dataframe(run_a, prices=DEFAULT_PRICES),
+        run_dataframe(run_b, prices=DEFAULT_PRICES),
+    ], ignore_index=True)
+    level_a = level_a_dataframe(df)
+
+    path = write_html_report(
+        out_dir=out_dir,
+        trials=df,
+        level_a_trials=level_a,
+        external_trials=df[df["mode"] == "external"],
+        aggregate=aggregate(level_a),
+        overall=aggregate_overall(level_a),
+        by_strategy=aggregate_by_strategy(level_a),
+    )
+
+    html = path.read_text(encoding="utf-8")
+    assert "../run-a/a.jsonl" in html
+    assert "../run-b/b.jsonl" in html
+    assert "run-a/a.jsonl" in html
+    assert "run-b/b.jsonl" in html
+    assert '"replay_key": "../run-a/a.jsonl"' in html
+
+
+def test_make_report_accepts_output_dir_for_combined_runs(tmp_path):
+    run_a = tmp_path / "run-a"
+    run_b = tmp_path / "run-b"
+    out_dir = tmp_path / "combined"
+    run_a.mkdir()
+    run_b.mkdir()
+    _write_log(run_a / "a.jsonl", [_start(strategy="naive"), _end()])
+    _write_log(run_b / "b.jsonl", [
+        _start(strategy="adaptive_lease"),
+        _end(prompt_tokens=200, completion_tokens=20),
+    ])
+
+    result = make_report_main([str(run_a), str(run_b), "--out", str(out_dir)])
+
+    assert result == 0
+    trials = pd.read_csv(out_dir / "trials.csv")
+    assert len(trials) == 2
+    assert set(trials["strategy"]) == {"naive", "adaptive_lease"}
+    assert (out_dir / "report.html").is_file()

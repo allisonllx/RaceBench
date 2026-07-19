@@ -1,0 +1,56 @@
+# Full extension grid for the post-grid Level A strategies.
+#
+# This keeps the original grid-v1 baseline stable. It reruns the same 16 tasks
+# and 5 repetitions only for the newer experimental strategies:
+# peer_contract, peer_broker, and adaptive_lease.
+#
+# Expected size: 16 tasks x 3 strategies x 5 reps = 240 trials after each
+# task's required agent count is applied.
+#
+# Recommended flow:
+#   1. Run targeted configs first:
+#      - runner/config.peer-targeted.yaml
+#      - runner/config.adaptive-lease-targeted.yaml
+#   2. Run this full extension grid only if the targeted signal is worth the
+#      extra model spend.
+#   3. Compare results/grid-v1-extensions-full against results/grid-v1 and the
+#      targeted extension folders.
+run_id: grid-v1-extensions-full
+mode: openai
+provider: openai
+model: gpt-5-mini
+tasks:
+  - t01_stale_clobber
+  - t02_benign_overlap
+  - t03_fetch_clobber
+  - t04_cascade
+  - t05_cross_file
+  - t06_feature_pair
+  - t07_rw_canary
+  - t08_livelock
+  - t09_overhead
+  - t10_phantom_tool
+  - t11_irreversible
+  - t12_split_view
+  # External-validity track (FastAPI Conduit)
+  - rw_c_benign_overlap
+  - rw_b_signature_drift
+  - rw_d_tag_antidependency
+  - rw_e_cascade
+strategies:
+  - peer_contract
+  - peer_broker
+  - adaptive_lease
+agent_counts: [2, 3, 4]
+reps: 5
+max_turns: 40
+lock_timeout_s: 30
+trial_timeout_s: 900
+# Broker and adaptive-lease turns can be expensive; keep this modest unless
+# rate limits and budget are comfortable.
+parallel: 2
+budget:
+  max_usd: 18
+  max_total_tokens: 30000000
+prices:
+  gpt-5-mini: {input: 0.25, output: 2.00}
