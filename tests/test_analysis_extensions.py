@@ -374,6 +374,11 @@ def test_html_report_contains_labels_and_sections(tmp_path):
     assert "replaySelect" in html
     assert "replayPickCount" in html
     assert "replayZoom" in html
+    assert 'step="0.01"' in html
+    assert "clampReplayZoom" in html
+    assert "replayPinchCenterX" in html
+    assert "anchorClientX" in html
+    assert "Math.exp(-event.deltaY * 0.002)" in html
     assert "laneEventLevels" in html
     assert "replayTickStep" in html
     assert "replayRuler" in html

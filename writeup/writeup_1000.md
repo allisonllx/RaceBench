@@ -2,41 +2,43 @@
 
 ## 1. Problem
 
-Parallel coding agents are easy to launch but hard to trust. When two agents edit the same repository, they can clobber each other's work, read stale state, coordinate too much, or waste tokens. Existing proposals usually report gains inside one system or task distribution, making it hard to tell whether the mechanism helped or the product simply gave it easier work.
+Parallel coding agents are easy to launch but hard to trust. When two or more agents edit the same repository, they can clobber each other's work, read stale state, coordinate too much, or waste tokens. Existing proposals usually report gains inside one system or task distribution, making it hard to tell whether the mechanism helped or the product simply gave it easier work.
 
-RaceBench asks: given the same repository, prompts, models, task pairs, and oracles, which coordination policies reduce race failures, and when do they create avoidable stalls? It also tests new coordination ideas by asking whether they improve correctness or merely add stalls, tokens, latency, or hidden overcoordination. My pre-grid criteria were: replay fixed race tasks, compare against naive, report correctness, wall time, tokens, wasted work, stalls, and false-positive stalls, and preserve auditable logs.
+RaceBench asks: given the same repository, prompts, models, task pairs, and oracles, which coordination policies reduce race failures, and when do they create avoidable stalls? The tasks are seeded for **contention**, not convenience: solo calibration checks whether agents can do the work alone; parallel cells measure what coordination adds on top. It also tests new coordination ideas by asking whether they improve correctness or merely add stalls, tokens, latency, or hidden overcoordination. My pre-grid criteria were: replay fixed race tasks, compare against naive, report correctness, wall time, tokens, wasted work, stalls, and false-positive stalls, and preserve auditable logs.
 
 The novelty is not just measuring failures. It is also measuring overcoordination. False-positive stalls, where a strategy blocks safe parallelism, are rarely foregrounded in prior multi-agent coordination work, but they matter in practice because a safe agent team that serializes everything is not very useful.
 
 ## 2. Approach
 
-RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records reads and writes, applies a coordination strategy, runs the oracle, and writes JSONL logs plus aggregate tables. The current suite has 16 tasks and 6 Level A headline strategies: `naive`, `file_lock`, `notify`, `git_hash`, `ast_scope`, and `ast_dep`. Post-grid extensions, `peer_contract`, `peer_broker`, and `adaptive_lease`, adapt older negotiation and locking ideas to LLM agents editing shared code.
+RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records reads and writes, applies a coordination strategy, runs the oracle, and writes JSONL logs plus aggregate tables. The headline grid uses 16 tasks and 6 Level A strategies: `naive`, `file_lock`, `notify`, `git_hash`, `ast_scope`, and `ast_dep`. Post-grid extensions ([`peer_contract` / `peer_broker`](#peer-broker-v25-iteration), [`adaptive_lease`](#adaptive-lease-iteration)) are appendix-only for this submission.
 
-I considered three broader multi-agent coordination approaches and ruled them out for this submission. First, an auto-merge editor that rewrites two agents' patches into one final patch. I ruled it out because a pass or fail would depend on both the coordination rule and the **merge algorithm**, so the result would be harder to interpret. Second, a full CoAgent or MTPO-style saga layer. That is valuable, but requires inverse operations and workflow semantics beyond this coding benchmark. Third, direct comparison with commercial or open-source agent products like Claude Code and Cursor. However, without shared mediation hooks (e.g. tool call usage), that mostly measures each product's hidden planner, not a reusable coordination policy.
+I ruled out three broader approaches. An auto-merge editor would confound coordination with merge quality. A full CoAgent or MTPO-style saga layer needs inverse operations beyond this benchmark. Direct comparison with products like Claude Code or Cursor without shared mediation hooks mostly measures each product's hidden planner, not a reusable policy.
 
-I chose an instrumented Level A harness because it gives the cleanest attribution. The task, model, oracle, and prompts stay fixed, while only the coordination mechanism changes. I still support Level C black-box runtime checks, but I label them separately because they are correctness and wall-clock checks, not apples-to-apples strategy comparisons unless the runtime emits RaceBench-compatible events.
+I chose an instrumented [Level A](#level-a-to-c) harness for cleanest attribution: fixed task, model, oracle, and prompts; only the coordination mechanism changes. [Level C](#level-a-to-c) black-box runtime checks stay separate unless a runtime emits RaceBench-compatible events.
 
 ## 3. Evidence
 
-The main run, `results/grid-v1`, contains 480 replayable trials: 16 tasks, 6 strategies, 5 repetitions. The pooled pass rate was 74.4 percent, with about $13.56 spent and 37.7M tokens recorded. The report pipeline validates JSONL structure, required events, token-accounting fallbacks, and external-mode tagging, then generates aggregate tables, deterministic bootstrap confidence intervals, and a static HTML explorer.
+The main run, `results/grid-v1`, contains 480 replayable trials: 16 tasks, 6 strategies, 5 repetitions. The pooled pass rate was 74.4 percent, with about $13.56 spent and 37.7M tokens recorded. JSONL logs record reads, writes, stalls, and coordination events so claims trace to trajectories, not demos alone. The report pipeline validates log structure, then generates aggregate tables, bootstrap confidence intervals, and a [static HTML explorer](#full-results).
 
-The baseline is intentionally simple. `naive` gives the floor for "just run both agents." On hard clobber cases, the floor collapses: in `t01_same_line` and `t03_fetch_clobber`, naive went 0/5 while `file_lock` went 5/5. That supports the modest claim that coordination is necessary for destructive overlap. On `rw_d` antidependency cases, naive went 1/5 while `notify` went 5/5, showing that lightweight notification can help when the issue is stale reads rather than simultaneous writes.
+The baseline is intentionally simple. `naive` gives the floor for "just run both agents." On hard clobber cases, the floor collapses: in `t01_stale_clobber` and `t03_fetch_clobber`, naive went 0/5 while `file_lock` went 5/5. That supports the modest claim that coordination is necessary for destructive overlap. On `rw_d_tag_antidependency`, naive went 1/5 while `notify` went 5/5, showing that lightweight notification can help when the issue is stale reads rather than simultaneous writes.
 
-The evidence also shows trade-offs. In `t02_disjoint`, `file_lock` stayed correct but produced 5/5 false-positive stalls on benign parallel work. That is why RaceBench tracks stalls separately from correctness. A strategy can pass tests and still destroy concurrency.
+The evidence also shows trade-offs. In `t02_benign_overlap`, `file_lock` stayed correct but averaged 1.0 false-positive stall per trial on benign parallel work. That is why RaceBench tracks stalls separately from correctness. A strategy can pass tests and still destroy concurrency.
 
 ## 4. Constraints
 
-The biggest constraint was cost. I kept the grid small and reused the same logs for the final report instead of buying a larger sweep. I did run a scoped Agnes sensitivity check, but not a full second-provider grid. My prediction is that the relative shape of results, for example file locks helping hard clobbers but overblocking disjoint work, would remain similar across models because those effects come from repository state and strategy semantics. Still, that is a hypothesis, not full-grid evidence.
+The biggest constraint was cost. I kept the grid small and reused the same logs for the final report instead of buying a larger sweep. I did run a [scoped Agnes sensitivity check](#cross-run-findings), but not a full second-provider grid.
 
-There are also realism constraints. RaceBench currently uses a local Conduit-style in-process setup, fixed task pairs, and deterministic oracles. That makes the benchmark reproducible and cheap, but it does not capture long-horizon planning, changing user requirements, flaky external services, or heterogeneous agent products.
+Coordination also has a latency price. On pooled n=2 cells, parallel `notify` averaged 51.8s and 72.7k tokens while `file_lock` averaged 174.2s with heavy benign-overlap blocking. Safety and throughput are not the same metric. There are also realism constraints: RaceBench uses a local Conduit-style in-process setup, fixed task pairs, and deterministic oracles. That keeps trials reproducible and cheap, but it does not capture long-horizon planning, changing requirements, flaky external services, or heterogeneous agent products.
 
 ## 5. Honesty & Trajectory
 
-RaceBench is not a plug-and-play benchmark for arbitrary existing agents. A black-box runtime such as Cursor, MegaAgent, or another orchestrated system can be scored as Level C, but without read/write intent hooks it collapses toward a naive external check from RaceBench's perspective. A true external strategy needs a mediation protocol around `on_read`, `on_write_intent`, `decision`, `on_write_committed`, and `on_agent_done`.
+RaceBench is not a plug-and-play benchmark for arbitrary existing agents. A black-box runtime such as Cursor, MegaAgent, or another orchestrated system can be scored as [Level C](#level-a-to-c), but without read/write intent hooks it collapses toward a naive external check from RaceBench's perspective. A true external strategy needs a mediation protocol around `on_read`, `on_write_intent`, `decision`, `on_write_committed`, and `on_agent_done`.
 
 Known failure modes are specific. The AST merge strategy is still too coarse for many real refactors. The dependency graph strategy depends on simplified static observations and can miss dynamic behavior. The task suite is small enough that strategies can accidentally fit it. The benchmark mostly studies two-agent races, not larger teams. It also rewards strategies implemented inside the harness more directly than external products, which is why I separate Level A and Level C throughout the docs and report.
 
-With two more weeks, I would spend effort where it changes the benchmark most. First, build the hybrid strategy: adaptive semantic leases first, peer negotiation only for ambiguous conflicts, followed by mandatory re-read before commit. Second, add harder probes such as 5-8 agent chains, fan-in/fan-out migrations, and generated-client schema drift. Third, implement one mediated Level C adapter that emits read/write intent events. More Cursor repetitions and a full Agnes grid are useful, but lower priority. The claim would stay modest: RaceBench is a reusable benchmark for coordination mechanisms, plus a task and oracle suite for black-box runtime checks.
+With two more weeks, I would prioritize hybrid coordination (adaptive leases plus broker only on ambiguous conflicts), harder multi-agent probes, and one mediated Level C adapter that emits read/write intent events. More Cursor repetitions and a full Agnes grid are useful, but secondary. The claim stays modest: RaceBench is a reusable benchmark for coordination mechanisms, plus a task and oracle suite for black-box runtime checks.
+
+Full evidence and long-form reasoning: [`writeup/writeup.md`](writeup.md). Interactive results: [`results/grid-v1/report.html`](../results/grid-v1/report.html).
 
 ---
 
@@ -60,6 +62,19 @@ This appendix is supporting material and is not part of the five-pillar 1000-wor
 python -m analysis.validate_logs results/grid-v1 --expect-trials 480
 python -m analysis.make_report results/grid-v1
 ```
+
+### Suggested Screenshots From `report.html`
+
+Judges spot-check the repo; these views best match the write-up claims. Save PNGs under `writeup/figures/` and link them here if you embed images in the PDF.
+
+1. **Summary metrics bar** (top: 480 trials, 74.4% pass, spend/tokens). Establishes scale at a glance.
+2. **Task x Strategy heatmap** (`correct_rate`, unfiltered). Shows selective strategy value across failure modes, not one winner everywhere.
+3. **Heatmap filtered to `t02_benign_overlap`** with metric **false-positive stalls** or **stalls per trial**. Best single shot for the overcoordination claim (`file_lock` hot, `notify`/`naive` cool).
+4. **Heatmap or grid row for `t01_stale_clobber` and `t03_fetch_clobber`**. Shows `naive` 0% vs `file_lock`/`git_hash` passing (hard-race baseline).
+5. **Observable Event Replay** for one `t02_benign_overlap` + `file_lock` trial vs one `notify` trial. Proves trajectories exist (stall vs no stall), not just aggregate tables.
+6. **Optional:** Strategy Comparison chart with **mean wall clock** or **mean tokens** selected. Supports the latency/cost trade-off in §4.
+
+Skip: Pass/Fail donut alone (redundant with heatmap), Level C section unless you foreground Cursor C1, and extension-only `grid-v1-plus-extensions` unless you claim post-grid strategies in the 1000-word body.
 
 ### Cross-Run Findings
 

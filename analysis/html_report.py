@@ -244,6 +244,9 @@ def write_html_report(
     function replayZoomLabel() {
       return `${Math.round(replayState.zoom * 100)}%`;
     }
+    function clampReplayZoom(value) {
+      return Math.max(1, Math.min(8, toNumber(value) || 1));
+    }
     function replayTrackWidth() {
       const base = Math.max(720, replayEls.timeline.clientWidth - 190);
       return Math.round(base * replayState.zoom);
@@ -267,22 +270,40 @@ def write_html_report(
       }
       replayEls.timeline.scrollLeft = Math.max(0, Math.min(maxScroll, next));
     }
-    function setReplayZoom(value) {
-      const maxScroll = Math.max(1, replayEls.timeline.scrollWidth - replayEls.timeline.clientWidth);
-      const scrollRatio = replayEls.timeline.scrollLeft / maxScroll;
-      replayState.zoom = Math.max(1, Math.min(8, toNumber(value) || 1));
-      replayEls.zoom.value = String(replayState.zoom);
+    function setReplayZoom(value, options = {}) {
+      const nextZoom = clampReplayZoom(value);
+      if (Math.abs(nextZoom - replayState.zoom) < 0.001) return;
+      const rect = replayEls.timeline.getBoundingClientRect();
+      const viewportWidth = Math.max(1, replayEls.timeline.clientWidth);
+      const anchorClientX = Number.isFinite(options.anchorClientX)
+        ? options.anchorClientX
+        : rect.left + viewportWidth / 2;
+      const anchorViewportX = Math.max(
+        0,
+        Math.min(viewportWidth, anchorClientX - rect.left),
+      );
+      const oldScrollWidth = Math.max(1, replayEls.timeline.scrollWidth);
+      const anchorRatio = (replayEls.timeline.scrollLeft + anchorViewportX) / oldScrollWidth;
+      replayState.zoom = nextZoom;
+      replayEls.zoom.value = fmt(replayState.zoom, 2);
       replayEls.zoomLabel.textContent = replayZoomLabel();
       renderReplay();
       window.requestAnimationFrame(() => {
-        const nextMaxScroll = Math.max(0, replayEls.timeline.scrollWidth - replayEls.timeline.clientWidth);
-        replayEls.timeline.scrollLeft = scrollRatio * nextMaxScroll;
+        const nextScrollWidth = Math.max(1, replayEls.timeline.scrollWidth);
+        const nextMaxScroll = Math.max(0, nextScrollWidth - replayEls.timeline.clientWidth);
+        const nextScrollLeft = anchorRatio * nextScrollWidth - anchorViewportX;
+        replayEls.timeline.scrollLeft = Math.max(0, Math.min(nextMaxScroll, nextScrollLeft));
       });
     }
     function replayPinchDistance(event) {
       if (!event.touches || event.touches.length < 2) return 0;
       const [first, second] = event.touches;
       return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
+    }
+    function replayPinchCenterX(event) {
+      if (!event.touches || event.touches.length < 2) return null;
+      const [first, second] = event.touches;
+      return (first.clientX + second.clientX) / 2;
     }
     function replayLabel(row) {
       const status = row.correct ? "pass" : "fail";
@@ -992,18 +1013,25 @@ def write_html_report(
     replayEls.timeline.addEventListener("wheel", event => {
       if (!event.ctrlKey && !event.metaKey) return;
       event.preventDefault();
-      const delta = event.deltaY < 0 ? 0.35 : -0.35;
-      setReplayZoom(replayState.zoom + delta);
+      const factor = Math.exp(-event.deltaY * 0.002);
+      setReplayZoom(replayState.zoom * factor, {anchorClientX: event.clientX});
     }, {passive: false});
     replayEls.timeline.addEventListener("touchstart", event => {
       const distance = replayPinchDistance(event);
-      replayState.pinch = distance ? {distance, zoom: replayState.zoom} : null;
+      replayState.pinch = distance ? {
+        distance,
+        zoom: replayState.zoom,
+        centerX: replayPinchCenterX(event),
+      } : null;
     }, {passive: true});
     replayEls.timeline.addEventListener("touchmove", event => {
       const distance = replayPinchDistance(event);
       if (!distance || !replayState.pinch) return;
       event.preventDefault();
-      setReplayZoom(replayState.pinch.zoom * distance / replayState.pinch.distance);
+      setReplayZoom(
+        replayState.pinch.zoom * distance / replayState.pinch.distance,
+        {anchorClientX: replayPinchCenterX(event) ?? replayState.pinch.centerX},
+      );
     }, {passive: false});
     replayEls.timeline.addEventListener("touchend", () => {
       replayState.pinch = null;
@@ -1014,7 +1042,10 @@ def write_html_report(
     }, {passive: false});
     replayEls.timeline.addEventListener("gesturechange", event => {
       event.preventDefault();
-      setReplayZoom((replayState.pinch?.zoom || replayState.zoom) * event.scale);
+      setReplayZoom(
+        (replayState.pinch?.zoom || replayState.zoom) * event.scale,
+        {anchorClientX: event.clientX},
+      );
     }, {passive: false});
     replayEls.timeline.addEventListener("gestureend", () => {
       replayState.pinch = null;
@@ -2122,7 +2153,7 @@ def write_html_report(
           </select>
         </label>
         <label>Zoom
-          <input id="replayZoom" type="range" min="1" max="8" step="0.25" value="1" aria-label="Replay zoom">
+          <input id="replayZoom" type="range" min="1" max="8" step="0.01" value="1" aria-label="Replay zoom">
         </label>
         <span class="replay-zoom-label" id="replayZoomLabel">100%</span>
       </div>
