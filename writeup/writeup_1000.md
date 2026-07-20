@@ -10,7 +10,7 @@ The novelty is measuring overcoordination, not just failures. False-positive sta
 
 ## 2. Approach
 
-RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records reads and writes, applies a coordination strategy, runs the oracle, and writes JSONL logs plus aggregate tables. The headline grid uses 16 tasks and 6 Level A strategies: `naive`, `file_lock`, `notify`, `git_hash`, `ast_scope`, and `ast_dep`. I then added three post-grid extensions on the same tasks: `adaptive_lease`, `peer_contract`, and `peer_broker` ([iteration notes](#adaptive-lease-iteration)), combining lock safety, notify-style re-reads, semantic granularity, and peer negotiation.
+RaceBench is a small, instrumented benchmark harness. Each trial runs two to four agents on a seeded coding task. The harness records reads and writes, applies a coordination strategy, runs the oracle, and writes JSONL logs plus aggregate tables. What defines the benchmark is the [task suite](#task-suite): 16 collision-seeded repos with fixed briefs, collision maps, and hidden oracles. The headline grid runs those tasks under 6 Level A strategies (`naive`, `file_lock`, `notify`, `git_hash`, `ast_scope`, `ast_dep`; [catalog](#strategy-catalog)). I then added three post-grid extensions on the same tasks: `adaptive_lease`, `peer_contract`, and `peer_broker` ([iteration notes](#adaptive-lease-iteration)), combining lock safety, notify-style re-reads, semantic granularity, and peer negotiation.
 
 For the headline [Level A](#level-a-to-c) grid, I ruled out auto-merge editors (confounds merge quality) and full saga layers (need inverse operations like undo). I also kept commercial agent stacks off the strategy table: without shared read/write mediation hooks, Cursor or Claude Code mostly measure each product's hidden planner, not a reusable policy. Those runtimes belong in [Level C](#level-a-to-c) as external checks via adapters. Level A keeps fixed task, model, oracle, and prompts so only the coordination mechanism changes.
 
@@ -87,6 +87,75 @@ Screenshots from the static HTML explorers. Paths are relative to this file.
 
 ![Figure 5: Extended event profile](../assets/fig-event-profile-extended.png)
 
+### Strategy Catalog
+
+This note is appendix material, not part of the 1000-word body.
+
+Each strategy is intentionally small. The labels are "X-style" because these are minimal reimplementations of mechanism classes, not the original authors' full systems. The headline `grid-v1` table uses six baseline strategies:
+
+| Strategy | Mechanism |
+|----------|-----------|
+| `naive` | Direct writes; last writer wins (floor) |
+| `file_lock` | File-level lock on first touch, held until agent finishes |
+| `git_hash` | MegaAgent-style read snapshot + 3-way merge + surfaced conflicts |
+| `ast_scope` | Same-file symbol claims via AST diff |
+| `ast_dep` | `ast_scope` plus import/use dep graph (cross-file races on t04/t05/t07) |
+| `notify` | CoAgent-lite: writes land immediately; advisory notices to intersecting readers |
+
+AST-level claims are prior art (Grit, Phantom, Weave, arXiv:2603.24284). The missing piece is a neutral comparison against other coordination styles on the same tasks. I keep `ast_scope` and `ast_dep` as separate columns because they answer a specific question: how much does the dependency graph add beyond same-file symbol claims?
+
+After the main grid, RaceBench adds three post-grid extensions:
+
+| Strategy | Mechanism |
+|----------|-----------|
+| `peer_contract` | Voluntary agent-to-agent negotiation with declared intent and peer ACKs |
+| `peer_broker` | Forced brokered negotiation with cached obligations |
+| `adaptive_lease` | Semantic adaptive locking with symbol/resource leases |
+
+Together, the project covers nine mechanism classes: no coordination, coarse pessimistic locking, optimistic merge, syntactic scope, static dependency scope, advisory notification, voluntary negotiation, forced negotiation, and semantic adaptive locking. I kept it at nine because each row answers a distinct coordination question.
+
+The extension strategies are inspired by existing coordination strategies in other fields of computing. Peer negotiation connects to older multi-agent negotiation work such as Contract Net and POANCD. Adaptive leases connect to database and systems work on lock granularity, semantic locking, and adaptive locks. The RaceBench contribution is adapting those ideas to LLM coding agents at the file-tool boundary and measuring correctness, cost, latency, and false-positive stalls on the same tasks. See also [`docs/adding-a-strategy.md`](../docs/adding-a-strategy.md) and the [iteration notes](#adaptive-lease-iteration) below.
+
+### Task Suite
+
+This note is appendix material, not part of the 1000-word body. The task suite is what defines RaceBench as a benchmark: seeded failure modes, fixed briefs, collision maps, and hidden oracles.
+
+The suite starts from the failure modes described in arXiv:2606.17182 and CoAgent. For each mode, I built a tiny repository that tries to isolate one kind of race. The goal is attribution: if a strategy fails, I want to know whether it failed because of coordination, not because the app itself was too hard.
+
+That produced **t01 through t12**. Each task has a seeded repository, fixed agent briefs, a collision map, a hidden pytest oracle, and a reference solution. In this writeup, "oracle" means the hidden test suite that decides whether the final repository is correct.
+
+| Mode | Task | Why it exists |
+|------|------|---------------|
+| Stale read / lost update | `t01_stale_clobber` | Whole-file rewrite race (hardened; v1 archived) |
+| **Benign overlap** | `t02_benign_overlap` | Correct coordination is *do nothing* (false-positive stalls) |
+| Write-write clobber | `t03_fetch_clobber` | Whole-`fetch` rewrite race (hardened; v1 archived) |
+| Causal cascade | `t04_cascade` | 4-agent dependency chain |
+| Cross-file interface | `t05_cross_file` | Invisible to file-scoped locks / same-file AST |
+| Feature pair | `t06_feature_pair` | CooperBench-style coupled features |
+| Antidependency / rw-canary | `t07_rw_canary` | Read-write ordering hazard |
+| Lock livelock | `t08_livelock` | Coordination thrash under contention |
+| Overhead confound | `t09_overhead` | Disjoint packages; cost without benefit |
+| Phantom tool / registry | `t10_phantom_tool` | Tool surface drifts |
+| Irreversible effects | `t11_irreversible` | Ordering of non-rewindable side effects |
+| Split-view worktrees | `t12_split_view` | Isolation until end merge |
+
+**Hardening t01 and t03.** The first versions were too easy: gpt-5-mini often used anchored `edit_file` calls that composed cleanly even under `naive`, so the tasks did not reliably test stale whole-file writes. Those versions are archived under `tasks/_archive/` and replaced with hardened siblings that require whole-file `write_file` from the agent's last read.
+
+**Conduit track (added later).** The first tasks were useful probes, but they were very small. Real coding work usually has layered imports, shared schemas, and serializers between routes and storage. To add structure without losing reproducibility, I added a trimmed RealWorld-inspired Conduit app using FastAPI, SQLite, and Pydantic:
+
+| Task | Failure mode | Agents | Notes |
+|------|--------------|--------|-------|
+| `rw_c_benign_overlap` | Benign same-file overlap | 2 | FastAPI + SQLite + Pydantic |
+| `rw_b_signature_drift` | Stale-read / signature drift | 2 | Conduit `format_article` |
+| `rw_d_tag_antidependency` | Tag filter vs count silent invalidation | 2 | Conduit tags |
+| `rw_e_cascade` | 3-agent causal cascade | 3 | Conduit `Article.summary` |
+
+**Conduit limits (deliberate).** Conduit is not a full production app. It does not use Newman, Postgres, or long-running servers. Oracles use FastAPI `TestClient` and in-process SQLite. That keeps the benchmark cheap and reproducible: more structural realism, not full deployment realism.
+
+**What I ruled out for the suite.** I did not build a full CRDT substrate (Yjs / CodeCRDT were too large or would introduce their own code-volume effects). I deferred 8+ agent tasks for cost. CooperBench (arXiv:2601.13295) already studies the communication axis; RaceBench holds communication mostly fixed and varies the coordination mechanism.
+
+The real-model grid (`results/grid-v1/`, gpt-5-mini) covers t01–t12 plus the four `rw_*` Conduit tasks (16 tasks total). Offline scripted tests validate mechanics on every expansion. Future harder probes are sketched under [Harder Task Suite Extension](#harder-task-suite-extension).
+
 ### Cross-Run Findings
 
 This note is appendix material, not part of the 1000-word body.
@@ -108,12 +177,6 @@ In short: use Level A for strategy rankings, Level B for reusable benchmark task
 This note is appendix material, not part of the 1000-word body.
 
 The Agnes run is intentionally a small provider-sensitivity check, not a second full strategy grid. Its purpose is to ask whether the broad baseline findings survive another OpenAI-compatible model provider on selected high-signal cells. I do not need to rerun `peer_contract`, `peer_broker`, or `adaptive_lease` on Agnes for the current submission because those strategies are post-grid extensions and still being interpreted. The main comparison remains the full gpt-5-mini Level A grid.
-
-### Strategy Class Framing
-
-This note is appendix material, not part of the 1000-word body.
-
-The committed `grid-v1` headline table uses six baseline Level A strategies. The post-grid extensions add three more: `peer_contract`, `peer_broker`, and `adaptive_lease`. Together, RaceBench covers nine mechanism classes: no coordination, coarse pessimistic locking, optimistic merge, syntactic scope, static dependency scope, advisory notification, voluntary negotiation, forced negotiation, and semantic adaptive locking. I kept it at nine because each row answers a distinct coordination question; adding a tenth only for symmetry would make the taxonomy less crisp.
 
 ### Adaptive Lease Iteration
 
