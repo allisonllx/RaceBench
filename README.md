@@ -247,6 +247,29 @@ python -m analysis.make_report results/grid-v1
 
 If you do not activate the virtualenv, replace `python` with `.venv/bin/python`.
 
+### Tool argument audit rerun
+
+Strict tool-argument validation can flag old logs where the model omitted a
+required tool field. Do a surgical rerun before deciding whether any headline
+claim needs a note or replacement cell. This keeps the original result folders
+unchanged and writes only the flagged missing-field cells from `grid-v1` and
+`grid-v1-extensions-full`.
+
+```bash
+python -m runner.run_grid --config runner/config.toolarg-rerun.yaml
+python -m analysis.validate_logs results/grid-v1-toolarg-rerun \
+  --expect-trials 16 --strict-tool-args
+python -m analysis.make_report results/grid-v1-toolarg-rerun \
+  --prices-config runner/config.toolarg-rerun.yaml
+```
+
+The strict validator also reports older `must_preserve` string-vs-array drift in
+some peer-contract logs. Those are useful audit warnings, but this minimal rerun
+targets missing required fields first because those are most likely to affect
+correctness. A strict audit can still print warnings when a malformed model
+attempt was followed by `tool_arg_invalid`; that means the runtime rejected the
+call before execution and asked the agent to retry.
+
 ### Adaptive lease strategy
 
 `adaptive_lease` is an experimental Level A hybrid between `file_lock`,

@@ -139,6 +139,36 @@ def test_validate_logs_strict_tool_arguments_fail(tmp_path):
                for e in result.errors)
 
 
+def test_validate_logs_strict_tool_arguments_allow_guarded_retry(tmp_path):
+    _write_log(tmp_path / "tool_arg_guarded.jsonl", [
+        _start(),
+        {
+            "ts": 1,
+            "event": "tool_call",
+            "agent": "agent-slugify",
+            "turn": 1,
+            "tool": "edit_file",
+            "args": {
+                "path": "stringutils.py",
+                "old_string": "def slugify(value): pass",
+            },
+        },
+        {
+            "ts": 1.01,
+            "event": "tool_arg_invalid",
+            "agent": "agent-slugify",
+            "turn": 1,
+            "tool": "edit_file",
+            "issues": ["args.new_string: missing required field"],
+        },
+        _end(),
+    ])
+    result = validate_run_dir(tmp_path, strict_tool_args=True)
+    assert result.ok, result.errors
+    assert any("argument schema drift" in w and "new_string" in w
+               for w in result.warnings)
+
+
 def test_validate_logs_rejects_missing_trial_end(tmp_path):
     _write_log(tmp_path / "missing_end.jsonl", [_start()])
     result = validate_run_dir(tmp_path)

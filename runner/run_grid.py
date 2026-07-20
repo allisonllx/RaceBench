@@ -167,7 +167,50 @@ def should_rerun_existing_log(path: Path, cfg: dict) -> bool:
     return any(marker in text for marker in INFRA_ERROR_MARKERS)
 
 
+def _explicit_trial_jobs(cfg: dict, out_dir: Path) -> list[PendingTrial]:
+    """Build pending jobs from an exact trial list.
+
+    This is for surgical reruns after an audit finds a small set of suspect
+    cells. It avoids expanding back into the full task x strategy x rep grid.
+    """
+    pending: list[PendingTrial] = []
+    for index, spec in enumerate(cfg.get("trials") or [], start=1):
+        try:
+            task_name = str(spec["task"])
+            strategy = str(spec["strategy"])
+            n = int(spec.get("n_agents", spec.get("n")))
+            rep = int(spec["rep"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError(
+                f"trials[{index}] must define task, strategy, n_agents, and rep"
+            ) from exc
+
+        task = load_task(task_name)
+        if n < task.min_agents or n > len(task.agents):
+            raise ValueError(
+                f"trials[{index}] has invalid n_agents={n} for {task_name}"
+            )
+        trial_cfg = TrialConfig(
+            strategy=strategy, n_agents=n, rep=rep,
+            model_name=(cfg.get("model", "scripted")
+                        if cfg["mode"] == "openai"
+                        else f"scripted-{cfg['script_variant']}"),
+            max_turns=cfg["max_turns"],
+            lock_timeout_s=cfg["lock_timeout_s"],
+            trial_timeout_s=cfg["trial_timeout_s"],
+        )
+        log_path = out_dir / f"{task_name}__{trial_cfg.trial_id}.jsonl"
+        pending.append(PendingTrial(
+            task_name=task_name, strategy=strategy, n=n, rep=rep,
+            trial_cfg=trial_cfg, log_path=log_path,
+        ))
+    return pending
+
+
 def collect_pending(cfg: dict, out_dir: Path, calibrate: bool) -> list[PendingTrial]:
+    if cfg.get("trials") and not calibrate:
+        return _explicit_trial_jobs(cfg, out_dir)
+
     strategies = ["naive"] if calibrate else cfg["strategies"]
     agent_counts = [1] if calibrate else cfg["agent_counts"]
     pending: list[PendingTrial] = []

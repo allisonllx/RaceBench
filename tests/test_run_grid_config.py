@@ -104,6 +104,56 @@ def test_extensions_full_config_runs_new_strategies_on_full_task_set(tmp_path):
     assert {job.n for job in pending if job.task_name == "t01_stale_clobber"} == {2}
 
 
+def test_toolarg_rerun_config_runs_only_exact_flagged_trials(tmp_path):
+    cfg = load_config(str(ROOT / "runner" / "config.toolarg-rerun.yaml"))
+    pending = collect_pending(cfg, tmp_path, calibrate=False)
+
+    assert cfg["run_id"] == "grid-v1-toolarg-rerun"
+    assert cfg["provider"] == "openai"
+    assert len(pending) == 16
+    assert {job.log_path.name for job in pending} == {
+        "rw_b_signature_drift__ast_dep-n2-r4.jsonl",
+        "rw_d_tag_antidependency__ast_scope-n2-r0.jsonl",
+        "rw_d_tag_antidependency__naive-n2-r3.jsonl",
+        "rw_d_tag_antidependency__notify-n2-r1.jsonl",
+        "rw_e_cascade__peer_broker-n3-r2.jsonl",
+        "t10_phantom_tool__adaptive_lease-n2-r0.jsonl",
+        "t10_phantom_tool__adaptive_lease-n2-r1.jsonl",
+        "t10_phantom_tool__ast_dep-n2-r0.jsonl",
+        "t10_phantom_tool__ast_scope-n2-r0.jsonl",
+        "t10_phantom_tool__ast_scope-n2-r4.jsonl",
+        "t10_phantom_tool__naive-n2-r3.jsonl",
+        "t10_phantom_tool__notify-n2-r2.jsonl",
+        "t10_phantom_tool__notify-n2-r3.jsonl",
+        "t10_phantom_tool__peer_broker-n2-r1.jsonl",
+        "t10_phantom_tool__peer_broker-n2-r2.jsonl",
+        "t10_phantom_tool__peer_contract-n2-r2.jsonl",
+    }
+
+
+def test_explicit_trial_config_rejects_invalid_agent_count(tmp_path):
+    cfg = {
+        "run_id": "bad",
+        "mode": "openai",
+        "model": "gpt-5-mini",
+        "provider": "openai",
+        "script_variant": "edit",
+        "max_turns": 40,
+        "lock_timeout_s": 30,
+        "trial_timeout_s": 900,
+        "trials": [
+            {"task": "t04_cascade", "strategy": "naive", "n_agents": 2, "rep": 0}
+        ],
+    }
+
+    try:
+        collect_pending(cfg, tmp_path, calibrate=False)
+    except ValueError as exc:
+        assert "invalid n_agents=2" in str(exc)
+    else:
+        raise AssertionError("explicit trial config should reject invalid n_agents")
+
+
 def test_resolve_agnes_provider_uses_dedicated_env(monkeypatch):
     monkeypatch.setenv("AGNES_API_KEY", "test-key")
     cfg = {

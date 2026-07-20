@@ -7,7 +7,8 @@ Usage:
 Known event records are validated with Pydantic. Nested tool-call arguments are
 checked against RaceBench's local tool schemas as warnings by default, because
 older logs may contain strategy-tolerated coercions. Use --strict-tool-args to
-turn those warnings into errors during audits.
+turn unguarded drift into errors during audits. Invalid model attempts that are
+immediately followed by tool_arg_invalid are treated as guarded retries.
 """
 from __future__ import annotations
 
@@ -96,6 +97,24 @@ def _tool_arg_warnings(path: Path, lineno: int, record: dict[str, Any]) -> list[
     ]
 
 
+def _tool_arg_invalid_guarded(
+    records: list[tuple[int, dict[str, Any]]],
+    index: int,
+    record: dict[str, Any],
+) -> bool:
+    """True when a malformed model tool call was rejected by the runtime guard."""
+    if record.get("event") != "tool_call" or index + 1 >= len(records):
+        return False
+    next_record = records[index + 1][1]
+    if next_record.get("event") != "tool_arg_invalid":
+        return False
+    return (
+        next_record.get("agent") == record.get("agent")
+        and next_record.get("tool") == record.get("tool")
+        and next_record.get("turn") == record.get("turn")
+    )
+
+
 def _missing(record: dict[str, Any] | None, required: set[str]) -> list[str]:
     if record is None:
         return sorted(required)
@@ -116,9 +135,9 @@ def validate_log(
         errors.extend(_schema_errors(path, lineno, record))
     if errors:
         return False, errors, warnings
-    for lineno, record in records:
+    for index, (lineno, record) in enumerate(records):
         tool_warnings = _tool_arg_warnings(path, lineno, record)
-        if strict_tool_args:
+        if strict_tool_args and not _tool_arg_invalid_guarded(records, index, record):
             errors.extend(tool_warnings)
         else:
             warnings.extend(tool_warnings)
@@ -220,9 +239,9 @@ def main(argv: list[str] | None = None) -> int:
         "--strict-tool-args",
         action="store_true",
         help=(
-            "Treat nested tool-call argument schema drift as errors instead of "
-            "warnings. By default these are warnings because older logs may "
-            "contain strategy-tolerated coercions."
+            "Treat unguarded nested tool-call argument schema drift as errors "
+            "instead of warnings. Guarded retries are warnings because the "
+            "runtime rejected the malformed call before execution."
         ),
     )
     args = parser.parse_args(argv)
