@@ -127,7 +127,7 @@ That produced **t01 through t12**. Each task has a seeded repository, fixed agen
 | Mode | Task | Why it exists |
 |------|------|---------------|
 | Stale read / lost update | `t01_stale_clobber` | Whole-file rewrite race (hardened; v1 archived) |
-| **Benign overlap** | `t02_benign_overlap` | Correct coordination is *do nothing* (false-positive stalls) |
+| Benign overlap | `t02_benign_overlap` | Correct coordination is *do nothing* (false-positive stalls) |
 | Write-write clobber | `t03_fetch_clobber` | Whole-`fetch` rewrite race (hardened; v1 archived) |
 | Causal cascade | `t04_cascade` | 4-agent dependency chain |
 | Cross-file interface | `t05_cross_file` | Invisible to file-scoped locks / same-file AST |

@@ -1,10 +1,14 @@
 """Unit tests for worktree isolation and tool registry."""
+import json
 from pathlib import Path
 
 import pytest
 
+from harness.agent import Agent
 from harness.events import EventLogger
+from harness.models import ScriptedModel
 from harness.registry import ToolRegistry
+from harness.strategies.naive import NaiveStrategy
 from harness.workspace import Workspace
 
 
@@ -34,6 +38,45 @@ def test_worktree_isolation_and_merge(tmp_path):
     # Same file, incompatible edits → conflict + force-integrate of one side
     assert result.ok or result.conflicts
     assert "X =" in ws.read_file("hello.py")
+    ws.cleanup()
+
+
+@pytest.mark.asyncio
+async def test_invalid_edit_file_args_are_rejected_before_write(tmp_path):
+    repo = _mini_repo(tmp_path)
+    dest = tmp_path / "ws_invalid_tool_args"
+    ws = Workspace.create(repo, dest)
+    logger = EventLogger(tmp_path / "events.jsonl")
+    strategy = NaiveStrategy(ws, logger, ["agent-a"])
+    model = ScriptedModel(script=[
+        ("edit_file", {"path": "hello.py", "old_string": "X = 1\n"}),
+        ("done", {"summary": "stopped after invalid edit"}),
+    ])
+    agent = Agent(
+        "agent-a",
+        "Edit hello.py.",
+        model,
+        strategy,
+        ws,
+        logger,
+        max_turns=2,
+    )
+
+    result = await agent.run()
+
+    assert result.status == "done"
+    assert ws.read_file("hello.py") == "X = 1\n"
+    events = [
+        json.loads(line)
+        for line in logger.path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert any(
+        event.get("event") == "tool_arg_invalid"
+        and event.get("tool") == "edit_file"
+        and any("new_string" in issue for issue in event.get("issues", []))
+        for event in events
+    )
+    assert not any(event.get("event") == "write" for event in events)
     ws.cleanup()
 
 

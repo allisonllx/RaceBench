@@ -2,6 +2,12 @@
 
 Usage:
     python -m analysis.validate_logs results/grid-v1 --expect-trials 480
+    python -m analysis.validate_logs results/grid-v1 --strict-tool-args
+
+Known event records are validated with Pydantic. Nested tool-call arguments are
+checked against RaceBench's local tool schemas as warnings by default, because
+older logs may contain strategy-tolerated coercions. Use --strict-tool-args to
+turn those warnings into errors during audits.
 """
 from __future__ import annotations
 
@@ -12,7 +18,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError
+
+from analysis.event_schema import schema_for_event
 from harness.task import TASKS_DIR
+from harness.tool_arg_schema import validate_tool_arguments
 
 REQUIRED_START = {
     "task", "failure_mode", "benign", "strategy", "n_agents", "rep",
@@ -36,8 +46,8 @@ class ValidationResult:
         return not self.errors
 
 
-def _read_jsonl(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
-    events: list[dict[str, Any]] = []
+def _read_jsonl(path: Path) -> tuple[list[tuple[int, dict[str, Any]]], list[str]]:
+    events: list[tuple[int, dict[str, Any]]] = []
     errors: list[str] = []
     try:
         with path.open(encoding="utf-8") as fh:
@@ -53,10 +63,37 @@ def _read_jsonl(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
                 if not isinstance(rec, dict):
                     errors.append(f"{path.name}:{lineno}: JSONL record is not an object")
                     continue
-                events.append(rec)
+                events.append((lineno, rec))
     except OSError as exc:
         errors.append(f"{path.name}: cannot read log: {exc}")
     return events, errors
+
+
+def _schema_errors(path: Path, lineno: int, record: dict[str, Any]) -> list[str]:
+    model = schema_for_event(str(record.get("event") or ""))
+    try:
+        model.model_validate(record)
+    except ValidationError as exc:
+        errors = []
+        for err in exc.errors():
+            loc = ".".join(str(part) for part in err.get("loc", ())) or "<record>"
+            errors.append(
+                f"{path.name}:{lineno}: schema invalid at {loc}: {err['msg']}"
+            )
+        return errors
+    return []
+
+
+def _tool_arg_warnings(path: Path, lineno: int, record: dict[str, Any]) -> list[str]:
+    event = record.get("event")
+    if event not in {"tool_call", "effect"}:
+        return []
+    tool = str(record.get("tool") or "")
+    args = record.get("args")
+    return [
+        f"{path.name}:{lineno}: {event} {tool!r} argument schema drift: {issue}"
+        for issue in validate_tool_arguments(tool, args)
+    ]
 
 
 def _missing(record: dict[str, Any] | None, required: set[str]) -> list[str]:
@@ -65,12 +102,30 @@ def _missing(record: dict[str, Any] | None, required: set[str]) -> list[str]:
     return sorted(k for k in required if k not in record)
 
 
-def validate_log(path: Path) -> tuple[bool, list[str], list[str]]:
+def validate_log(
+    path: Path,
+    *,
+    strict_tool_args: bool = False,
+) -> tuple[bool, list[str], list[str]]:
     """Validate a single JSONL log. Returns (valid_trial, errors, warnings)."""
-    events, errors = _read_jsonl(path)
+    records, errors = _read_jsonl(path)
     warnings: list[str] = []
     if errors:
         return False, errors, warnings
+    for lineno, record in records:
+        errors.extend(_schema_errors(path, lineno, record))
+    if errors:
+        return False, errors, warnings
+    for lineno, record in records:
+        tool_warnings = _tool_arg_warnings(path, lineno, record)
+        if strict_tool_args:
+            errors.extend(tool_warnings)
+        else:
+            warnings.extend(tool_warnings)
+    if errors:
+        return False, errors, warnings
+
+    events = [record for _, record in records]
 
     starts = [e for e in events if e.get("event") == "trial_start"]
     ends = [e for e in events if e.get("event") == "trial_end"]
@@ -125,7 +180,12 @@ def validate_log(path: Path) -> tuple[bool, list[str], list[str]]:
     return not errors, errors, warnings
 
 
-def validate_run_dir(run_dir: Path, expect_trials: int | None = None) -> ValidationResult:
+def validate_run_dir(
+    run_dir: Path,
+    expect_trials: int | None = None,
+    *,
+    strict_tool_args: bool = False,
+) -> ValidationResult:
     run_dir = Path(run_dir)
     logs = sorted(run_dir.glob("*.jsonl"))
     errors: list[str] = []
@@ -139,7 +199,8 @@ def validate_run_dir(run_dir: Path, expect_trials: int | None = None) -> Validat
         return ValidationResult(0, 0, errors, warnings)
 
     for log in logs:
-        valid, log_errors, log_warnings = validate_log(log)
+        valid, log_errors, log_warnings = validate_log(
+            log, strict_tool_args=strict_tool_args)
         errors.extend(log_errors)
         warnings.extend(log_warnings)
         if valid:
@@ -155,9 +216,22 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run_dir", type=Path)
     parser.add_argument("--expect-trials", type=int, default=None)
+    parser.add_argument(
+        "--strict-tool-args",
+        action="store_true",
+        help=(
+            "Treat nested tool-call argument schema drift as errors instead of "
+            "warnings. By default these are warnings because older logs may "
+            "contain strategy-tolerated coercions."
+        ),
+    )
     args = parser.parse_args(argv)
 
-    result = validate_run_dir(args.run_dir, expect_trials=args.expect_trials)
+    result = validate_run_dir(
+        args.run_dir,
+        expect_trials=args.expect_trials,
+        strict_tool_args=args.strict_tool_args,
+    )
     for warning in result.warnings:
         print(f"warning: {warning}", file=sys.stderr)
     for error in result.errors:

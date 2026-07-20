@@ -81,6 +81,64 @@ def test_validate_logs_rejects_malformed_jsonl(tmp_path):
     assert any("invalid JSON" in e for e in result.errors)
 
 
+def test_validate_logs_rejects_schema_invalid_known_event(tmp_path):
+    _write_log(tmp_path / "bad_schema.jsonl", [
+        _start(),
+        {"ts": 1, "event": "write", "agent": "agent-slugify",
+         "path": "x.py", "kind": "replace"},
+        _end(),
+    ])
+    result = validate_run_dir(tmp_path)
+    assert not result.ok
+    assert any("schema invalid" in e and "status" in e for e in result.errors)
+
+
+def test_validate_logs_warns_on_tool_argument_schema_drift(tmp_path):
+    _write_log(tmp_path / "tool_arg_drift.jsonl", [
+        _start(strategy="peer_contract"),
+        {
+            "ts": 1,
+            "event": "tool_call",
+            "agent": "agent-slugify",
+            "turn": 1,
+            "tool": "declare_intent",
+            "args": {
+                "path": "stringutils.py",
+                "summary": "edit slugify",
+                "must_preserve": "truncate behavior",
+            },
+        },
+        _end(),
+    ])
+    result = validate_run_dir(tmp_path)
+    assert result.ok, result.errors
+    assert any("argument schema drift" in w and "must_preserve" in w
+               for w in result.warnings)
+
+
+def test_validate_logs_strict_tool_arguments_fail(tmp_path):
+    _write_log(tmp_path / "tool_arg_drift.jsonl", [
+        _start(strategy="peer_contract"),
+        {
+            "ts": 1,
+            "event": "tool_call",
+            "agent": "agent-slugify",
+            "turn": 1,
+            "tool": "declare_intent",
+            "args": {
+                "path": "stringutils.py",
+                "summary": "edit slugify",
+                "must_preserve": "truncate behavior",
+            },
+        },
+        _end(),
+    ])
+    result = validate_run_dir(tmp_path, strict_tool_args=True)
+    assert not result.ok
+    assert any("argument schema drift" in e and "must_preserve" in e
+               for e in result.errors)
+
+
 def test_validate_logs_rejects_missing_trial_end(tmp_path):
     _write_log(tmp_path / "missing_end.jsonl", [_start()])
     result = validate_run_dir(tmp_path)

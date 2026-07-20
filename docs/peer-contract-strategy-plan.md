@@ -117,6 +117,11 @@ affected peers whether the write is compatible.
 - [x] Include a compact write preview so peers judge the actual proposed change,
       not only the file and symbols.
 
+Broker log convention: normal agent-loop turns are positive. Private broker LLM
+calls are logged as `llm_usage` with `phase: "broker"` and `turn: -1`, `-2`,
+etc. The negative turn marks an out-of-band negotiation call and keeps it
+separate from the agent's normal ReAct/tool trajectory.
+
 ## V2.4: Trigger And Conflict-Semantics Cleanup
 
 These refinements correspond to the raw targeted `v4` run. They still belong to

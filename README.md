@@ -134,6 +134,10 @@ runtime-triggered broker is worth the extra turn and token cost.
 `adaptive_lease` is a separate hybrid: it asks whether `file_lock` safety can be
 kept while recovering some `ast_scope` granularity.
 
+Log note: normal agent turns are positive. `peer_broker` may emit
+`llm_usage` with `phase: "broker"` and `turn: -1`, `-2`, etc. Those are private
+broker decision calls outside the normal agent tool loop, not negative progress.
+
 **Adding your strategy (Level A).** Implement `_coordinate_read` and
 `_coordinate_write`, register with `@register`, import in
 `harness/strategies/__init__.py`, add the name to `strategies:` in a runner
@@ -234,6 +238,8 @@ python -m runner.run_grid --config runner/config.example.yaml
 
 # validate replay logs, then regenerate tables, CI intervals, event profiles, plots, and report.html
 python -m analysis.validate_logs results/grid-v1 --expect-trials 480
+# optional: treat nested tool-call argument schema drift as validation errors
+# python -m analysis.validate_logs results/grid-v1 --expect-trials 480 --strict-tool-args
 python -m analysis.make_report results/grid-v1
 # optional: pass the runner config that holds prices:
 # python -m analysis.make_report results/<run_id> --prices-config runner/config.example.yaml

@@ -9,6 +9,7 @@ from harness.events import EventLogger
 from harness.models import ModelClient, ModelTurn, ToolCall
 from harness.registry import ToolRegistry
 from harness.strategies.base import Mutation, Strategy
+from harness.tool_arg_schema import validate_tool_arguments
 from harness.tools import FILE_TOOL_SCHEMAS
 from harness.workspace import Workspace
 
@@ -265,6 +266,13 @@ class Agent:
         self.log.log("tool_call", agent=self.id, turn=turn, tool=name,
                      args={k: (v[:200] if isinstance(v, str) else v)
                            for k, v in args.items()})
+        arg_issues = validate_tool_arguments(
+            name, args, self._tool_schemas(), unknown_is_issue=False)
+        if arg_issues:
+            self.log.log("tool_arg_invalid", agent=self.id, turn=turn,
+                         tool=name, issues=arg_issues[:8])
+            return _describe_tool_arg_errors(name, arg_issues), False
+
         if name == "list_files":
             files = self.ws.list_files(agent_id=self.id)
             return "\n".join(files), False
@@ -330,6 +338,16 @@ def _describe(outcome) -> str:
         note = " (auto-merged with a concurrent edit)" if outcome.status == "merged" else ""
         return f"OK: change applied{note}."
     return f"REFUSED ({outcome.status}): {outcome.message}"
+
+
+def _describe_tool_arg_errors(tool: str, issues: list[str]) -> str:
+    details = "; ".join(issues[:5])
+    if len(issues) > 5:
+        details += f"; plus {len(issues) - 5} more"
+    return (
+        f"ERROR: invalid arguments for {tool}: {details}. "
+        f"Re-call {tool} with all required fields and correct JSON types."
+    )
 
 
 def _dump_args(arguments: dict) -> str:
