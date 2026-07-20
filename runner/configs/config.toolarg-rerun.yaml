@@ -1,0 +1,55 @@
+# Surgical rerun for logs with missing required tool-call fields found by
+# `analysis.validate_logs --strict-tool-args`.
+#
+# This does not overwrite grid-v1 or grid-v1-extensions. It writes a small
+# audit folder so the before/after cells can be checked before deciding whether
+# any headline tables need replacement notes.
+#
+# Run:
+#   python -m runner.run_grid --config runner/configs/config.toolarg-rerun.yaml
+#   python -m analysis.validate_logs results/grid-v1-toolarg-rerun --expect-trials 16 --strict-tool-args
+#   python -m analysis.make_report results/grid-v1-toolarg-rerun --prices-config runner/configs/config.toolarg-rerun.yaml
+run_id: grid-v1-toolarg-rerun
+mode: openai
+provider: openai
+model: gpt-5-mini
+
+# Exact cells only. These came from:
+# - missing edit_file.new_string in grid-v1 and grid-v1-extensions
+# - missing registry-tool summary payloads on t10_phantom_tool
+trials:
+  # Main grid: missing edit payloads
+  - {task: rw_b_signature_drift, strategy: ast_dep, n_agents: 2, rep: 4}
+  - {task: rw_d_tag_antidependency, strategy: ast_scope, n_agents: 2, rep: 0}
+  - {task: rw_d_tag_antidependency, strategy: naive, n_agents: 2, rep: 3}
+  - {task: rw_d_tag_antidependency, strategy: notify, n_agents: 2, rep: 1}
+
+  # Main grid: phantom-tool wrapper payloads
+  - {task: t10_phantom_tool, strategy: ast_dep, n_agents: 2, rep: 0}
+  - {task: t10_phantom_tool, strategy: ast_scope, n_agents: 2, rep: 0}
+  - {task: t10_phantom_tool, strategy: ast_scope, n_agents: 2, rep: 4}
+  - {task: t10_phantom_tool, strategy: naive, n_agents: 2, rep: 3}
+  - {task: t10_phantom_tool, strategy: notify, n_agents: 2, rep: 2}
+  - {task: t10_phantom_tool, strategy: notify, n_agents: 2, rep: 3}
+
+  # Extension grid: missing edit payload
+  - {task: rw_e_cascade, strategy: peer_broker, n_agents: 3, rep: 2}
+
+  # Extension grid: phantom-tool wrapper payloads
+  - {task: t10_phantom_tool, strategy: adaptive_lease, n_agents: 2, rep: 0}
+  - {task: t10_phantom_tool, strategy: adaptive_lease, n_agents: 2, rep: 1}
+  - {task: t10_phantom_tool, strategy: peer_broker, n_agents: 2, rep: 1}
+  - {task: t10_phantom_tool, strategy: peer_broker, n_agents: 2, rep: 2}
+  - {task: t10_phantom_tool, strategy: peer_contract, n_agents: 2, rep: 2}
+
+max_turns: 40
+lock_timeout_s: 30
+trial_timeout_s: 900
+parallel: 2
+rerun_incomplete_logs: true
+rerun_infra_errors: true
+budget:
+  max_usd: 3
+  max_total_tokens: 5000000
+prices:
+  gpt-5-mini: {input: 0.25, output: 2.00}

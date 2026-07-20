@@ -212,7 +212,7 @@ tables and `results/grid-v1/report.html`.
 **Post-grid 9-strategy extension.** I also ran a full extension grid after the
 headline table to recognize the three new strategies on the same 16 tasks. The
 combined artifact is `results/grid-v1-plus-extensions/`, built from
-`results/grid-v1/` and `results/grid-v1-extensions-full/`.
+`results/grid-v1/` and `results/grid-v1-extensions/`.
 
 This is not the 480-trial headline grid, because the strategies were added after
 the baseline run. It is still valuable evidence. In the combined report,
@@ -429,7 +429,7 @@ Cost shaped the benchmark. The runner enforces a **$25 / 40M-token** guardrail
 and supports idempotent resume, so existing logs are skipped instead of rerun.
 
 Every trial logs token counts at `trial_end`. The report command derives USD
-from committed price tables in `run_meta.json` or `runner/config.example.yaml`.
+from committed price tables in `run_meta.json` or `runner/configs/config.example.yaml`.
 For gpt-5-mini, the configured rates are $0.25/M input tokens and $2/M output
 tokens.
 

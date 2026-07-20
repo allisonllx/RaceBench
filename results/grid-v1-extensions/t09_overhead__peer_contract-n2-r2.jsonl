@@ -1,0 +1,64 @@
+{"ts": 0.141, "event": "trial_start", "task": "t09_overhead", "failure_mode": "overhead_masks_benefit", "benign": true, "strategy": "peer_contract", "n_agents": 2, "rep": 2, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-a", "agent-b"]}
+{"ts": 0.1798, "event": "notification_delivered", "agent": "agent-a", "turn": 1, "note": "[peer-contract protocol] Before editing, call declare_intent with the file path, symbols you expect to change, a short summary, any exports other agents can rely on, and must-preserve constraints. If you receive a peer intent, ACK when one final implementation can satisfy both subtasks, even if both"}
+{"ts": 0.1812, "event": "notification_delivered", "agent": "agent-b", "turn": 1, "note": "[peer-contract protocol] Before editing, call declare_intent with the file path, symbols you expect to change, a short summary, any exports other agents can rely on, and must-preserve constraints. If you receive a peer intent, ACK when one final implementation can satisfy both subtasks, even if both"}
+{"ts": 1.4157, "event": "llm_usage", "agent": "agent-a", "turn": 1, "prompt_tokens": 925, "completion_tokens": 23}
+{"ts": 1.416, "event": "tool_call", "agent": "agent-a", "turn": 1, "tool": "glob", "args": {"pattern": "**/*"}}
+{"ts": 1.4221, "event": "search", "agent": "agent-a", "kind": "glob", "pattern": "**/*", "n": 7}
+{"ts": 2.7548, "event": "llm_usage", "agent": "agent-a", "turn": 2, "prompt_tokens": 995, "completion_tokens": 27}
+{"ts": 2.7549, "event": "tool_call", "agent": "agent-a", "turn": 2, "tool": "read_file", "args": {"path": "mod_a/mathops.py"}}
+{"ts": 2.7552, "event": "read", "agent": "agent-a", "path": "mod_a/mathops.py", "found": true, "size": 45}
+{"ts": 3.7127, "event": "llm_usage", "agent": "agent-a", "turn": 3, "prompt_tokens": 1037, "completion_tokens": 21}
+{"ts": 3.7128, "event": "tool_call", "agent": "agent-a", "turn": 3, "tool": "read_file", "args": {"path": "mod_a/textops.py"}}
+{"ts": 3.7131, "event": "read", "agent": "agent-a", "path": "mod_a/textops.py", "found": true, "size": 47}
+{"ts": 3.8301, "event": "llm_usage", "agent": "agent-b", "turn": 1, "prompt_tokens": 925, "completion_tokens": 389}
+{"ts": 3.8302, "event": "tool_call", "agent": "agent-b", "turn": 1, "tool": "declare_intent", "args": {"path": "mod_b/", "symbols": ["square", "shout", "__all__"], "summary": "Implement square(x) in mod_b/mathops.py to return x*x, implement shout(name) in mod_b/textops.py to return f\"{name}!\".upper(), and ensure mod_b __init__ exports these functions if needed; preserve fun", "exports": ["square", "shout"], "must_preserve": ["Function names and signatures: square(x), shout(name); do not change other modules' behavior or tests."]}}
+{"ts": 3.8302, "event": "coord", "strategy": "peer_contract", "action": "intent_declared", "agent": "agent-b", "contract_id": "contract-1", "path": "mod_b/", "symbols": ["__all__", "shout", "square"], "summary": "Implement square(x) in mod_b/mathops.py to return x*x, implement shout(name) in mod_b/textops.py to return f\"{name}!\".upper(), and ensure mod_b __init__ exports these functions if needed; preserve function signatures and other module contents.", "exports": ["shout", "square"], "must_preserve": ["Function names and signatures: square(x), shout(name); do not change other modules' behavior or tests."]}
+{"ts": 4.505, "event": "llm_usage", "agent": "agent-a", "turn": 4, "prompt_tokens": 1079, "completion_tokens": 22}
+{"ts": 4.5051, "event": "tool_call", "agent": "agent-a", "turn": 4, "tool": "read_file", "args": {"path": "mod_a/__init__.py"}}
+{"ts": 4.5055, "event": "read", "agent": "agent-a", "path": "mod_a/__init__.py", "found": true, "size": 96}
+{"ts": 4.9278, "event": "llm_usage", "agent": "agent-b", "turn": 2, "prompt_tokens": 1077, "completion_tokens": 22}
+{"ts": 4.928, "event": "tool_call", "agent": "agent-b", "turn": 2, "tool": "grep", "args": {"pattern": "square", "glob": "**/*"}}
+{"ts": 4.9357, "event": "search", "agent": "agent-b", "kind": "grep", "pattern": "square", "n": 3}
+{"ts": 5.9723, "event": "llm_usage", "agent": "agent-b", "turn": 3, "prompt_tokens": 1157, "completion_tokens": 21}
+{"ts": 5.9724, "event": "tool_call", "agent": "agent-b", "turn": 3, "tool": "read_file", "args": {"path": "mod_b/mathops.py"}}
+{"ts": 5.9728, "event": "read", "agent": "agent-b", "path": "mod_b/mathops.py", "found": true, "size": 45}
+{"ts": 7.0564, "event": "llm_usage", "agent": "agent-b", "turn": 4, "prompt_tokens": 1199, "completion_tokens": 21}
+{"ts": 7.0566, "event": "tool_call", "agent": "agent-b", "turn": 4, "tool": "read_file", "args": {"path": "mod_b/textops.py"}}
+{"ts": 7.0574, "event": "read", "agent": "agent-b", "path": "mod_b/textops.py", "found": true, "size": 47}
+{"ts": 8.0252, "event": "llm_usage", "agent": "agent-a", "turn": 5, "prompt_tokens": 1139, "completion_tokens": 295}
+{"ts": 8.0254, "event": "tool_call", "agent": "agent-a", "turn": 5, "tool": "declare_intent", "args": {"path": "mod_a/mathops.py, mod_a/textops.py", "symbols": ["double", "greet"], "summary": "Implement double(x) to return 2*x and greet(name) to return 'hello {name}'.", "exports": ["mod_a.double", "mod_a.greet"], "must_preserve": ["function signatures def double(x) and def greet(name); module-level names and imports should remain unchanged"]}}
+{"ts": 8.0256, "event": "coord", "strategy": "peer_contract", "action": "intent_declared", "agent": "agent-a", "contract_id": "contract-2", "path": "mod_a/mathops.py, mod_a/textops.py", "symbols": ["double", "greet"], "summary": "Implement double(x) to return 2*x and greet(name) to return 'hello {name}'.", "exports": ["mod_a.double", "mod_a.greet"], "must_preserve": ["function signatures def double(x) and def greet(name); module-level names and imports should remain unchanged"]}
+{"ts": 8.0375, "event": "llm_usage", "agent": "agent-b", "turn": 5, "prompt_tokens": 1241, "completion_tokens": 22}
+{"ts": 8.0376, "event": "tool_call", "agent": "agent-b", "turn": 5, "tool": "read_file", "args": {"path": "mod_b/__init__.py"}}
+{"ts": 8.038, "event": "read", "agent": "agent-b", "path": "mod_b/__init__.py", "found": true, "size": 96}
+{"ts": 10.1983, "event": "llm_usage", "agent": "agent-a", "turn": 6, "prompt_tokens": 1261, "completion_tokens": 188}
+{"ts": 10.1985, "event": "tool_call", "agent": "agent-a", "turn": 6, "tool": "edit_file", "args": {"path": "mod_a/mathops.py", "old_string": "def double(x):\n    raise NotImplementedError\n", "new_string": "def double(x):\n    return 2 * x\n"}}
+{"ts": 10.1992, "event": "coord", "strategy": "peer_contract", "action": "intent_inferred", "agent": "agent-a", "contract_id": "contract-3", "path": "mod_a/mathops.py", "symbols": ["double"]}
+{"ts": 10.2001, "event": "write", "agent": "agent-a", "path": "mod_a/mathops.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["double"], "message": ""}
+{"ts": 10.8028, "event": "llm_usage", "agent": "agent-b", "turn": 6, "prompt_tokens": 1301, "completion_tokens": 251}
+{"ts": 10.8029, "event": "tool_call", "agent": "agent-b", "turn": 6, "tool": "edit_file", "args": {"path": "mod_b/mathops.py", "old_string": "def square(x):\n    raise NotImplementedError\n", "new_string": "def square(x):\n    return x * x\n"}}
+{"ts": 10.8032, "event": "coord", "strategy": "peer_contract", "action": "intent_inferred", "agent": "agent-b", "contract_id": "contract-4", "path": "mod_b/mathops.py", "symbols": ["square"]}
+{"ts": 10.8035, "event": "write", "agent": "agent-b", "path": "mod_b/mathops.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["square"], "message": ""}
+{"ts": 11.4436, "event": "llm_usage", "agent": "agent-a", "turn": 7, "prompt_tokens": 1331, "completion_tokens": 57}
+{"ts": 11.4438, "event": "tool_call", "agent": "agent-a", "turn": 7, "tool": "edit_file", "args": {"path": "mod_a/textops.py", "old_string": "def greet(name):\n    raise NotImplementedError\n", "new_string": "def greet(name):\n    return f\"hello {name}\"\n"}}
+{"ts": 11.4447, "event": "coord", "strategy": "peer_contract", "action": "intent_inferred", "agent": "agent-a", "contract_id": "contract-5", "path": "mod_a/textops.py", "symbols": ["greet"]}
+{"ts": 11.4458, "event": "write", "agent": "agent-a", "path": "mod_a/textops.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["greet"], "message": ""}
+{"ts": 12.0624, "event": "llm_usage", "agent": "agent-b", "turn": 7, "prompt_tokens": 1370, "completion_tokens": 59}
+{"ts": 12.0627, "event": "tool_call", "agent": "agent-b", "turn": 7, "tool": "edit_file", "args": {"path": "mod_b/textops.py", "old_string": "def shout(name):\n    raise NotImplementedError\n", "new_string": "def shout(name):\n    return f\"{name}!\".upper()\n"}}
+{"ts": 12.0638, "event": "coord", "strategy": "peer_contract", "action": "intent_inferred", "agent": "agent-b", "contract_id": "contract-6", "path": "mod_b/textops.py", "symbols": ["shout"]}
+{"ts": 12.065, "event": "write", "agent": "agent-b", "path": "mod_b/textops.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["shout"], "message": ""}
+{"ts": 12.5006, "event": "llm_usage", "agent": "agent-a", "turn": 8, "prompt_tokens": 1404, "completion_tokens": 13}
+{"ts": 12.5007, "event": "tool_call", "agent": "agent-a", "turn": 8, "tool": "run_tests", "args": {}}
+{"ts": 12.8486, "event": "run_tests", "agent": "agent-a", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 13.2601, "event": "llm_usage", "agent": "agent-b", "turn": 8, "prompt_tokens": 1445, "completion_tokens": 13}
+{"ts": 13.2603, "event": "tool_call", "agent": "agent-b", "turn": 8, "tool": "run_tests", "args": {}}
+{"ts": 13.5133, "event": "run_tests", "agent": "agent-b", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 14.0258, "event": "llm_usage", "agent": "agent-a", "turn": 9, "prompt_tokens": 1443, "completion_tokens": 37}
+{"ts": 14.0258, "event": "tool_call", "agent": "agent-a", "turn": 9, "tool": "done", "args": {"summary": "Implemented mod_a.double and mod_a.greet to return 2*x and 'hello {name}' respectively."}}
+{"ts": 14.0258, "event": "agent_done_coord", "agent": "agent-a"}
+{"ts": 14.0258, "event": "agent_done", "agent": "agent-a", "status": "done", "turns": 9, "prompt_tokens": 10614, "completion_tokens": 683}
+{"ts": 14.6078, "event": "llm_usage", "agent": "agent-b", "turn": 9, "prompt_tokens": 1484, "completion_tokens": 40}
+{"ts": 14.6079, "event": "tool_call", "agent": "agent-b", "turn": 9, "tool": "done", "args": {"summary": "Implemented square(x) and shout(name) in mod_b; ensured exports in mod_b/__init__.py; tests pass."}}
+{"ts": 14.6079, "event": "agent_done_coord", "agent": "agent-b"}
+{"ts": 14.608, "event": "agent_done", "agent": "agent-b", "status": "done", "turns": 9, "prompt_tokens": 11199, "completion_tokens": 838}
+{"ts": 14.8569, "event": "trial_end", "correct": true, "oracle_passed": 2, "oracle_total": 2, "wall_clock_s": 14.43, "prompt_tokens": 21813, "completion_tokens": 1521, "agent_statuses": {"agent-a": "done", "agent-b": "done"}, "oracle_output": "..                                                                       [100%]\n2 passed in 0.01s\n"}

@@ -1,0 +1,79 @@
+{"ts": 0.9498, "event": "trial_start", "task": "t10_phantom_tool", "failure_mode": "phantom_tool_registry_drift", "benign": false, "strategy": "adaptive_lease", "n_agents": 2, "rep": 4, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-pipeline", "agent-console"]}
+{"ts": 1.1402, "event": "notification_delivered", "agent": "agent-pipeline", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 1.156, "event": "notification_delivered", "agent": "agent-console", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 3.2671, "event": "llm_usage", "agent": "agent-pipeline", "turn": 1, "prompt_tokens": 950, "completion_tokens": 86}
+{"ts": 3.2673, "event": "tool_call", "agent": "agent-pipeline", "turn": 1, "tool": "declare_scope", "args": {"resources": ["pipeline.build.build_summary", "data.records.SAMPLE", "metrics.stats.summarize", "out/report.txt"], "path": "pipeline/build.py", "summary": "Implement build_summary to use data.records.SAMPLE and metrics.stats.summarize and write formatted report to out/report.txt", "must_preserve": ["existing file behaviors"]}}
+{"ts": 3.2674, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-pipeline", "path": "pipeline/build.py", "symbols": [], "resources": ["data.records.SAMPLE", "metrics.stats.summarize", "out/report.txt", "pipeline.build.build_summary"], "summary": "Implement build_summary to use data.records.SAMPLE and metrics.stats.summarize and write formatted report to out/report.txt", "exports": [], "must_preserve": ["existing file behaviors"]}
+{"ts": 3.2674, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-pipeline", "path": "pipeline/build.py", "lease_level": "resource", "symbols": [], "resources": ["data.records.SAMPLE", "metrics.stats.summarize", "out/report.txt", "pipeline.build.build_summary"]}
+{"ts": 3.8995, "event": "llm_usage", "agent": "agent-console", "turn": 1, "prompt_tokens": 900, "completion_tokens": 154}
+{"ts": 3.8995, "event": "tool_call", "agent": "agent-console", "turn": 1, "tool": "declare_scope", "args": {"resources": ["console.cli.run_behavior", "console.report_file_handling"], "path": "console/cli.py", "summary": "Implement console.run() to create out/report.txt with PENDING if missing, then loop until it changes to a finished report, returning contents prefixed with 'CONSOLE: '", "must_preserve": ["other console module APIs"]}}
+{"ts": 3.8996, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-console", "path": "console/cli.py", "symbols": [], "resources": ["console.cli.run_behavior", "console.report_file_handling"], "summary": "Implement console.run() to create out/report.txt with PENDING if missing, then loop until it changes to a finished report, returning contents prefixed with 'CONSOLE: '", "exports": [], "must_preserve": ["other console module APIs"]}
+{"ts": 3.8996, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-console", "path": "console/cli.py", "lease_level": "resource", "symbols": [], "resources": ["console.cli.run_behavior", "console.report_file_handling"]}
+{"ts": 4.1461, "event": "llm_usage", "agent": "agent-pipeline", "turn": 2, "prompt_tokens": 1065, "completion_tokens": 13}
+{"ts": 4.1462, "event": "tool_call", "agent": "agent-pipeline", "turn": 2, "tool": "list_files", "args": {}}
+{"ts": 4.7654, "event": "llm_usage", "agent": "agent-console", "turn": 2, "prompt_tokens": 1011, "completion_tokens": 13}
+{"ts": 4.7655, "event": "tool_call", "agent": "agent-console", "turn": 2, "tool": "list_files", "args": {}}
+{"ts": 5.1604, "event": "llm_usage", "agent": "agent-pipeline", "turn": 3, "prompt_tokens": 1154, "completion_tokens": 23}
+{"ts": 5.1606, "event": "tool_call", "agent": "agent-pipeline", "turn": 3, "tool": "grep", "args": {"pattern": "build_summary", "glob": "**/*"}}
+{"ts": 5.1669, "event": "search", "agent": "agent-pipeline", "kind": "grep", "pattern": "build_summary", "n": 3}
+{"ts": 5.8291, "event": "llm_usage", "agent": "agent-console", "turn": 3, "prompt_tokens": 1100, "completion_tokens": 20}
+{"ts": 5.8294, "event": "tool_call", "agent": "agent-console", "turn": 3, "tool": "read_file", "args": {"path": "console/cli.py"}}
+{"ts": 5.83, "event": "read", "agent": "agent-console", "path": "console/cli.py", "found": true, "size": 123}
+{"ts": 6.1929, "event": "llm_usage", "agent": "agent-pipeline", "turn": 4, "prompt_tokens": 1227, "completion_tokens": 19}
+{"ts": 6.1931, "event": "tool_call", "agent": "agent-pipeline", "turn": 4, "tool": "read_file", "args": {"path": "pipeline/build.py"}}
+{"ts": 6.1941, "event": "read", "agent": "agent-pipeline", "path": "pipeline/build.py", "found": true, "size": 193}
+{"ts": 6.9784, "event": "llm_usage", "agent": "agent-console", "turn": 4, "prompt_tokens": 1160, "completion_tokens": 19}
+{"ts": 6.9785, "event": "tool_call", "agent": "agent-console", "turn": 4, "tool": "read_file", "args": {"path": "out/report.txt"}}
+{"ts": 6.9791, "event": "read", "agent": "agent-console", "path": "out/report.txt", "found": true, "size": 8}
+{"ts": 7.3783, "event": "llm_usage", "agent": "agent-pipeline", "turn": 5, "prompt_tokens": 1308, "completion_tokens": 20}
+{"ts": 7.3784, "event": "tool_call", "agent": "agent-pipeline", "turn": 5, "tool": "read_file", "args": {"path": "data/records.py"}}
+{"ts": 7.3788, "event": "read", "agent": "agent-pipeline", "path": "data/records.py", "found": true, "size": 96}
+{"ts": 8.4349, "event": "llm_usage", "agent": "agent-pipeline", "turn": 6, "prompt_tokens": 1375, "completion_tokens": 20}
+{"ts": 8.435, "event": "tool_call", "agent": "agent-pipeline", "turn": 6, "tool": "read_file", "args": {"path": "metrics/stats.py"}}
+{"ts": 8.4358, "event": "read", "agent": "agent-pipeline", "path": "metrics/stats.py", "found": true, "size": 358}
+{"ts": 9.2197, "event": "llm_usage", "agent": "agent-console", "turn": 5, "prompt_tokens": 1193, "completion_tokens": 155}
+{"ts": 9.2199, "event": "tool_call", "agent": "agent-console", "turn": 5, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 9.2212, "event": "read", "agent": "agent-console", "path": "tests/test_smoke.py", "found": true, "size": 87}
+{"ts": 9.2612, "event": "llm_usage", "agent": "agent-pipeline", "turn": 7, "prompt_tokens": 1502, "completion_tokens": 19}
+{"ts": 9.2613, "event": "tool_call", "agent": "agent-pipeline", "turn": 7, "tool": "read_file", "args": {"path": "out/report.txt"}}
+{"ts": 9.2618, "event": "read", "agent": "agent-pipeline", "path": "out/report.txt", "found": true, "size": 8}
+{"ts": 11.0663, "event": "llm_usage", "agent": "agent-pipeline", "turn": 8, "prompt_tokens": 1535, "completion_tokens": 19}
+{"ts": 11.0664, "event": "tool_call", "agent": "agent-pipeline", "turn": 8, "tool": "list_tools", "args": {}}
+{"ts": 14.0419, "event": "llm_usage", "agent": "agent-console", "turn": 6, "prompt_tokens": 1250, "completion_tokens": 411}
+{"ts": 14.0421, "event": "tool_call", "agent": "agent-console", "turn": 6, "tool": "read_file", "args": {"path": "console/__init__.py"}}
+{"ts": 14.0429, "event": "read", "agent": "agent-console", "path": "console/__init__.py", "found": true, "size": 47}
+{"ts": 22.3353, "event": "llm_usage", "agent": "agent-pipeline", "turn": 9, "prompt_tokens": 1564, "completion_tokens": 1032}
+{"ts": 22.3355, "event": "tool_call", "agent": "agent-pipeline", "turn": 9, "tool": "edit_file", "args": {"path": "pipeline/build.py", "old_string": "\"\"\"Pipeline stubs — use data.records + metrics.stats.\"\"\"\n\n\ndef build_summary():\n    \"\"\"Return {\"count\": 2, \"total\": 10, \"mean\": 5.0} from SAMPLE via summarize.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Pipeline stubs — use data.records + metrics.stats.\"\"\"\n\n\ndef build_summary():\n    \"\"\"Return {\"count\": 2, \"total\": 10, \"mean\": 5.0} from SAMPLE via summarize.\"\"\"\n    # Import here to follow module bo"}}
+{"ts": 22.3364, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-pipeline", "path": "pipeline/build.py", "lease_level": "resource", "symbols": ["build_summary"], "resources": ["data.records.SAMPLE", "metrics.stats.summarize", "out/report.txt", "pipeline.build.build_summary"]}
+{"ts": 22.3371, "event": "write", "agent": "agent-pipeline", "path": "pipeline/build.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["build_summary"], "message": ""}
+{"ts": 22.3371, "event": "registry_mutation", "action": "remove", "tool": "format_report", "after_writes": 1}
+{"ts": 22.3372, "event": "registry_mutation", "action": "add", "tool": "format_report_v2", "after_writes": 1}
+{"ts": 23.6559, "event": "llm_usage", "agent": "agent-pipeline", "turn": 10, "prompt_tokens": 1774, "completion_tokens": 41}
+{"ts": 23.656, "event": "tool_call", "agent": "agent-pipeline", "turn": 10, "tool": "invoke_tool", "args": {"name": "format_report", "arguments": {"summary": {"count": 2, "total": 10, "mean": 5.0}, "title": "Ops Report"}}}
+{"ts": 24.0042, "event": "llm_usage", "agent": "agent-console", "turn": 7, "prompt_tokens": 1295, "completion_tokens": 956}
+{"ts": 24.0044, "event": "tool_call", "agent": "agent-console", "turn": 7, "tool": "edit_file", "args": {"path": "console/cli.py", "old_string": "\"\"\"Console entry.\"\"\"\n\n\ndef run():\n    \"\"\"Return 'CONSOLE: ' + contents of out/report.txt.\"\"\"\n    raise NotImplementedError\n", "new_string": "\"\"\"Console entry.\"\"\"\n\nimport time\nfrom pathlib import Path\n\n\ndef run():\n    \"\"\"Return 'CONSOLE: ' + contents of out/report.txt.\n\n    If out/report.txt is missing, create it with a single line \"PENDING"}}
+{"ts": 24.0058, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-console", "path": "console/cli.py", "lease_level": "file", "symbols": ["<module>", "run"], "resources": ["console.cli.run_behavior", "console.report_file_handling"]}
+{"ts": 24.0067, "event": "write", "agent": "agent-console", "path": "console/cli.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["<module>", "run"], "message": ""}
+{"ts": 24.6187, "event": "llm_usage", "agent": "agent-pipeline", "turn": 11, "prompt_tokens": 1842, "completion_tokens": 13}
+{"ts": 24.6205, "event": "tool_call", "agent": "agent-pipeline", "turn": 11, "tool": "list_tools", "args": {}}
+{"ts": 25.0128, "event": "llm_usage", "agent": "agent-console", "turn": 8, "prompt_tokens": 1621, "completion_tokens": 13}
+{"ts": 25.0129, "event": "tool_call", "agent": "agent-console", "turn": 8, "tool": "run_tests", "args": {}}
+{"ts": 25.318, "event": "run_tests", "agent": "agent-console", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 25.8733, "event": "llm_usage", "agent": "agent-pipeline", "turn": 12, "prompt_tokens": 1873, "completion_tokens": 43}
+{"ts": 25.8734, "event": "tool_call", "agent": "agent-pipeline", "turn": 12, "tool": "invoke_tool", "args": {"name": "format_report_v2", "arguments": {"summary": {"count": 2, "total": 10, "mean": 5.0}, "title": "Ops Report"}}}
+{"ts": 26.6404, "event": "llm_usage", "agent": "agent-console", "turn": 9, "prompt_tokens": 1660, "completion_tokens": 50}
+{"ts": 26.6404, "event": "tool_call", "agent": "agent-console", "turn": 9, "tool": "done", "args": {"summary": "Implemented console.run() to create out/report.txt with PENDING if missing, poll until it's no longer PENDING, and return contents prefixed with 'CONSOLE: '."}}
+{"ts": 26.6405, "event": "agent_done_coord", "agent": "agent-console"}
+{"ts": 26.6405, "event": "agent_done", "agent": "agent-console", "status": "done", "turns": 9, "prompt_tokens": 11190, "completion_tokens": 1791}
+{"ts": 27.4759, "event": "llm_usage", "agent": "agent-pipeline", "turn": 13, "prompt_tokens": 1942, "completion_tokens": 38}
+{"ts": 27.476, "event": "tool_call", "agent": "agent-pipeline", "turn": 13, "tool": "write_file", "args": {"path": "out/report.txt", "content": "# Ops Report\ncount=2 total=10 mean=5.0\n"}}
+{"ts": 27.4766, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-pipeline", "path": "out/report.txt", "lease_level": "file", "symbols": ["<file>"], "resources": ["data.records.SAMPLE", "metrics.stats.summarize", "out/report.txt", "pipeline.build.build_summary"]}
+{"ts": 27.477, "event": "write", "agent": "agent-pipeline", "path": "out/report.txt", "kind": "overwrite", "status": "applied", "waited_s": 0.001, "changed_symbols": ["<file>"], "message": ""}
+{"ts": 28.5033, "event": "llm_usage", "agent": "agent-pipeline", "turn": 14, "prompt_tokens": 1996, "completion_tokens": 13}
+{"ts": 28.5034, "event": "tool_call", "agent": "agent-pipeline", "turn": 14, "tool": "run_tests", "args": {}}
+{"ts": 28.7773, "event": "run_tests", "agent": "agent-pipeline", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 30.0667, "event": "llm_usage", "agent": "agent-pipeline", "turn": 15, "prompt_tokens": 2035, "completion_tokens": 44}
+{"ts": 30.0668, "event": "tool_call", "agent": "agent-pipeline", "turn": 15, "tool": "done", "args": {"summary": "Implemented build_summary to use data.records.SAMPLE and metrics.stats.summarize; formatted report written to out/report.txt using format_report_v2."}}
+{"ts": 30.0669, "event": "agent_done_coord", "agent": "agent-pipeline"}
+{"ts": 30.0669, "event": "agent_done", "agent": "agent-pipeline", "status": "done", "turns": 15, "prompt_tokens": 23142, "completion_tokens": 1443}
+{"ts": 30.3484, "event": "trial_end", "correct": true, "oracle_passed": 3, "oracle_total": 3, "wall_clock_s": 28.93, "prompt_tokens": 34332, "completion_tokens": 3234, "agent_statuses": {"agent-pipeline": "done", "agent-console": "done"}, "oracle_output": "...                                                                      [100%]\n3 passed in 0.01s\n"}

@@ -1,0 +1,41 @@
+{"ts": 0.2416, "event": "trial_start", "task": "t01_stale_clobber", "failure_mode": "stale_read_lost_update", "benign": false, "strategy": "adaptive_lease", "n_agents": 2, "rep": 4, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-timeout", "agent-retries"]}
+{"ts": 0.3085, "event": "notification_delivered", "agent": "agent-timeout", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 0.3111, "event": "notification_delivered", "agent": "agent-retries", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 2.0988, "event": "llm_usage", "agent": "agent-timeout", "turn": 1, "prompt_tokens": 875, "completion_tokens": 64}
+{"ts": 2.0989, "event": "tool_call", "agent": "agent-timeout", "turn": 1, "tool": "declare_scope", "args": {"resources": ["config.defaults", "config.validate", "configuration.schema"], "path": "config.py", "summary": "Modify config.py to add timeout default and validation while preserving other keys and rules; must preserve existing behavior and validations."}}
+{"ts": 2.099, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-timeout", "path": "config.py", "symbols": [], "resources": ["config.defaults", "config.validate", "configuration.schema"], "summary": "Modify config.py to add timeout default and validation while preserving other keys and rules; must preserve existing behavior and validations.", "exports": [], "must_preserve": []}
+{"ts": 2.0991, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-timeout", "path": "config.py", "lease_level": "resource", "symbols": [], "resources": ["config.defaults", "config.validate", "configuration.schema"]}
+{"ts": 2.4229, "event": "llm_usage", "agent": "agent-retries", "turn": 1, "prompt_tokens": 877, "completion_tokens": 59}
+{"ts": 2.423, "event": "tool_call", "agent": "agent-retries", "turn": 1, "tool": "declare_scope", "args": {"resources": ["config.defaults", "config.validate"], "path": "config.py", "summary": "Modify DEFAULTS to add 'retries' default and extend validate() to check retries is non-negative int"}}
+{"ts": 2.4231, "event": "coord", "strategy": "adaptive_lease", "action": "blocked", "agent": "agent-retries", "path": "config.py", "lease_level": "resource", "resources": ["config.defaults", "config.validate"], "holders": ["agent-timeout"]}
+{"ts": 3.095, "event": "llm_usage", "agent": "agent-timeout", "turn": 2, "prompt_tokens": 958, "completion_tokens": 18}
+{"ts": 3.0951, "event": "tool_call", "agent": "agent-timeout", "turn": 2, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 3.0961, "event": "read", "agent": "agent-timeout", "path": "config.py", "found": true, "size": 1056}
+{"ts": 9.1711, "event": "llm_usage", "agent": "agent-timeout", "turn": 3, "prompt_tokens": 1229, "completion_tokens": 566}
+{"ts": 9.1712, "event": "tool_call", "agent": "agent-timeout", "turn": 3, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 9.1721, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-timeout", "path": "config.py", "lease_level": "file", "symbols": ["<module>", "validate"], "resources": ["config.defaults", "config.validate", "configuration.schema"]}
+{"ts": 9.1733, "event": "write", "agent": "agent-timeout", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.002, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 10.106, "event": "llm_usage", "agent": "agent-timeout", "turn": 4, "prompt_tokens": 1613, "completion_tokens": 13}
+{"ts": 10.1061, "event": "tool_call", "agent": "agent-timeout", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 10.4453, "event": "run_tests", "agent": "agent-timeout", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 11.6139, "event": "llm_usage", "agent": "agent-timeout", "turn": 5, "prompt_tokens": 1652, "completion_tokens": 38}
+{"ts": 11.614, "event": "tool_call", "agent": "agent-timeout", "turn": 5, "tool": "done", "args": {"summary": "Added timeout default to DEFAULTS and extended validate() to enforce positive numeric timeout; preserved existing host/port behavior."}}
+{"ts": 11.6141, "event": "agent_done_coord", "agent": "agent-timeout"}
+{"ts": 11.6141, "event": "agent_done", "agent": "agent-timeout", "status": "done", "turns": 5, "prompt_tokens": 6327, "completion_tokens": 699}
+{"ts": 11.6142, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-retries", "path": "config.py", "symbols": [], "resources": ["config.defaults", "config.validate"], "summary": "Modify DEFAULTS to add 'retries' default and extend validate() to check retries is non-negative int", "exports": [], "must_preserve": []}
+{"ts": 11.6142, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-retries", "path": "config.py", "lease_level": "resource", "symbols": [], "resources": ["config.defaults", "config.validate"]}
+{"ts": 12.86, "event": "llm_usage", "agent": "agent-retries", "turn": 2, "prompt_tokens": 952, "completion_tokens": 18}
+{"ts": 12.86, "event": "tool_call", "agent": "agent-retries", "turn": 2, "tool": "read_file", "args": {"path": "config.py"}}
+{"ts": 12.8625, "event": "read", "agent": "agent-retries", "path": "config.py", "found": true, "size": 1249}
+{"ts": 20.5186, "event": "llm_usage", "agent": "agent-retries", "turn": 3, "prompt_tokens": 1272, "completion_tokens": 680}
+{"ts": 20.5187, "event": "tool_call", "agent": "agent-retries", "turn": 3, "tool": "write_file", "args": {"path": "config.py", "content": "\"\"\"Application configuration with validated defaults.\n\nAgents must rewrite this entire file (write_file) when adding keys — do not\npiecewise-edit individual lines.\n\"\"\"\n\n# === CONFIG BLOCK (rewrite thi"}}
+{"ts": 20.5196, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-retries", "path": "config.py", "lease_level": "file", "symbols": ["<module>", "validate"], "resources": ["config.defaults", "config.validate"]}
+{"ts": 20.5209, "event": "write", "agent": "agent-retries", "path": "config.py", "kind": "overwrite", "status": "applied", "waited_s": 0.002, "changed_symbols": ["<module>", "validate"], "message": ""}
+{"ts": 21.5403, "event": "llm_usage", "agent": "agent-retries", "turn": 4, "prompt_tokens": 1706, "completion_tokens": 13}
+{"ts": 21.5404, "event": "tool_call", "agent": "agent-retries", "turn": 4, "tool": "run_tests", "args": {}}
+{"ts": 21.9435, "event": "run_tests", "agent": "agent-retries", "passed": 4, "failed": 0, "errored": 0}
+{"ts": 23.2069, "event": "llm_usage", "agent": "agent-retries", "turn": 5, "prompt_tokens": 1745, "completion_tokens": 35}
+{"ts": 23.207, "event": "tool_call", "agent": "agent-retries", "turn": 5, "tool": "done", "args": {"summary": "Added 'retries' default to DEFAULTS and extended validate() to enforce non-negative int for retries"}}
+{"ts": 23.207, "event": "agent_done_coord", "agent": "agent-retries"}
+{"ts": 23.207, "event": "agent_done", "agent": "agent-retries", "status": "done", "turns": 5, "prompt_tokens": 6552, "completion_tokens": 805}
+{"ts": 23.5506, "event": "trial_end", "correct": true, "oracle_passed": 6, "oracle_total": 6, "wall_clock_s": 22.9, "prompt_tokens": 12879, "completion_tokens": 1504, "agent_statuses": {"agent-timeout": "done", "agent-retries": "done"}, "oracle_output": "......                                                                   [100%]\n6 passed in 0.01s\n"}

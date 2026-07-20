@@ -52,7 +52,7 @@ This appendix is supporting material and is not part of the five-pillar 1000-wor
 - Combined 9-strategy explorer: [`results/grid-v1-plus-extensions/report.html`](../results/grid-v1-plus-extensions/report.html)
 - Cross-run dashboard: [`results/cross-run-analysis/dashboard.html`](../results/cross-run-analysis/dashboard.html)
 - Main result logs and tables: [`results/grid-v1/`](../results/grid-v1/)
-- Post-grid extension logs and tables: [`results/grid-v1-extensions-full/`](../results/grid-v1-extensions-full/)
+- Post-grid extension logs and tables: [`results/grid-v1-extensions/`](../results/grid-v1-extensions/)
 - Cursor C1 exploratory logs: [`results/ext-cursor/`](../results/ext-cursor/)
 - Report generator code: [`analysis/html_report.py`](../analysis/html_report.py)
 

@@ -9,10 +9,11 @@ from runner.run_grid import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
+CONFIGS = ROOT / "runner" / "configs"
 
 
 def test_agnes_sensitivity_config_is_144_trials(tmp_path):
-    cfg = load_config(str(ROOT / "runner" / "config.agnes-sensitivity.yaml"))
+    cfg = load_config(str(CONFIGS / "config.agnes-sensitivity.yaml"))
     pending = collect_pending(cfg, tmp_path, calibrate=False)
 
     assert cfg["run_id"] == "grid-v1-agnes-sensitivity"
@@ -38,7 +39,7 @@ def test_agnes_sensitivity_config_is_144_trials(tmp_path):
 
 
 def test_peer_targeted_config_includes_peer_strategies(tmp_path):
-    cfg = load_config(str(ROOT / "runner" / "config.peer-targeted.yaml"))
+    cfg = load_config(str(CONFIGS / "config.peer-targeted.yaml"))
     pending = collect_pending(cfg, tmp_path, calibrate=False)
 
     assert cfg["run_id"] == "grid-v1-peer-targeted-v5"
@@ -62,7 +63,7 @@ def test_peer_targeted_config_includes_peer_strategies(tmp_path):
 
 
 def test_adaptive_lease_targeted_config_runs_only_new_strategy(tmp_path):
-    cfg = load_config(str(ROOT / "runner" / "config.adaptive-lease-targeted.yaml"))
+    cfg = load_config(str(CONFIGS / "config.adaptive-lease-targeted.yaml"))
     pending = collect_pending(cfg, tmp_path, calibrate=False)
 
     assert cfg["run_id"] == "grid-v1-adaptive-lease-targeted-v2"
@@ -83,11 +84,11 @@ def test_adaptive_lease_targeted_config_runs_only_new_strategy(tmp_path):
     assert {job.n for job in pending if job.task_name == "rw_e_cascade"} == {3}
 
 
-def test_extensions_full_config_runs_new_strategies_on_full_task_set(tmp_path):
-    cfg = load_config(str(ROOT / "runner" / "config.extensions-full.yaml"))
+def test_extensions_config_runs_new_strategies_on_full_task_set(tmp_path):
+    cfg = load_config(str(CONFIGS / "config.extensions.yaml"))
     pending = collect_pending(cfg, tmp_path, calibrate=False)
 
-    assert cfg["run_id"] == "grid-v1-extensions-full"
+    assert cfg["run_id"] == "grid-v1-extensions"
     assert cfg["provider"] == "openai"
     assert cfg["reps"] == 5
     assert cfg["parallel"] == 2
@@ -105,7 +106,7 @@ def test_extensions_full_config_runs_new_strategies_on_full_task_set(tmp_path):
 
 
 def test_toolarg_rerun_config_runs_only_exact_flagged_trials(tmp_path):
-    cfg = load_config(str(ROOT / "runner" / "config.toolarg-rerun.yaml"))
+    cfg = load_config(str(CONFIGS / "config.toolarg-rerun.yaml"))
     pending = collect_pending(cfg, tmp_path, calibrate=False)
 
     assert cfg["run_id"] == "grid-v1-toolarg-rerun"
@@ -201,7 +202,7 @@ def test_incomplete_logs_can_be_rerun(tmp_path):
 
 
 def test_agnes_tiny_config_is_one_trial(tmp_path):
-    cfg = load_config(str(ROOT / "runner" / "config.agnes-tiny.yaml"))
+    cfg = load_config(str(CONFIGS / "config.agnes-tiny.yaml"))
     pending = collect_pending(cfg, tmp_path, calibrate=False)
 
     assert cfg["run_id"] == "grid-v1-agnes-tiny"

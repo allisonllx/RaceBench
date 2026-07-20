@@ -1,0 +1,90 @@
+{"ts": 0.134, "event": "trial_start", "task": "t08_livelock", "failure_mode": "livelock_deadlock", "benign": false, "strategy": "peer_contract", "n_agents": 2, "rep": 4, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-ab", "agent-ba"]}
+{"ts": 0.1736, "event": "notification_delivered", "agent": "agent-ab", "turn": 1, "note": "[peer-contract protocol] Before editing, call declare_intent with the file path, symbols you expect to change, a short summary, any exports other agents can rely on, and must-preserve constraints. If you receive a peer intent, ACK when one final implementation can satisfy both subtasks, even if both"}
+{"ts": 0.175, "event": "notification_delivered", "agent": "agent-ba", "turn": 1, "note": "[peer-contract protocol] Before editing, call declare_intent with the file path, symbols you expect to change, a short summary, any exports other agents can rely on, and must-preserve constraints. If you receive a peer intent, ACK when one final implementation can satisfy both subtasks, even if both"}
+{"ts": 1.699, "event": "llm_usage", "agent": "agent-ab", "turn": 1, "prompt_tokens": 937, "completion_tokens": 83}
+{"ts": 1.6992, "event": "tool_call", "agent": "agent-ab", "turn": 1, "tool": "list_files", "args": {}}
+{"ts": 2.5295, "event": "llm_usage", "agent": "agent-ab", "turn": 2, "prompt_tokens": 980, "completion_tokens": 18}
+{"ts": 2.5296, "event": "tool_call", "agent": "agent-ab", "turn": 2, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 2.5303, "event": "read", "agent": "agent-ab", "path": "alpha.py", "found": true, "size": 32}
+{"ts": 3.2928, "event": "llm_usage", "agent": "agent-ba", "turn": 1, "prompt_tokens": 935, "completion_tokens": 320}
+{"ts": 3.293, "event": "tool_call", "agent": "agent-ba", "turn": 1, "tool": "declare_intent", "args": {"path": "beta.py", "symbols": ["COUNT"], "summary": "Change COUNT from 1 to 2", "exports": [], "must_preserve": "Preserve other code and behavior; only update the COUNT constant value."}}
+{"ts": 3.2931, "event": "coord", "strategy": "peer_contract", "action": "intent_declared", "agent": "agent-ba", "contract_id": "contract-1", "path": "beta.py", "symbols": ["COUNT"], "summary": "Change COUNT from 1 to 2", "exports": [], "must_preserve": ["Preserve other code and behavior; only update the COUNT constant value."]}
+{"ts": 3.3863, "event": "llm_usage", "agent": "agent-ab", "turn": 3, "prompt_tokens": 1022, "completion_tokens": 18}
+{"ts": 3.3865, "event": "tool_call", "agent": "agent-ab", "turn": 3, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 3.3869, "event": "read", "agent": "agent-ab", "path": "beta.py", "found": true, "size": 27}
+{"ts": 4.4029, "event": "llm_usage", "agent": "agent-ba", "turn": 2, "prompt_tokens": 1018, "completion_tokens": 18}
+{"ts": 4.403, "event": "tool_call", "agent": "agent-ba", "turn": 2, "tool": "read_file", "args": {"path": "beta.py"}}
+{"ts": 4.4032, "event": "read", "agent": "agent-ba", "path": "beta.py", "found": true, "size": 27}
+{"ts": 4.4848, "event": "llm_usage", "agent": "agent-ab", "turn": 4, "prompt_tokens": 1064, "completion_tokens": 55}
+{"ts": 4.4849, "event": "tool_call", "agent": "agent-ab", "turn": 4, "tool": "declare_intent", "args": {"path": "alpha.py", "symbols": ["GREETING"], "summary": "Change GREETING from 'hi' to 'hello'", "exports": ["GREETING", "VERSION"], "must_preserve": ["VERSION"]}}
+{"ts": 4.4849, "event": "coord", "strategy": "peer_contract", "action": "intent_declared", "agent": "agent-ab", "contract_id": "contract-2", "path": "alpha.py", "symbols": ["GREETING"], "summary": "Change GREETING from 'hi' to 'hello'", "exports": ["GREETING", "VERSION"], "must_preserve": ["VERSION"]}
+{"ts": 5.5221, "event": "llm_usage", "agent": "agent-ba", "turn": 3, "prompt_tokens": 1060, "completion_tokens": 34}
+{"ts": 5.5222, "event": "tool_call", "agent": "agent-ba", "turn": 3, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "COUNT = 1", "new_string": "COUNT = 2"}}
+{"ts": 5.5225, "event": "coord", "strategy": "peer_contract", "action": "intent_inferred", "agent": "agent-ba", "contract_id": "contract-3", "path": "beta.py", "symbols": ["<module>"]}
+{"ts": 5.5226, "event": "coord", "strategy": "peer_contract", "action": "contract_proposed", "agent": "agent-ba", "peer": "agent-ab", "contract_id": "contract-3", "path": "beta.py", "symbols": ["<module>"], "reason": "write_overlap"}
+{"ts": 5.5226, "event": "coord", "strategy": "peer_contract", "action": "blocked", "agent": "agent-ba", "path": "beta.py", "contract_id": "contract-3", "holders": ["agent-ab"]}
+{"ts": 5.743, "event": "llm_usage", "agent": "agent-ab", "turn": 5, "prompt_tokens": 1144, "completion_tokens": 38}
+{"ts": 5.7431, "event": "tool_call", "agent": "agent-ab", "turn": 5, "tool": "edit_file", "args": {"path": "alpha.py", "old_string": "GREETING = \"hi\"", "new_string": "GREETING = \"hello\""}}
+{"ts": 5.7434, "event": "coord", "strategy": "peer_contract", "action": "intent_inferred", "agent": "agent-ab", "contract_id": "contract-4", "path": "alpha.py", "symbols": ["<module>"]}
+{"ts": 5.7439, "event": "write", "agent": "agent-ab", "path": "alpha.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 5.744, "event": "notification_delivered", "agent": "agent-ab", "turn": 6, "note": "[peer-contract request] agent-ba wants to edit beta.py (contract_id=contract-3, symbols=<module>). Summary: inferred from write without prior declare_intent. Exports: none. Must preserve: none. ACK when one final implementation can satisfy both subtasks, even if both agents touch the same file or fu"}
+{"ts": 8.0965, "event": "llm_usage", "agent": "agent-ab", "turn": 6, "prompt_tokens": 1292, "completion_tokens": 50}
+{"ts": 8.0967, "event": "tool_call", "agent": "agent-ab", "turn": 6, "tool": "ack_contract", "args": {"contract_id": "contract-3", "decision": "ack", "notes": "Both edits can coexist; my change is to alpha.py only, their edit targets beta.py. No conflicts."}}
+{"ts": 8.0968, "event": "coord", "strategy": "peer_contract", "action": "contract_ack", "agent": "agent-ab", "owner": "agent-ba", "contract_id": "contract-3", "path": "beta.py", "decision": "ack", "notes": "Both edits can coexist; my change is to alpha.py only, their edit targets beta.py. No conflicts."}
+{"ts": 8.097, "event": "coord", "strategy": "peer_contract", "action": "contract_write_allowed", "agent": "agent-ba", "contract_id": "contract-3", "path": "beta.py", "peers": ["agent-ab"]}
+{"ts": 8.0984, "event": "write", "agent": "agent-ba", "path": "beta.py", "kind": "replace", "status": "applied", "waited_s": 2.576, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 9.4579, "event": "llm_usage", "agent": "agent-ab", "turn": 7, "prompt_tokens": 1360, "completion_tokens": 62}
+{"ts": 9.458, "event": "tool_call", "agent": "agent-ab", "turn": 7, "tool": "declare_intent", "args": {"path": "beta.py", "symbols": ["FAREWELL"], "summary": "Change FAREWELL from 'bye' to 'goodbye'", "exports": ["FAREWELL", "COUNT"], "must_preserve": ["COUNT"]}}
+{"ts": 9.458, "event": "coord", "strategy": "peer_contract", "action": "intent_declared", "agent": "agent-ab", "contract_id": "contract-5", "path": "beta.py", "symbols": ["FAREWELL"], "summary": "Change FAREWELL from 'bye' to 'goodbye'", "exports": ["COUNT", "FAREWELL"], "must_preserve": ["COUNT"]}
+{"ts": 9.4624, "event": "llm_usage", "agent": "agent-ba", "turn": 4, "prompt_tokens": 1110, "completion_tokens": 65}
+{"ts": 9.4624, "event": "tool_call", "agent": "agent-ba", "turn": 4, "tool": "declare_intent", "args": {"path": "alpha.py", "symbols": ["VERSION"], "summary": "Change VERSION string from '0.1' to '0.2'", "exports": [], "must_preserve": "Preserve other code and behavior; only update the VERSION constant value."}}
+{"ts": 9.4625, "event": "coord", "strategy": "peer_contract", "action": "intent_declared", "agent": "agent-ba", "contract_id": "contract-6", "path": "alpha.py", "symbols": ["VERSION"], "summary": "Change VERSION string from '0.1' to '0.2'", "exports": [], "must_preserve": ["Preserve other code and behavior; only update the VERSION constant value."]}
+{"ts": 10.5263, "event": "llm_usage", "agent": "agent-ba", "turn": 5, "prompt_tokens": 1200, "completion_tokens": 18}
+{"ts": 10.5264, "event": "tool_call", "agent": "agent-ba", "turn": 5, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 10.5266, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": true, "size": 35}
+{"ts": 10.5805, "event": "llm_usage", "agent": "agent-ab", "turn": 8, "prompt_tokens": 1447, "completion_tokens": 43}
+{"ts": 10.5806, "event": "tool_call", "agent": "agent-ab", "turn": 8, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "FAREWELL = \"bye\"", "new_string": "FAREWELL = \"goodbye\""}}
+{"ts": 10.5808, "event": "coord", "strategy": "peer_contract", "action": "intent_inferred", "agent": "agent-ab", "contract_id": "contract-7", "path": "beta.py", "symbols": ["<module>"]}
+{"ts": 10.5808, "event": "coord", "strategy": "peer_contract", "action": "contract_proposed", "agent": "agent-ab", "peer": "agent-ba", "contract_id": "contract-7", "path": "beta.py", "symbols": ["<module>"], "reason": "write_overlap"}
+{"ts": 10.5808, "event": "coord", "strategy": "peer_contract", "action": "blocked", "agent": "agent-ab", "path": "beta.py", "contract_id": "contract-7", "holders": ["agent-ba"]}
+{"ts": 11.892, "event": "llm_usage", "agent": "agent-ba", "turn": 6, "prompt_tokens": 1242, "completion_tokens": 40}
+{"ts": 11.8922, "event": "tool_call", "agent": "agent-ba", "turn": 6, "tool": "edit_file", "args": {"path": "alpha.py", "old_string": "VERSION = \"0.1\"", "new_string": "VERSION = \"0.2\""}}
+{"ts": 11.893, "event": "coord", "strategy": "peer_contract", "action": "intent_inferred", "agent": "agent-ba", "contract_id": "contract-8", "path": "alpha.py", "symbols": ["<module>"]}
+{"ts": 11.8931, "event": "coord", "strategy": "peer_contract", "action": "contract_proposed", "agent": "agent-ba", "peer": "agent-ab", "contract_id": "contract-8", "path": "alpha.py", "symbols": ["<module>"], "reason": "write_overlap"}
+{"ts": 11.8932, "event": "coord", "strategy": "peer_contract", "action": "blocked", "agent": "agent-ba", "path": "alpha.py", "contract_id": "contract-8", "holders": ["agent-ab"]}
+{"ts": 40.5818, "event": "coord", "strategy": "peer_contract", "action": "contract_timeout", "agent": "agent-ab", "contract_id": "contract-7", "path": "beta.py", "peers": ["agent-ba"], "waited_s": 30.001}
+{"ts": 40.5819, "event": "write", "agent": "agent-ab", "path": "beta.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.001, "changed_symbols": [], "message": "peer_contract needs ACK from agent-ba before editing beta.py; ask peers to ACK or retry after they finish"}
+{"ts": 40.5821, "event": "notification_delivered", "agent": "agent-ab", "turn": 9, "note": "[peer-contract request] agent-ba wants to edit alpha.py (contract_id=contract-8, symbols=<module>). Summary: inferred from write without prior declare_intent. Exports: none. Must preserve: none. ACK when one final implementation can satisfy both subtasks, even if both agents touch the same file or f"}
+{"ts": 41.8935, "event": "coord", "strategy": "peer_contract", "action": "contract_timeout", "agent": "agent-ba", "contract_id": "contract-8", "path": "alpha.py", "peers": ["agent-ab"], "waited_s": 30.001}
+{"ts": 41.8936, "event": "write", "agent": "agent-ba", "path": "alpha.py", "kind": "replace", "status": "lock_timeout", "waited_s": 30.001, "changed_symbols": [], "message": "peer_contract needs ACK from agent-ab before editing alpha.py; ask peers to ACK or retry after they finish"}
+{"ts": 41.8937, "event": "notification_delivered", "agent": "agent-ba", "turn": 7, "note": "[peer-contract request] agent-ab wants to edit beta.py (contract_id=contract-7, symbols=<module>). Summary: inferred from write without prior declare_intent. Exports: none. Must preserve: none. ACK when one final implementation can satisfy both subtasks, even if both agents touch the same file or fu"}
+{"ts": 45.7695, "event": "llm_usage", "agent": "agent-ab", "turn": 9, "prompt_tokens": 1622, "completion_tokens": 568}
+{"ts": 45.7696, "event": "tool_call", "agent": "agent-ab", "turn": 9, "tool": "ack_contract", "args": {"contract_id": "contract-8", "decision": "ack", "notes": "Agent-ba's intent to edit alpha.py is compatible; my change to alpha.py already preserves their potential edits."}}
+{"ts": 45.7697, "event": "coord", "strategy": "peer_contract", "action": "contract_ack", "agent": "agent-ab", "owner": "agent-ba", "contract_id": "contract-8", "path": "alpha.py", "decision": "ack", "notes": "Agent-ba's intent to edit alpha.py is compatible; my change to alpha.py already preserves their potential edits."}
+{"ts": 46.8002, "event": "llm_usage", "agent": "agent-ba", "turn": 7, "prompt_tokens": 1414, "completion_tokens": 572}
+{"ts": 46.8005, "event": "tool_call", "agent": "agent-ba", "turn": 7, "tool": "ack_contract", "args": {"contract_id": "contract-7", "decision": "ack", "notes": "I only change COUNT in beta.py; both edits can coexist. I will preserve existing code and only update module-level constants."}}
+{"ts": 46.8006, "event": "coord", "strategy": "peer_contract", "action": "contract_ack", "agent": "agent-ba", "owner": "agent-ab", "contract_id": "contract-7", "path": "beta.py", "decision": "ack", "notes": "I only change COUNT in beta.py; both edits can coexist. I will preserve existing code and only update module-level constants."}
+{"ts": 46.9544, "event": "llm_usage", "agent": "agent-ab", "turn": 10, "prompt_tokens": 1690, "completion_tokens": 43}
+{"ts": 46.9545, "event": "tool_call", "agent": "agent-ab", "turn": 10, "tool": "edit_file", "args": {"path": "beta.py", "old_string": "FAREWELL = \"bye\"", "new_string": "FAREWELL = \"goodbye\""}}
+{"ts": 46.9557, "event": "write", "agent": "agent-ab", "path": "beta.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 47.6605, "event": "llm_usage", "agent": "agent-ba", "turn": 8, "prompt_tokens": 1485, "completion_tokens": 18}
+{"ts": 47.6606, "event": "tool_call", "agent": "agent-ba", "turn": 8, "tool": "read_file", "args": {"path": "alpha.py"}}
+{"ts": 47.6612, "event": "read", "agent": "agent-ba", "path": "alpha.py", "found": true, "size": 35}
+{"ts": 48.1036, "event": "llm_usage", "agent": "agent-ab", "turn": 11, "prompt_tokens": 1749, "completion_tokens": 13}
+{"ts": 48.1038, "event": "tool_call", "agent": "agent-ab", "turn": 11, "tool": "run_tests", "args": {}}
+{"ts": 48.4634, "event": "run_tests", "agent": "agent-ab", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 48.8891, "event": "llm_usage", "agent": "agent-ba", "turn": 9, "prompt_tokens": 1527, "completion_tokens": 40}
+{"ts": 48.8892, "event": "tool_call", "agent": "agent-ba", "turn": 9, "tool": "edit_file", "args": {"path": "alpha.py", "old_string": "VERSION = \"0.1\"", "new_string": "VERSION = \"0.2\""}}
+{"ts": 48.8901, "event": "write", "agent": "agent-ba", "path": "alpha.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["<module>"], "message": ""}
+{"ts": 49.6245, "event": "llm_usage", "agent": "agent-ab", "turn": 12, "prompt_tokens": 1788, "completion_tokens": 44}
+{"ts": 49.6246, "event": "tool_call", "agent": "agent-ab", "turn": 12, "tool": "done", "args": {"summary": "Changed alpha.GREETING from 'hi' to 'hello' and beta.FAREWELL from 'bye' to 'goodbye'."}}
+{"ts": 49.6246, "event": "agent_done_coord", "agent": "agent-ab"}
+{"ts": 49.6247, "event": "agent_done", "agent": "agent-ab", "status": "done", "turns": 12, "prompt_tokens": 16095, "completion_tokens": 1035}
+{"ts": 50.131, "event": "llm_usage", "agent": "agent-ba", "turn": 10, "prompt_tokens": 1583, "completion_tokens": 13}
+{"ts": 50.1312, "event": "tool_call", "agent": "agent-ba", "turn": 10, "tool": "run_tests", "args": {}}
+{"ts": 50.3981, "event": "run_tests", "agent": "agent-ba", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 51.6687, "event": "llm_usage", "agent": "agent-ba", "turn": 11, "prompt_tokens": 1622, "completion_tokens": 42}
+{"ts": 51.6773, "event": "tool_call", "agent": "agent-ba", "turn": 11, "tool": "done", "args": {"summary": "Updated beta.py COUNT from 1 to 2 and alpha.py VERSION from '0.1' to '0.2'."}}
+{"ts": 51.6825, "event": "agent_done_coord", "agent": "agent-ba"}
+{"ts": 51.6826, "event": "agent_done", "agent": "agent-ba", "status": "done", "turns": 11, "prompt_tokens": 14196, "completion_tokens": 1180}
+{"ts": 52.2958, "event": "trial_end", "correct": true, "oracle_passed": 1, "oracle_total": 1, "wall_clock_s": 51.51, "prompt_tokens": 30291, "completion_tokens": 2215, "agent_statuses": {"agent-ab": "done", "agent-ba": "done"}, "oracle_output": ".                                                                        [100%]\n1 passed in 0.02s\n"}

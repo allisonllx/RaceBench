@@ -9,8 +9,8 @@ Writes:
 
 Usage:
     python -m analysis.make_report results/<run_id>
-    python -m analysis.make_report results/<run_id> --prices-config runner/config.example.yaml
-    python -m analysis.make_report results/grid-v1 results/grid-v1-extensions-full --out results/grid-v1-plus-extensions
+    python -m analysis.make_report results/<run_id> --prices-config runner/configs/config.example.yaml
+    python -m analysis.make_report results/grid-v1 results/grid-v1-extensions --out results/grid-v1-plus-extensions
 
 USD is derived from prompt/completion token counts on each trial_end event and
 the price table (run_meta.json in the run dir, --prices-config, or defaults).

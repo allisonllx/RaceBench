@@ -1,0 +1,51 @@
+# Real baseline grid. Requires OPENAI_API_KEY in .env (repo root) or the environment.
+#
+# Budget guardrails stop the run when exceeded. Prices are USD per 1M tokens.
+# Update to current rates before a big run.
+#
+# Keep this config stable for the committed grid-v1 baseline. To run the newer
+# peer_contract, peer_broker, and adaptive_lease strategies across the same
+# tasks, use runner/configs/config.extensions.yaml instead of appending them here.
+#
+# Recommended flow:
+#   1. python -m runner.run_grid --config runner/configs/config.example.yaml --calibrate
+#      (solo agent, naive strategy; check solo pass rate > 80% per task before
+#       spending on the full grid)
+#   2. python -m runner.run_grid --config runner/configs/config.example.yaml
+run_id: grid-v1
+mode: openai
+model: gpt-5-mini
+tasks:
+  - t01_stale_clobber
+  - t02_benign_overlap
+  - t03_fetch_clobber
+  - t04_cascade
+  - t05_cross_file
+  - t06_feature_pair
+  - t07_rw_canary
+  - t08_livelock
+  - t09_overhead
+  - t10_phantom_tool
+  - t11_irreversible
+  - t12_split_view
+  # External-validity track (FastAPI Conduit)
+  - rw_c_benign_overlap
+  - rw_b_signature_drift
+  - rw_d_tag_antidependency
+  - rw_e_cascade
+strategies: [naive, file_lock, git_hash, ast_scope, ast_dep, notify]
+# Per-task min_agents / agent count also gate cells (e.g. rw_e_cascade needs n=3;
+# t04_cascade needs n=4). Truncating a cascade drops later agents and voids the oracle.
+agent_counts: [2, 3, 4]
+reps: 5
+max_turns: 40
+lock_timeout_s: 30
+trial_timeout_s: 900
+# Concurrent trials (agents within a trial already run in parallel).
+# Start at 2 to 4; bump carefully because OpenAI rate limits and cost burn faster.
+parallel: 4
+budget:
+  max_usd: 25
+  max_total_tokens: 40000000
+prices:
+  gpt-5-mini: {input: 0.25, output: 2.00}

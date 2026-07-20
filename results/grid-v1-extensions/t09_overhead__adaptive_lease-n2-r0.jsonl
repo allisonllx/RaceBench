@@ -1,0 +1,69 @@
+{"ts": 0.1336, "event": "trial_start", "task": "t09_overhead", "failure_mode": "overhead_masks_benefit", "benign": true, "strategy": "adaptive_lease", "n_agents": 2, "rep": 0, "model": "gpt-5-mini", "isolation": "shared", "agent_ids": ["agent-a", "agent-b"]}
+{"ts": 0.1716, "event": "notification_delivered", "agent": "agent-a", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 0.1729, "event": "notification_delivered", "agent": "agent-b", "turn": 1, "note": "[adaptive-lease protocol] Before risky cross-file or behavior changes, call declare_scope with semantic resources you will change or must preserve. Examples: tag.normalization, article.summary.schema, article.summary.feed_output, api.fetch.signature, datasource.parse_dataset.public_api. If you recei"}
+{"ts": 2.1431, "event": "llm_usage", "agent": "agent-a", "turn": 1, "prompt_tokens": 805, "completion_tokens": 100}
+{"ts": 2.1432, "event": "tool_call", "agent": "agent-a", "turn": 1, "tool": "declare_scope", "args": {"resources": ["mod_a.mathops.double", "mod_a.textops.greet", "mod_a.__init__ exports"], "path": "mod_a/__init__.py", "summary": "Implement double(x) to return 2*x and greet(name) to return 'hello {name}'; update package exports if needed", "exports": ["double", "greet"], "must_preserve": ["other modules and tests"]}}
+{"ts": 2.1433, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-a", "path": "mod_a/__init__.py", "symbols": [], "resources": ["mod_a.mathops.double", "mod_a.textops.greet"], "summary": "Implement double(x) to return 2*x and greet(name) to return 'hello {name}'; update package exports if needed", "exports": ["double", "greet"], "must_preserve": ["other modules and tests"]}
+{"ts": 2.1433, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-a", "path": "mod_a/__init__.py", "lease_level": "resource", "symbols": [], "resources": ["mod_a.mathops.double", "mod_a.textops.greet"]}
+{"ts": 2.2996, "event": "llm_usage", "agent": "agent-b", "turn": 1, "prompt_tokens": 805, "completion_tokens": 135}
+{"ts": 2.2997, "event": "tool_call", "agent": "agent-b", "turn": 1, "tool": "declare_scope", "args": {"resources": ["mod_b.mathops.square", "mod_b.textops.shout", "mod_b.__init__.py exports"], "path": "mod_b/", "summary": "Implement square(x) and shout(name); update package exports if needed; preserve other behaviors."}}
+{"ts": 2.2998, "event": "coord", "strategy": "adaptive_lease", "action": "scope_declared", "agent": "agent-b", "path": "mod_b/", "symbols": [], "resources": ["mod_b.mathops.square", "mod_b.textops.shout"], "summary": "Implement square(x) and shout(name); update package exports if needed; preserve other behaviors.", "exports": [], "must_preserve": []}
+{"ts": 2.2998, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-b", "path": "mod_b/", "lease_level": "resource", "symbols": [], "resources": ["mod_b.mathops.square", "mod_b.textops.shout"]}
+{"ts": 3.2659, "event": "llm_usage", "agent": "agent-b", "turn": 2, "prompt_tokens": 900, "completion_tokens": 17}
+{"ts": 3.266, "event": "tool_call", "agent": "agent-b", "turn": 2, "tool": "glob", "args": {"pattern": "**/*"}}
+{"ts": 3.2682, "event": "search", "agent": "agent-b", "kind": "glob", "pattern": "**/*", "n": 7}
+{"ts": 3.2887, "event": "llm_usage", "agent": "agent-a", "turn": 2, "prompt_tokens": 928, "completion_tokens": 17}
+{"ts": 3.2887, "event": "tool_call", "agent": "agent-a", "turn": 2, "tool": "glob", "args": {"pattern": "**/*"}}
+{"ts": 3.2905, "event": "search", "agent": "agent-a", "kind": "glob", "pattern": "**/*", "n": 7}
+{"ts": 4.5147, "event": "llm_usage", "agent": "agent-b", "turn": 3, "prompt_tokens": 970, "completion_tokens": 21}
+{"ts": 4.5148, "event": "tool_call", "agent": "agent-b", "turn": 3, "tool": "read_file", "args": {"path": "mod_b/mathops.py"}}
+{"ts": 4.5154, "event": "read", "agent": "agent-b", "path": "mod_b/mathops.py", "found": true, "size": 45}
+{"ts": 4.5576, "event": "llm_usage", "agent": "agent-a", "turn": 3, "prompt_tokens": 998, "completion_tokens": 21}
+{"ts": 4.5578, "event": "tool_call", "agent": "agent-a", "turn": 3, "tool": "read_file", "args": {"path": "mod_a/mathops.py"}}
+{"ts": 4.5585, "event": "read", "agent": "agent-a", "path": "mod_a/mathops.py", "found": true, "size": 45}
+{"ts": 5.5104, "event": "llm_usage", "agent": "agent-a", "turn": 4, "prompt_tokens": 1040, "completion_tokens": 21}
+{"ts": 5.5106, "event": "tool_call", "agent": "agent-a", "turn": 4, "tool": "read_file", "args": {"path": "mod_a/textops.py"}}
+{"ts": 5.5114, "event": "read", "agent": "agent-a", "path": "mod_a/textops.py", "found": true, "size": 47}
+{"ts": 5.5407, "event": "llm_usage", "agent": "agent-b", "turn": 4, "prompt_tokens": 1012, "completion_tokens": 21}
+{"ts": 5.5409, "event": "tool_call", "agent": "agent-b", "turn": 4, "tool": "read_file", "args": {"path": "mod_b/textops.py"}}
+{"ts": 5.5417, "event": "read", "agent": "agent-b", "path": "mod_b/textops.py", "found": true, "size": 47}
+{"ts": 6.5742, "event": "llm_usage", "agent": "agent-b", "turn": 5, "prompt_tokens": 1054, "completion_tokens": 22}
+{"ts": 6.5743, "event": "tool_call", "agent": "agent-b", "turn": 5, "tool": "read_file", "args": {"path": "mod_b/__init__.py"}}
+{"ts": 6.5751, "event": "read", "agent": "agent-b", "path": "mod_b/__init__.py", "found": true, "size": 96}
+{"ts": 6.6213, "event": "llm_usage", "agent": "agent-a", "turn": 5, "prompt_tokens": 1082, "completion_tokens": 22}
+{"ts": 6.6215, "event": "tool_call", "agent": "agent-a", "turn": 5, "tool": "read_file", "args": {"path": "mod_a/__init__.py"}}
+{"ts": 6.6222, "event": "read", "agent": "agent-a", "path": "mod_a/__init__.py", "found": true, "size": 96}
+{"ts": 8.7138, "event": "llm_usage", "agent": "agent-b", "turn": 6, "prompt_tokens": 1114, "completion_tokens": 123}
+{"ts": 8.7141, "event": "tool_call", "agent": "agent-b", "turn": 6, "tool": "edit_file", "args": {"path": "mod_b/mathops.py", "old_string": "def square(x):\n    raise NotImplementedError\n", "new_string": "def square(x):\n    return x * x\n"}}
+{"ts": 8.7149, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-b", "path": "mod_b/mathops.py", "lease_level": "resource", "symbols": ["square"], "resources": ["mod_b.mathops.square", "mod_b.textops.shout"]}
+{"ts": 8.7161, "event": "write", "agent": "agent-b", "path": "mod_b/mathops.py", "kind": "replace", "status": "applied", "waited_s": 0.002, "changed_symbols": ["square"], "message": ""}
+{"ts": 9.3918, "event": "llm_usage", "agent": "agent-a", "turn": 6, "prompt_tokens": 1142, "completion_tokens": 186}
+{"ts": 9.3919, "event": "tool_call", "agent": "agent-a", "turn": 6, "tool": "edit_file", "args": {"path": "mod_a/mathops.py", "old_string": "def double(x):\n    raise NotImplementedError", "new_string": "def double(x):\n    return 2 * x"}}
+{"ts": 9.3923, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-a", "path": "mod_a/mathops.py", "lease_level": "resource", "symbols": ["double"], "resources": ["mod_a.mathops.double", "mod_a.textops.greet"]}
+{"ts": 9.3927, "event": "write", "agent": "agent-a", "path": "mod_a/mathops.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["double"], "message": ""}
+{"ts": 9.9129, "event": "llm_usage", "agent": "agent-b", "turn": 7, "prompt_tokens": 1183, "completion_tokens": 59}
+{"ts": 9.9129, "event": "tool_call", "agent": "agent-b", "turn": 7, "tool": "edit_file", "args": {"path": "mod_b/textops.py", "old_string": "def shout(name):\n    raise NotImplementedError\n", "new_string": "def shout(name):\n    return f\"{name}!\".upper()\n"}}
+{"ts": 9.9132, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-b", "path": "mod_b/textops.py", "lease_level": "resource", "symbols": ["shout"], "resources": ["mod_b.mathops.square", "mod_b.textops.shout"]}
+{"ts": 9.9136, "event": "write", "agent": "agent-b", "path": "mod_b/textops.py", "kind": "replace", "status": "applied", "waited_s": 0.001, "changed_symbols": ["shout"], "message": ""}
+{"ts": 10.7996, "event": "llm_usage", "agent": "agent-a", "turn": 7, "prompt_tokens": 1210, "completion_tokens": 54}
+{"ts": 10.804, "event": "tool_call", "agent": "agent-a", "turn": 7, "tool": "edit_file", "args": {"path": "mod_a/textops.py", "old_string": "def greet(name):\n    raise NotImplementedError", "new_string": "def greet(name):\n    return f\"hello {name}\""}}
+{"ts": 10.8071, "event": "coord", "strategy": "adaptive_lease", "action": "lease_acquired", "agent": "agent-a", "path": "mod_a/textops.py", "lease_level": "resource", "symbols": ["greet"], "resources": ["mod_a.mathops.double", "mod_a.textops.greet"]}
+{"ts": 10.8089, "event": "write", "agent": "agent-a", "path": "mod_a/textops.py", "kind": "replace", "status": "applied", "waited_s": 0.005, "changed_symbols": ["greet"], "message": ""}
+{"ts": 10.9375, "event": "llm_usage", "agent": "agent-b", "turn": 8, "prompt_tokens": 1258, "completion_tokens": 21}
+{"ts": 10.9376, "event": "tool_call", "agent": "agent-b", "turn": 8, "tool": "read_file", "args": {"path": "tests/test_smoke.py"}}
+{"ts": 10.938, "event": "read", "agent": "agent-b", "path": "tests/test_smoke.py", "found": true, "size": 82}
+{"ts": 11.7271, "event": "llm_usage", "agent": "agent-a", "turn": 8, "prompt_tokens": 1280, "completion_tokens": 13}
+{"ts": 11.7273, "event": "tool_call", "agent": "agent-a", "turn": 8, "tool": "run_tests", "args": {}}
+{"ts": 11.9418, "event": "llm_usage", "agent": "agent-b", "turn": 9, "prompt_tokens": 1317, "completion_tokens": 13}
+{"ts": 11.9418, "event": "tool_call", "agent": "agent-b", "turn": 9, "tool": "run_tests", "args": {}}
+{"ts": 11.984, "event": "run_tests", "agent": "agent-a", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 12.1841, "event": "run_tests", "agent": "agent-b", "passed": 1, "failed": 0, "errored": 0}
+{"ts": 12.9795, "event": "llm_usage", "agent": "agent-a", "turn": 9, "prompt_tokens": 1319, "completion_tokens": 33}
+{"ts": 12.9795, "event": "tool_call", "agent": "agent-a", "turn": 9, "tool": "done", "args": {"summary": "Implemented mod_a.double and mod_a.greet; updated exports preserved. All tests pass."}}
+{"ts": 12.9796, "event": "agent_done_coord", "agent": "agent-a"}
+{"ts": 12.9796, "event": "agent_done", "agent": "agent-a", "status": "done", "turns": 9, "prompt_tokens": 9804, "completion_tokens": 467}
+{"ts": 13.4261, "event": "llm_usage", "agent": "agent-b", "turn": 10, "prompt_tokens": 1356, "completion_tokens": 36}
+{"ts": 13.4262, "event": "tool_call", "agent": "agent-b", "turn": 10, "tool": "done", "args": {"summary": "Implemented mod_b.square and mod_b.shout; kept exports in mod_b.__init__.py unchanged."}}
+{"ts": 13.4263, "event": "agent_done_coord", "agent": "agent-b"}
+{"ts": 13.4263, "event": "agent_done", "agent": "agent-b", "status": "done", "turns": 10, "prompt_tokens": 10969, "completion_tokens": 468}
+{"ts": 13.6855, "event": "trial_end", "correct": true, "oracle_passed": 2, "oracle_total": 2, "wall_clock_s": 13.26, "prompt_tokens": 20773, "completion_tokens": 935, "agent_statuses": {"agent-a": "done", "agent-b": "done"}, "oracle_output": "..                                                                       [100%]\n2 passed in 0.01s\n"}

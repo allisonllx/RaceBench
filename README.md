@@ -32,14 +32,14 @@
 
 If you are new to the repo, use this path:
 
-1. Open the headline static explorer: [`results/grid-v1/report.html`](results/grid-v1/report.html)
-   (regenerate with `python -m analysis.make_report results/grid-v1`)
+1. Open the 9-strategy static explorer: [`results/grid-v1-plus-extensions/report.html`](results/grid-v1-plus-extensions/report.html)
+   (regenerate with `python -m analysis.make_report results/grid-v1 results/grid-v1-extensions --out results/grid-v1-plus-extensions`)
 2. Read the practical takeaways: [`docs/coordination-decision-guide.md`](docs/coordination-decision-guide.md)
 3. Read the external-runtime boundary: [`docs/external-coordination-protocol.md`](docs/external-coordination-protocol.md)
 4. Read the submission write-up: [`writeup/writeup_1000.md`](writeup/writeup_1000.md)
    (long-form claim and limits: [`writeup/writeup.md`](writeup/writeup.md))
-5. Optional: post-grid 9-strategy explorer (extensions on the same 16 tasks):
-   [`results/grid-v1-plus-extensions/report.html`](results/grid-v1-plus-extensions/report.html)
+5. Optional: baseline-only explorer:
+   [`results/grid-v1/report.html`](results/grid-v1/report.html)
 6. Run validation locally:
 
 ```bash
@@ -141,7 +141,7 @@ broker decision calls outside the normal agent tool loop, not negative progress.
 **Adding your strategy (Level A).** Implement `_coordinate_read` and
 `_coordinate_write`, register with `@register`, import in
 `harness/strategies/__init__.py`, add the name to `strategies:` in a runner
-config, and smoke-test with `runner/config.smoke.yaml` (scripted agents, no API
+config, and smoke-test with `runner/configs/config.smoke.yaml` (scripted agents, no API
 key). Strategies can also expose optional strategy-owned tools through
 `extra_tool_schemas()` / `handle_strategy_tool(...)`, or use private broker
 callbacks through `request_negotiation(...)`.
@@ -228,13 +228,13 @@ pip install -e ".[dev]"
 pytest
 
 # single trial with scripted agents (offline demo)
-python -m runner.run_grid --config runner/config.smoke.yaml
+python -m runner.run_grid --config runner/configs/config.smoke.yaml
 
 # real grid (needs OPENAI_API_KEY in .env or your shell)
 # echo 'OPENAI_API_KEY=sk-...' > .env
-python -m runner.run_grid --config runner/config.example.yaml
+python -m runner.run_grid --config runner/configs/config.example.yaml
 # optional: override concurrent trials (config default: parallel: 4)
-# python -m runner.run_grid --config runner/config.example.yaml --parallel 8
+# python -m runner.run_grid --config runner/configs/config.example.yaml --parallel 8
 
 # validate replay logs, then regenerate tables, CI intervals, event profiles, plots, and report.html
 python -m analysis.validate_logs results/grid-v1 --expect-trials 480
@@ -242,10 +242,28 @@ python -m analysis.validate_logs results/grid-v1 --expect-trials 480
 # python -m analysis.validate_logs results/grid-v1 --expect-trials 480 --strict-tool-args
 python -m analysis.make_report results/grid-v1
 # optional: pass the runner config that holds prices:
-# python -m analysis.make_report results/<run_id> --prices-config runner/config.example.yaml
+# python -m analysis.make_report results/<run_id> --prices-config runner/configs/config.example.yaml
 ```
 
 If you do not activate the virtualenv, replace `python` with `.venv/bin/python`.
+
+### Frozen result folders
+
+The frozen submission evidence stays at the top level of `results/`:
+
+| Folder | Role |
+|---|---|
+| `results/grid-v1/` | Main 6-strategy baseline, 480 trials |
+| `results/grid-v1-extensions/` | Three post-grid strategies, 240 trials |
+| `results/grid-v1-plus-extensions/` | Combined 9-strategy report, 720 trials |
+| `results/grid-v1-calibration/` | Solo-agent calibration |
+| `results/grid-v1-agnes-sensitivity/` | Second-provider sensitivity check |
+| `results/cross-run-analysis/` | Provider and solo-versus-parallel dashboard |
+| `results/ext-cursor/` | Level C Cursor black-box smoke check |
+| `results/grid-v1-toolarg-rerun/` | Tool-argument audit rerun |
+
+Older targeted iterations, scripted smoke outputs, and incomplete external
+debug runs are archived locally under `results/_archive/nonofficial-runs/`.
 
 ### Tool argument audit rerun
 
@@ -253,14 +271,14 @@ Strict tool-argument validation can flag old logs where the model omitted a
 required tool field. Do a surgical rerun before deciding whether any headline
 claim needs a note or replacement cell. This keeps the original result folders
 unchanged and writes only the flagged missing-field cells from `grid-v1` and
-`grid-v1-extensions-full`.
+`grid-v1-extensions`.
 
 ```bash
-python -m runner.run_grid --config runner/config.toolarg-rerun.yaml
+python -m runner.run_grid --config runner/configs/config.toolarg-rerun.yaml
 python -m analysis.validate_logs results/grid-v1-toolarg-rerun \
   --expect-trials 16 --strict-tool-args
 python -m analysis.make_report results/grid-v1-toolarg-rerun \
-  --prices-config runner/config.toolarg-rerun.yaml
+  --prices-config runner/configs/config.toolarg-rerun.yaml
 ```
 
 The strict validator also reports older `must_preserve` string-vs-array drift in
@@ -277,16 +295,16 @@ call before execution and asked the agent to retry.
 precise edits, falls back to file leases when scope is broad or uncertain, lets
 agents call `declare_scope` for resources such as `tag.normalization`, and
 refuses stale whole-file overwrites. Use the offline smoke first, then the
-targeted live config only if you want a cheap one-rep signal. Existing
-`results/grid-v1-adaptive-lease-targeted/` logs are V1; the config now writes V2
-logs to `results/grid-v1-adaptive-lease-targeted-v2/`.
+targeted live config only if you want a cheap one-rep signal. Historical
+targeted logs are archived under `results/_archive/nonofficial-runs/`; rerunning
+the config will recreate `results/grid-v1-adaptive-lease-targeted-v2/`.
 
 ```bash
-python -m runner.run_grid --config runner/config.smoke.yaml
-python -m runner.run_grid --config runner/config.adaptive-lease-targeted.yaml
+python -m runner.run_grid --config runner/configs/config.smoke.yaml
+python -m runner.run_grid --config runner/configs/config.adaptive-lease-targeted.yaml
 python -m analysis.validate_logs results/grid-v1-adaptive-lease-targeted-v2
 python -m analysis.make_report results/grid-v1-adaptive-lease-targeted-v2 \
-  --prices-config runner/config.adaptive-lease-targeted.yaml
+  --prices-config runner/configs/config.adaptive-lease-targeted.yaml
 ```
 
 ### Peer negotiation strategies
@@ -297,31 +315,33 @@ tasks where peer negotiation should matter.
 
 The current target folder keeps the raw run label `v5`, but the docs refer to
 that broker refinement as conceptual V2.5 so V3 can remain reserved for the
-future external mediation protocol.
+future external mediation protocol. Historical targeted peer logs are archived
+under `results/_archive/nonofficial-runs/`; rerunning the config will recreate
+`results/grid-v1-peer-targeted-v5/`.
 
 ```bash
-python -m runner.run_grid --config runner/config.peer-targeted.yaml
+python -m runner.run_grid --config runner/configs/config.peer-targeted.yaml
 python -m analysis.validate_logs results/grid-v1-peer-targeted-v5
 python -m analysis.make_report results/grid-v1-peer-targeted-v5 \
-  --prices-config runner/config.peer-targeted.yaml
+  --prices-config runner/configs/config.peer-targeted.yaml
 ```
 
-### Full extension grid
+### Extension grid
 
 After the targeted runs look stable, run the three experimental Level A
 strategies across the same 16 tasks and 5 reps as `grid-v1`. This keeps the
 original baseline folder stable and writes a separate 240-trial extension run.
 
 ```bash
-python -m runner.run_grid --config runner/config.extensions-full.yaml
-python -m analysis.validate_logs results/grid-v1-extensions-full --expect-trials 240
-python -m analysis.make_report results/grid-v1-extensions-full \
-  --prices-config runner/config.extensions-full.yaml
+python -m runner.run_grid --config runner/configs/config.extensions.yaml
+python -m analysis.validate_logs results/grid-v1-extensions --expect-trials 240
+python -m analysis.make_report results/grid-v1-extensions \
+  --prices-config runner/configs/config.extensions.yaml
 
 # combined 9-strategy explorer, preserving both source result folders
-python -m analysis.make_report results/grid-v1 results/grid-v1-extensions-full \
+python -m analysis.make_report results/grid-v1 results/grid-v1-extensions \
   --out results/grid-v1-plus-extensions \
-  --prices-config runner/config.example.yaml
+  --prices-config runner/configs/config.example.yaml
 ```
 
 ### Agnes model sensitivity
@@ -329,16 +349,16 @@ python -m analysis.make_report results/grid-v1 results/grid-v1-extensions-full \
 ```bash
 # second-provider sensitivity check, 144 trials
 # echo 'AGNES_API_KEY=sk-...' >> .env
-python -m runner.run_grid --config runner/config.agnes-sensitivity.yaml --parallel 1
+python -m runner.run_grid --config runner/configs/config.agnes-sensitivity.yaml --parallel 1
 python -m analysis.validate_logs results/grid-v1-agnes-sensitivity --expect-trials 144
 python -m analysis.make_report results/grid-v1-agnes-sensitivity \
-  --prices-config runner/config.agnes-sensitivity.yaml
+  --prices-config runner/configs/config.agnes-sensitivity.yaml
 
 # optional full Agnes grid, 480 trials, only if credits/time allow
-python -m runner.run_grid --config runner/config.agnes-full.yaml --parallel 1
+python -m runner.run_grid --config runner/configs/config.agnes-full.yaml --parallel 1
 python -m analysis.validate_logs results/grid-v1-agnes --expect-trials 480
 python -m analysis.make_report results/grid-v1-agnes \
-  --prices-config runner/config.agnes-full.yaml
+  --prices-config runner/configs/config.agnes-full.yaml
 ```
 
 Use `results/grid-v1-agnes-sensitivity/` as a model-sensitivity check, not as a

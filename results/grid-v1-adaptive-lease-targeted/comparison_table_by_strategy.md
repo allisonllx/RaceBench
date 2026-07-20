@@ -1,3 +1,0 @@
-| strategy       |   n_tasks |   trials |   correct_rate |   mean_wall_s |   mean_tokens |   mean_usd |   wasted_rate |   stalls_per_trial |   fp_stalls_per_trial |   notifies_per_trial |   mean_stall_wait_s |
-|:---------------|----------:|---------:|---------------:|--------------:|--------------:|-----------:|--------------:|-------------------:|----------------------:|---------------------:|--------------------:|
-| adaptive_lease |         6 |        6 |            0.5 |          70.2 |        153679 |     0.0521 |         0.051 |              0.667 |                     0 |                    0 |               15.13 |

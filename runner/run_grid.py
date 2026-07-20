@@ -1,9 +1,9 @@
 """Grid orchestrator with cost guardrails and resume.
 
 Usage:
-    python -m runner.run_grid --config runner/config.smoke.yaml
-    python -m runner.run_grid --config runner/config.example.yaml --calibrate
-    python -m runner.run_grid --config runner/config.example.yaml --parallel 4
+    python -m runner.run_grid --config runner/configs/config.smoke.yaml
+    python -m runner.run_grid --config runner/configs/config.example.yaml --calibrate
+    python -m runner.run_grid --config runner/configs/config.example.yaml --parallel 4
 
 Every trial writes results/<run_id>/<task>__<strategy>-n<N>-r<rep>.jsonl.
 Existing logs are skipped, so an interrupted (or budget-stopped) run resumes
@@ -260,7 +260,7 @@ async def main() -> int:
         print(f"{provider['api_key_env']} is not set for provider "
               f"{provider['provider']}. Add it to .env at the repo root "
               f"({ENV_FILE}) or export it in your shell. For an offline run, "
-              "use runner/config.smoke.yaml.", file=sys.stderr)
+              "use runner/configs/config.smoke.yaml.", file=sys.stderr)
         return 1
 
     parallel = max(1, args.parallel if args.parallel is not None else int(cfg["parallel"]))

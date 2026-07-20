@@ -53,8 +53,8 @@ from harness.strategies import (  # noqa: F401
 Run a single offline trial:
 
 ```bash
-# Copy runner/config.smoke.yaml, set strategies: [my_strategy, naive]
-python -m runner.run_grid --config runner/config.my_strategy.yaml
+# Copy runner/configs/config.smoke.yaml, set strategies: [my_strategy, naive]
+python -m runner.run_grid --config runner/configs/config.my_strategy.yaml
 ```
 
 ## Interface reference
@@ -161,7 +161,7 @@ async def test_my_strategy_on_t2(tmp_path):
 **Direct strategy unit test**: drive read/write without an LLM (see
 `tests/test_trials_scripted.py::test_ast_dep_blocks_cross_file_claim_deterministic`).
 
-**Full grid slice**: copy `runner/config.smoke.yaml`, swap in your strategy,
+**Full grid slice**: copy `runner/configs/config.smoke.yaml`, swap in your strategy,
 run `python -m runner.run_grid --config ...`, then
 `python -m analysis.make_report results/<run_id>`.
 
@@ -172,7 +172,7 @@ run `python -m runner.run_grid --config ...`, then
 | New strategy | `harness/strategies/` (this doc) |
 | New task | `tasks/<name>/`: `task.yaml`, `repo/`, `oracle_tests/`, `collision_map.yaml` |
 | External multi-agent system | Level C: [adding-an-external-runtime.md](adding-an-external-runtime.md) |
-| OpenAI-compatible LLM | Set `provider`, `api_key_env`, `base_url`, and `model` in a runner config, e.g. `runner/config.agnes-sensitivity.yaml` |
+| OpenAI-compatible LLM | Set `provider`, `api_key_env`, `base_url`, and `model` in a runner config, e.g. `runner/configs/config.agnes-sensitivity.yaml` |
 | Non-compatible LLM | Implement `ModelClient` in `harness/models.py`; wire `make_model_factory` in `runner/run_grid.py` |
 | Agent tools / loop | `harness/agent.py`, `harness/tools.py` (not pluggable via config today) |
 
