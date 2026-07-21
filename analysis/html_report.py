@@ -205,6 +205,7 @@ def write_html_report(
       timeline: document.getElementById("replayTimeline"),
       feed: document.getElementById("replayFeed"),
       toggles: document.getElementById("replayToggles"),
+      viewButtons: document.querySelectorAll("[data-replay-view]"),
     };
     const replayTypes = [
       {event: "llm_usage", label: "LLM"},
@@ -219,13 +220,25 @@ def write_html_report(
       {event: "agent_done_coord", label: "done coord"},
       {event: "trial_end", label: "outcome"},
     ];
+    const replayDefaultEvents = new Set([
+      "write",
+      "coord",
+      "notification_delivered",
+      "run_tests",
+      "agent_done",
+      "agent_done_coord",
+      "trial_end",
+    ]);
+    const replayAllEvents = new Set(replayTypes.map(t => t.event));
+    const actionGroupWindowS = 0.45;
     const replayState = {
       log: "",
       time: 0,
       timer: null,
       zoom: 1,
       pinch: null,
-      enabled: new Set(replayTypes.map(t => t.event)),
+      view: "actions",
+      enabled: new Set(replayDefaultEvents),
     };
 
     function selectedReplay() {
@@ -350,6 +363,7 @@ def write_html_report(
       replayEls.picker.value = replayState.log;
     }
     function eventDetail(event) {
+      if (event.detail) return event.detail;
       const bits = [];
       if (event.tool) bits.push(event.tool);
       if (event.path) bits.push(event.path);
@@ -369,6 +383,7 @@ def write_html_report(
       return bits.join(" | ");
     }
     function eventLabel(event) {
+      if (event.label) return event.label;
       if (event.event === "llm_usage") return `LLM t${event.turn ?? ""}`.trim();
       if (event.event === "tool_call") return event.tool || "tool";
       if (event.event === "read") return "read";
@@ -384,6 +399,7 @@ def write_html_report(
     }
     function eventClass(event) {
       const classes = [`replay-${String(event.event).replace(/_/g, "-")}`];
+      if (event.grouped) classes.push("is-grouped");
       const badWrite = event.event === "write"
         && !["applied", "merged"].includes(String(event.status || ""));
       const badCoord = event.event === "coord"
@@ -397,8 +413,145 @@ def write_html_report(
       }
       return classes.join(" ");
     }
+    function sameAgent(left, right) {
+      return left.agent && right.agent && left.agent === right.agent;
+    }
+    function sameTurn(left, right) {
+      if (left.turn === undefined || right.turn === undefined) return true;
+      return String(left.turn) === String(right.turn);
+    }
+    function closeInTime(left, right) {
+      return Math.abs(toNumber(left.t) - toNumber(right.t)) <= actionGroupWindowS;
+    }
+    function toolMatchesResult(toolEvent, resultEvent) {
+      if (toolEvent.event !== "tool_call") return false;
+      if (!sameAgent(toolEvent, resultEvent) || !sameTurn(toolEvent, resultEvent)) return false;
+      if (!closeInTime(toolEvent, resultEvent)) return false;
+      if (!["read", "write", "search", "run_tests"].includes(resultEvent.event)) return false;
+      const toolPath = String(toolEvent.path || "");
+      const resultPath = String(resultEvent.path || "");
+      if (toolPath && resultPath && toolPath !== resultPath) return false;
+      const tool = String(toolEvent.tool || "");
+      if (resultEvent.event === "write") return !tool || ["edit_file", "write_file"].includes(tool);
+      if (resultEvent.event === "read") return !tool || tool === "read_file";
+      if (resultEvent.event === "search") return !tool || ["grep", "list_files"].includes(tool);
+      if (resultEvent.event === "run_tests") return !tool || tool === "run_tests";
+      return true;
+    }
+    function nearbyLlmIndex(events, toolIndex, used) {
+      const toolEvent = events[toolIndex];
+      for (let index = toolIndex - 1; index >= 0; index--) {
+        if (used.has(index)) continue;
+        const event = events[index];
+        if (toNumber(toolEvent.t) - toNumber(event.t) > actionGroupWindowS) break;
+        if (event.event === "llm_usage" && sameAgent(event, toolEvent)
+            && sameTurn(event, toolEvent)) {
+          return index;
+        }
+      }
+      return -1;
+    }
+    function pairedResultIndex(events, toolIndex, used) {
+      const toolEvent = events[toolIndex];
+      for (let index = toolIndex + 1; index < events.length; index++) {
+        if (used.has(index)) continue;
+        const event = events[index];
+        if (toNumber(event.t) - toNumber(toolEvent.t) > actionGroupWindowS) break;
+        if (toolMatchesResult(toolEvent, event)) return index;
+      }
+      return -1;
+    }
+    function actionGroupLabel(toolEvent, resultEvent) {
+      const tool = toolEvent.tool || "";
+      if (resultEvent.event === "write") {
+        return `${tool || "write"} ${resultEvent.status || "write"}`.trim();
+      }
+      if (resultEvent.event === "read") return tool || "read_file";
+      if (resultEvent.event === "search") return tool || resultEvent.kind || "search";
+      if (resultEvent.event === "run_tests") {
+        const failed = toNumber(resultEvent.failed) + toNumber(resultEvent.errored);
+        return failed ? "tests failed" : "tests passed";
+      }
+      return eventLabel(resultEvent);
+    }
+    function actionGroupDetail(sources, toolEvent, resultEvent) {
+      const bits = [];
+      const llm = sources.find(event => event.event === "llm_usage");
+      if (llm) {
+        bits.push(`LLM t${llm.turn ?? ""}`.trim());
+        if (llm.total_tokens) bits.push(`${fmt(llm.total_tokens, 0)} tokens`);
+      }
+      if (toolEvent.tool) bits.push(toolEvent.tool);
+      if (resultEvent.path) bits.push(resultEvent.path);
+      if (resultEvent.pattern) bits.push(`pattern=${resultEvent.pattern}`);
+      if (resultEvent.status) bits.push(`status=${resultEvent.status}`);
+      if (resultEvent.kind) bits.push(`kind=${resultEvent.kind}`);
+      if (resultEvent.waited_s) bits.push(`waited ${fmt(resultEvent.waited_s, 1)}s`);
+      if (resultEvent.symbols && resultEvent.symbols.length) {
+        bits.push(`symbols=${resultEvent.symbols.join(",")}`);
+      }
+      if (resultEvent.passed !== undefined || resultEvent.failed !== undefined
+          || resultEvent.errored !== undefined) {
+        bits.push(`tests ${resultEvent.passed ?? 0}/${resultEvent.failed ?? 0}/${resultEvent.errored ?? 0}`);
+      }
+      if (resultEvent.message) bits.push(resultEvent.message);
+      return bits.join(" | ");
+    }
+    function makeActionGroup(events, toolIndex, resultIndex, used) {
+      const toolEvent = events[toolIndex];
+      const resultEvent = events[resultIndex];
+      const sources = [toolEvent, resultEvent];
+      const llmIndex = nearbyLlmIndex(events, toolIndex, used);
+      if (llmIndex >= 0) sources.unshift(events[llmIndex]);
+      sources.forEach(event => used.add(events.indexOf(event)));
+      return Object.assign({}, resultEvent, {
+        grouped: true,
+        source_events: sources,
+        tool: toolEvent.tool || resultEvent.tool,
+        label: actionGroupLabel(toolEvent, resultEvent),
+        detail: actionGroupDetail(sources, toolEvent, resultEvent),
+        raw_count: sources.length,
+      });
+    }
+    function groupReplayEvents(replay) {
+      const events = (replay?.events || []).slice()
+        .sort((a, b) => toNumber(a.t) - toNumber(b.t));
+      const used = new Set();
+      const grouped = [];
+      events.forEach((event, index) => {
+        if (used.has(index)) return;
+        if (event.event === "llm_usage") {
+          const nextTool = events.findIndex((candidate, candidateIndex) =>
+            candidateIndex > index
+            && !used.has(candidateIndex)
+            && candidate.event === "tool_call"
+            && sameAgent(event, candidate)
+            && sameTurn(event, candidate)
+            && closeInTime(event, candidate));
+          if (nextTool >= 0 && pairedResultIndex(events, nextTool, used) >= 0) return;
+        }
+        if (event.event === "tool_call") {
+          const resultIndex = pairedResultIndex(events, index, used);
+          if (resultIndex >= 0) {
+            grouped.push(makeActionGroup(events, index, resultIndex, used));
+            return;
+          }
+        }
+        used.add(index);
+        grouped.push(event);
+      });
+      return grouped.sort((a, b) => toNumber(a.t) - toNumber(b.t));
+    }
+    function replayEventEnabled(event) {
+      if (replayState.enabled.has(event.event)) return true;
+      return (event.source_events || []).some(source =>
+        replayState.enabled.has(source.event));
+    }
     function visibleReplayEvents(replay) {
-      return (replay?.events || []).filter(event => replayState.enabled.has(event.event));
+      const events = replayState.view === "raw"
+        ? (replay?.events || [])
+        : groupReplayEvents(replay);
+      return events.filter(replayEventEnabled);
     }
     function eventLaneAgents(event, replay) {
       const agents = new Set(replay?.agents || []);
@@ -423,7 +576,8 @@ def write_html_report(
         .sort((a, b) => toNumber(a.t) - toNumber(b.t))
         .forEach(event => {
           const leftPx = toNumber(event.t) / Math.max(0.1, duration) * trackWidth;
-          let level = lastByLevel.findIndex(last => leftPx - last >= 78);
+          const spacing = event.grouped ? 116 : 82;
+          let level = lastByLevel.findIndex(last => leftPx - last >= spacing);
           if (level < 0) {
             level = lastByLevel.indexOf(Math.min(...lastByLevel));
           }
@@ -431,6 +585,16 @@ def write_html_report(
           levels.set(event, level);
       });
       return levels;
+    }
+    function eventDurationSpan(event, duration) {
+      const waited = Math.max(0, toNumber(event.waited_s));
+      if (!waited) return null;
+      const end = Math.max(0, toNumber(event.t));
+      const start = Math.max(0, end - waited);
+      return {
+        left: Math.max(0, Math.min(100, start / duration * 100)),
+        width: Math.max(0.4, Math.min(100, waited / duration * 100)),
+      };
     }
     function replayTickStep(duration, trackWidth) {
       const pxPerSecond = trackWidth / Math.max(0.1, duration);
@@ -475,10 +639,23 @@ def write_html_report(
         `<span class="replay-grid-line" style="left:${tick.left}%"></span>`
       ).join("");
     }
+    function syncReplayViewButtons() {
+      replayEls.viewButtons.forEach(button => {
+        button.classList.toggle("active", button.dataset.replayView === replayState.view);
+      });
+    }
+    function setReplayView(view) {
+      replayState.view = view === "raw" ? "raw" : "actions";
+      replayState.enabled = new Set(
+        replayState.view === "raw" ? replayAllEvents : replayDefaultEvents);
+      syncReplayViewButtons();
+      renderReplayToggles();
+      renderReplay();
+    }
     function renderReplayToggles() {
       replayEls.toggles.innerHTML = replayTypes.map(item => `
         <label class="replay-toggle">
-          <input type="checkbox" value="${attr(item.event)}" checked>
+          <input type="checkbox" value="${attr(item.event)}"${replayState.enabled.has(item.event) ? " checked" : ""}>
           <span>${esc(item.label)}</span>
         </label>
       `).join("");
@@ -576,8 +753,9 @@ def write_html_report(
           <span>${esc(replay.agents.length)} agent(s)</span>
           <span>${esc(fmt(replay.wall_clock_s ?? replay.duration_s, 1))}s wall</span>
           <span>oracle ${esc(replay.oracle_passed ?? "")}/${esc(replay.oracle_total ?? "")}</span>
+          <span>${replayState.view === "raw" ? "raw events" : "grouped actions"}</span>
         </div>
-        <p>Observable event replay from logged timestamps. Hidden model planning and exact generation intervals are not reconstructed.</p>
+        <p>Observable event replay from logged timestamps. Grouped view collapses adjacent LLM, tool, and result signals; raw view keeps each JSONL event. Hidden model planning and exact generation intervals are not reconstructed.</p>
       `;
       const currentPct = Math.max(0, Math.min(100, replayState.time / duration * 100));
       const events = visibleReplayEvents(replay);
@@ -603,7 +781,10 @@ def write_html_report(
               const top = [21, 50, 79][levels.get(event) || 0];
               const seen = toNumber(event.t) <= replayState.time ? "is-seen" : "";
               const title = `${fmt(event.t, 1)}s ${event.event} ${eventDetail(event)}`;
-              return `<button type="button" class="replay-marker ${eventClass(event)} ${seen}"
+              const span = eventDurationSpan(event, duration);
+              const spanHtml = span ? `<span class="replay-span ${eventClass(event)}"
+                style="left:${span.left}%;top:${top}%;width:${span.width}%"></span>` : "";
+              return `${spanHtml}<button type="button" class="replay-marker ${eventClass(event)} ${seen}"
                 title="${attr(title)}" style="left:${left}%; top:${top}%">${esc(eventLabel(event))}</button>`;
             }).join("")}
           </div>
@@ -1014,6 +1195,9 @@ def write_html_report(
     replayEls.zoom.addEventListener("input", () => setReplayZoom(replayEls.zoom.value));
     replayEls.picker.addEventListener("change", () => selectReplay(replayEls.picker.value, {scroll: false}));
     replayEls.search.addEventListener("input", () => updateReplayPicker(filteredTrials()));
+    replayEls.viewButtons.forEach(button => {
+      button.addEventListener("click", () => setReplayView(button.dataset.replayView));
+    });
     replayEls.timeline.addEventListener("wheel", event => {
       if (!event.ctrlKey && !event.metaKey) return;
       event.preventDefault();
@@ -1062,6 +1246,7 @@ def write_html_report(
       filters.search.value = "";
       render();
     });
+    syncReplayViewButtons();
     renderReplayToggles();
     render();
 """
@@ -1757,6 +1942,38 @@ def write_html_report(
       color: var(--ink-soft);
       font-size: 13px;
     }}
+    .replay-options {{
+      display: grid;
+      grid-template-columns: auto minmax(260px, 1fr);
+      gap: 10px;
+      align-items: stretch;
+    }}
+    .replay-mode {{
+      display: inline-grid;
+      grid-template-columns: repeat(2, minmax(112px, 1fr));
+      gap: 3px;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--bg-soft);
+    }}
+    .replay-mode button {{
+      border: 0;
+      border-radius: 4px;
+      padding: 7px 9px;
+      color: var(--muted);
+      background: transparent;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }}
+    .replay-mode button.active {{
+      color: #fff;
+      background: var(--accent);
+      box-shadow: 0 2px 7px rgb(15 118 110 / 20%);
+    }}
     .replay-toggles {{
       display: flex;
       flex-wrap: wrap;
@@ -1880,6 +2097,16 @@ def write_html_report(
       background: rgb(71 85 105 / 12%);
       transform: translateX(-0.5px);
     }}
+    .replay-span {{
+      position: absolute;
+      height: 9px;
+      border-radius: 999px;
+      background: rgb(190 18 60 / 14%);
+      border: 1px solid rgb(190 18 60 / 26%);
+      transform: translateY(-50%);
+      z-index: 1;
+      pointer-events: none;
+    }}
     .replay-marker {{
       position: absolute;
       min-width: 22px;
@@ -1900,10 +2127,16 @@ def write_html_report(
       white-space: nowrap;
       transform: translate(-50%, -50%) scale(0.92);
       opacity: 0.46;
+      z-index: 2;
     }}
     .replay-marker.is-seen {{
       transform: translate(-50%, -50%) scale(1);
       opacity: 1;
+    }}
+    .replay-marker.is-grouped {{
+      max-width: 150px;
+      padding-inline: 8px;
+      border-width: 1.5px;
     }}
     .replay-llm-usage {{ color: #115e59; background: #ccfbf1; border-color: #5eead4; }}
     .replay-tool-call {{ color: #334155; background: #e2e8f0; border-color: #94a3b8; }}
@@ -2050,6 +2283,7 @@ def write_html_report(
       .replay-picker {{ grid-template-columns: 1fr; }}
       .replay-picker-count {{ text-align: left; padding: 0; }}
       .replay-toolbar {{ grid-template-columns: 1fr; }}
+      .replay-options {{ grid-template-columns: 1fr; }}
       .replay-clock {{ text-align: left; }}
       .replay-feed-row {{ grid-template-columns: 58px minmax(90px, 1fr); }}
       .replay-feed-row em, .replay-feed-row p {{ grid-column: 2; }}
@@ -2186,7 +2420,13 @@ def write_html_report(
         </label>
         <span class="replay-zoom-label" id="replayZoomLabel">100%</span>
       </div>
-      <div class="replay-toggles" id="replayToggles" aria-label="replay event filters"></div>
+      <div class="replay-options">
+        <div class="replay-mode" aria-label="replay view mode">
+          <button type="button" class="active" data-replay-view="actions">Grouped actions</button>
+          <button type="button" data-replay-view="raw">Raw events</button>
+        </div>
+        <div class="replay-toggles" id="replayToggles" aria-label="replay event filters"></div>
+      </div>
       <div class="replay-timeline" id="replayTimeline"></div>
       <div class="replay-feed" id="replayFeed"></div>
     </section>

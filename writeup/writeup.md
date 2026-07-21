@@ -678,21 +678,30 @@ value rather than by how easy it is to add.
    of `log.txt`, fail-fast checks when agents go off-brief, and optional
    deterministic recruitment from RaceBench briefs.
 
+7. **Replay duration tracing.** The current `report.html` replay is an
+   observable event timeline, not a duration trace. Events are positioned by
+   logged timestamps, and the grouped-action view collapses adjacent LLM, tool,
+   and result signals for readability. Most LLM and tool calls are still point
+   markers because the harness does not yet log explicit start and end times.
+   A useful next step is to add `llm_start` / `llm_end` and `tool_start` /
+   `tool_end` events so the replay can render true duration bars, queueing time,
+   and time spent waiting on coordination.
+
 #### Priority 3: nice to have or deferred
 
-7. **Claude Code C1 adapter.** This would follow the same harness-swap pattern as
-   Cursor: N headless `claude -p` processes, one brief each, with cwd from
-   `paths.json`. Useful, but not required for the core contribution.
+8. **Claude Code C1 adapter.** This would follow the same harness-swap pattern as
+    Cursor: N headless `claude -p` processes, one brief each, with cwd from
+    `paths.json`. Useful, but not required for the core contribution.
 
-8. **C2 single-goal track.** Keep this named but unbuilt for now. A single-goal
-   product run mostly measures planning and single-agent capability unless the
-   runtime exposes coordination hooks.
+9. **C2 single-goal track.** Keep this named but unbuilt for now. A single-goal
+    product run mostly measures planning and single-agent capability unless the
+    runtime exposes coordination hooks.
 
-9. **Cascade at 8+ agents.** This would be interesting, but it is cost-heavy.
-   `t04` and `rw_e` already test smaller dependency chains at n=4 and n=3.
+10. **Cascade at 8+ agents.** This would be interesting, but it is cost-heavy.
+    `t04` and `rw_e` already test smaller dependency chains at n=4 and n=3.
 
-10. **Lite CRDT column.** Still deferred because it overlaps with `git_hash` on
-    compose-heavy tasks and would need honest `always_merge` labeling.
+11. **Lite CRDT column.** Still deferred because it overlaps with `git_hash` on
+     compose-heavy tasks and would need honest `always_merge` labeling.
 
 ---
 

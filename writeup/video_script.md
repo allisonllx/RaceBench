@@ -1,73 +1,178 @@
-# Demo video script (3:00 max)
+# RaceBench demo video script (3:00 max)
 
-Format: screen recording + voiceover. Record terminal at large font; pre-warm
-all commands so nothing stalls on camera. Rehearse to 2:40 to leave buffer.
+Format: a tightly edited product demo with voiceover, using terminal footage,
+the static results explorer, and animated callouts. The five judging pillars are
+the story structure, but should not be announced as a checklist.
 
-## 0:00-0:25: The problem (slide or README on screen)
+**One-sentence message:** A multi-agent coding run can look successful while
+silently losing work, and RaceBench makes that failure—and the cost of preventing
+it—measurable.
 
-> "Cursor, Claude Code and Devin all run coding agents in parallel now. The
-> moment two agents touch the same repo, you get database-style concurrency
-> bugs. Three papers propose three fixes: CRDTs, git-hash optimism, and
-> LLM notifications. Each one is evaluated only by its own authors, on
-> its own tasks. Nobody published the comparison table. We built it."
+**Audience:** hackathon judges who understand coding agents but may not know
+database-style concurrency terminology.
 
-## 0:25-1:00: Show a silent failure happen (terminal)
+**Target runtime:** rehearse to 2:45–2:50, leaving 10–15 seconds of submission
+buffer. Keep the voiceover near 390 words.
 
-Run:
+## Narrative flow
 
-    python -m runner.run_grid --config runner/configs/config.smoke.yaml
+| Time | Pillar | Visual purpose |
+|---|---|---|
+| 0:00–0:20 | Problem | Cold-open on a silent lost update; make the danger felt before naming the benchmark. |
+| 0:20–0:42 | Problem | Establish why existing one-system evaluations cannot answer the comparison question. |
+| 0:42–1:10 | Approach | Reveal RaceBench and show the controlled swap: same task, prompts, model, and oracle; only strategy changes. |
+| 1:10–1:42 | Evidence | Show destructive overlap and the event replay that explains the failure. |
+| 1:42–2:08 | Evidence | Flip to benign overlap and introduce false-positive stalls as the novel metric. |
+| 2:08–2:31 | Evidence | Zoom out to the full 480-trial grid and the strategy trade-off. |
+| 2:31–2:47 | Constraints | State the safety/throughput trade-off and the benchmark's realism boundary. |
+| 2:47–3:00 | Honesty & Trajectory | Separate benchmark from invention and black-box product scoring; close on the next design question. |
 
-> "Here are two agents adding two config keys to the same file. Under naive
-> parallelism, what you get by default, the run LOOKS fine: no error, no
-> crash. But the oracle says 3 of 6 tests fail: one agent's feature silently
-> vanished. That's a lost update. Same agents, same task under git-hash
-> optimistic concurrency: six out of six. The harness caught the difference
-> because every read and write flows through the coordination layer and lands
-> in an event log."
+## Shot-by-shot script
 
-Show the two `correct=` lines side by side; flash the JSONL event log briefly.
+### 0:00–0:20 — Cold open: “success” that lost the feature
 
-## 1:00-1:45: The false-positive axis (the novel number)
+**Visual:** Black screen. Two agent cards appear side by side: `Agent A: done` and
+`Agent B: done`. A green `RUN COMPLETE` stamp lands. It glitches into the oracle:
+`3 / 6 tests passed`. Show a two-line diff where one config key disappears.
 
-Open `results/.../comparison_table.md` (or the notebook).
+**Voiceover:**
 
-> "Coordination also fails in the opposite direction: stalling when it
-> shouldn't. Task 2 is deliberately benign: two agents edit different
-> functions in the same file. The right behavior is to do nothing. File
-> locking stalls anyway, a false positive. Symbol-level claims, the trick
-> tools like Grit and Weave use, don't stall at all. Nobody reports this
-> false-positive stall rate; our harness measures it for every strategy, on
-> every task, by diffing the symbols each write actually changed."
+> “Two coding agents finish. Both report success. There is no crash, no merge
+> conflict, and no warning. But half the feature is gone. One agent silently
+> overwrote the other. This is what failure looks like when parallel coding
+> agents share a repository.”
 
-Point at the `fp_stalls_per_trial` column: file_lock 1.0, ast_scope 0.0.
+### 0:20–0:42 — Why this needs a benchmark
 
-## 1:45-2:25: The real grid (static explorer)
+**Visual:** Pull back from the lost line into three mechanism cards: optimistic
+merge, file lock, notification. Each sits above a different task set; the cards
+cannot be compared. Resolve into a blank comparison table.
 
-Open `results/grid-v1/report.html`.
+**Voiceover:**
 
-> "The full grid is 16 tasks, 6 strategies, and 5 repetitions with gpt-5-mini:
-> 480 trials from committed JSONL logs. It includes hardened clobbers, benign
-> overlap, cross-file races, irreversible effects, split-view worktrees, and a
-> Conduit app track. The explorer lets judges filter by task, strategy, and
-> failure mode, then click through to the raw logs."
+> “Parallel agents are already a product category. Proposed fixes include
+> optimistic merges, locks, CRDTs, and agent notifications. But each is usually
+> evaluated inside its own system, on its own tasks and metrics. Nobody had
+> published the neutral comparison table.”
 
-Point at one headline result: `file_lock` fixes t01/t03 but creates
-false-positive stalls on benign tasks. Then point at `notify` and `naive` as
-evidence that the right answer is selective, not "always coordinate more."
+### 0:42–1:10 — Approach: reveal RaceBench
 
-## 2:25-3:00: Honesty + close (README on screen)
+**Visual:** RaceBench title. Animate the controlled experiment as fixed blocks:
+`task + briefs + model + oracle`; swap only the `coordination strategy` block.
+Then flash one task folder, the hidden oracle, and a short JSONL event timeline.
 
-> "What this isn't: a new coordination mechanism or a claim that external
-> products are strategy columns. Level A compares mechanisms under our
-> instrumented loop. Level C is black-box runtime scoring unless a product
-> exposes mediation hooks. What it is: a neutral, replayable benchmark artifact.
-> Every number regenerates from committed event logs, and the repo includes the
-> harness, tasks, static explorer, validation command, and limits."
+**Voiceover:**
 
-## Recording checklist
+> “RaceBench is that table. It replays collision-seeded coding tasks while
+> holding the repository, agent briefs, model, and hidden oracle fixed. Only the
+> coordination policy changes. Every read, write, stall, token, and final test
+> result becomes a replayable JSONL event. The suite covers 16 tasks and nine
+> mechanism classes, from no coordination to locks, optimistic merge, symbol
+> claims, notifications, peer negotiation, and adaptive leases.”
 
-- [ ] `pytest` green on camera-ready checkout
-- [ ] smoke configs pre-run once (git init noise warms up)
-- [ ] terminal >=18pt font, dark theme, window sized for 1080p
-- [ ] real-grid figures regenerated from final `results/grid-v1`
-- [ ] open `results/grid-v1/report.html` before recording
+### 1:10–1:42 — Evidence I: catch the invisible clobber
+
+**Visual:** Use the explorer or a prepared side-by-side result card for
+`t01_stale_clobber` / `t03_fetch_clobber`. Highlight `naive: 0/5`, then
+`file_lock: 5/5` and `git_hash: 5/5`. Open one failed replay and trace
+`read → write → stale overwrite → oracle failure`.
+
+**Voiceover:**
+
+> “On destructive overlap, the failure is repeatable: naive parallelism passes
+> zero of five runs. File locking and git-hash optimistic merge pass five of
+> five. And this is not just a red cell in a chart. The replay shows the stale
+> read, the competing writes, the exact overwrite, and the failing oracle.”
+
+### 1:42–2:08 — Evidence II: safety can also be waste
+
+**Visual:** Switch to `t02_benign_overlap`: two agents modify different functions
+in the same file. Show all strategies at `5/5`, then reveal the second axis:
+`file_lock: 1.0 false-positive stall/trial`; `naive + notify: 0`.
+
+**Voiceover:**
+
+> “But stopping races is only half the problem. Here, two agents edit different
+> functions in the same file. Every strategy passes five of five, yet file
+> locking stalls safe work once per trial. RaceBench measures that hidden tax as
+> a false-positive stall. A system that stays correct by serializing everything
+> has not solved parallelism.”
+
+### 2:08–2:31 — Evidence III: the full trade-off
+
+**Visual:** Open `results/grid-v1/report.html`. Show `480 trials`, `16 tasks`,
+`6 baseline strategies`, `5 repetitions`, then the correctness chart. Pin the
+two comparison cards: `file_lock: 90%, 174s` and `notify: 80%, 52s`.
+Briefly flash the combined nine-strategy explorer as post-grid extensions.
+
+**Voiceover:**
+
+> “The headline grid contains 480 real-model trials. Solo agents pass 96.2
+> percent, confirming the work itself is usually solvable. In parallel, the
+> safest baseline, file locking, reaches 90 percent—but averages 174 seconds.
+> Notifications reach 80 percent in 52 seconds. The right policy depends on the
+> race; there is no universal winner.”
+
+### 2:31–2:47 — Constraints: name the boundary
+
+**Visual:** Keep the chart visible but dim it. Bring forward two compact labels:
+`reproducible probes ≠ production realism` and `safety ↔ throughput`.
+
+**Voiceover:**
+
+> “That result has boundaries. These are fixed two-to-four-agent probes, plus a
+> structured Conduit track—not long-horizon production development. And every
+> safety gain must be read beside latency, tokens, wasted work, and unnecessary
+> stalls.”
+
+### 2:47–3:00 — Honesty, trajectory, and close
+
+**Visual:** Three levels lock into place: `A — strategies`, `B — tasks/oracles`,
+`C — external runtimes`. Highlight A/B; visually separate C. End on the
+RaceBench wordmark and the question `What survived? At what cost?`.
+
+**Voiceover:**
+
+> “RaceBench is not a new coordination mechanism, and black-box products stay a
+> separate external-runtime track. It is a neutral, extensible testbed. Next, it
+> can test hybrids that coordinate only when risk is real. Do not ask only
+> whether the agents finished. Ask what survived—and what coordination cost.”
+
+## Five-pillar coverage check
+
+| Criterion | What the judge hears or sees |
+|---|---|
+| Problem | A concrete silent lost update, why it matters now, and why prior results are not directly comparable. |
+| Approach | Fixed tasks/prompts/model/oracle; pluggable coordination policy; event-level observability; 16-task, 9-class scope. |
+| Evidence | 0/5 versus 5/5 destructive races; benign 5/5 with 1.0 false-positive stall; 480-trial aggregate; solo calibration. |
+| Constraints | Safety-versus-throughput numbers, limited agent scale, reproducible probes rather than full production realism. |
+| Honesty & Trajectory | Benchmark rather than invented mechanism; Level A/B separated from black-box Level C; hybrid next step. |
+
+## Recording and asset checklist
+
+- [ ] Capture a deterministic failed event replay instead of waiting for a live
+  race during recording.
+- [ ] Prepare clean side-by-side result cards for `naive`, `file_lock`, and
+  `git_hash`; terminal text alone will be too dense at 1080p.
+- [ ] Open `results/grid-v1/report.html` and
+  `results/grid-v1-plus-extensions/report.html` before recording.
+- [ ] Verify final headline values against the committed report immediately
+  before export.
+- [ ] Keep terminal text at least 18pt and never show a table wider than the
+  highlighted columns.
+- [ ] Use the existing figures in `assets/` as evidence plates, but animate
+  crops and callouts rather than holding on full screenshots.
+- [ ] Keep any music below narration and use sound design only for the false
+  “success” stamp, the failed oracle reveal, and the final question.
+
+## HyperFrames production note
+
+This should route to the **general-video** workflow: it is a narrated custom
+composition that mixes terminal capture, UI evidence, typography, and charts.
+It is not a slideshow and the motion is not a standalone sub-10-second graphic.
+
+When production starts, use a storyboard review. Build the cold open, the
+controlled-experiment diagram, and the A/B/C boundary as authored HTML motion;
+use real screenshots or short captures for the explorer and event replay. Avoid
+recreating the whole results UI in animation—the authentic artifact is stronger
+evidence.

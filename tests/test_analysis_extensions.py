@@ -468,6 +468,13 @@ def test_html_report_contains_labels_and_sections(tmp_path):
     assert "replaySearch" in html
     assert "replaySelect" in html
     assert "replayPickCount" in html
+    assert "Grouped actions" in html
+    assert "Raw events" in html
+    assert "replayDefaultEvents" in html
+    assert "groupReplayEvents" in html
+    assert "actionGroupLabel" in html
+    assert "edit_file" in html
+    assert "replay-span" in html
     assert "replayZoom" in html
     assert 'step="0.01"' in html
     assert "clampReplayZoom" in html
