@@ -166,6 +166,17 @@ python -m runner.run_external --task t02_benign_overlap --adapter cursor \
 Offline unit tests mock the SDK (`tests/test_cursor_adapter.py`); they do not call
 the Cursor API.
 
+### Planned Cursor upgrades (unbuilt)
+
+| Upgrade | SDK surface | What RaceBench gains | Still not |
+|---|---|---|---|
+| Richer C1 logs | `agent.send` + `run.stream()` / `tool_call` events | Trajectories of read/write/edit/shell actions | Mediation, FP stalls, Level A column |
+| Mediated C1 | `.cursor/hooks.json` (`preToolUse`, `afterFileEdit`, …) mapped to RaceBench `on_read` / `on_write_intent` / `decision` | Stalls, conflicts, notify, FP stalls if every write is gated | Automatic product orchestration |
+| C2-lite | One prompt; Cursor spawns subagents, then reunite + oracle | External validity for product-owned parallelization | Strategy ranking unless mediation is also on |
+
+Protocol details: [`external-coordination-protocol.md`](external-coordination-protocol.md#cursor-sdk-observe-vs-mediate).
+Do not put stream-only or C2-lite cells on the Level A heatmap.
+
 ## MegaAgent vendor adapter
 
 MegaAgent’s public entrypoint is `config.py` prompts + `main.py` writing under
@@ -207,8 +218,9 @@ Level A `git_hash` remains the apples-to-apples **mechanism-class** column.
 | Oracle correctness | yes |
 | Wall clock | yes |
 | Token / USD | only if adapter fills `ExternalOutcome` token fields |
-| FP stalls / read-set visibility | **no** (no Strategy mediation) |
-| Product orchestration / dynamic hiring | **no** (C1 forces fixed briefs) |
+| FP stalls / read-set visibility | **no** today (needs hooks → mediation bridge) |
+| Tool trajectories | **no** today (needs `run.stream()` / `tool_call` logging) |
+| Product orchestration / dynamic hiring | **no** (C1 forces fixed briefs; C2-lite unbuilt) |
 
 ## Related
 

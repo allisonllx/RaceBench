@@ -60,3 +60,45 @@ are not evidence that the runtime's coordination mechanism outperformed
 RaceBench keeps the claim narrower: Level A compares mechanisms with full
 visibility; Level C checks whether real worker stacks survive the same seeded
 collisions under fixed RaceBench briefs.
+
+## Cursor SDK: observe vs mediate
+
+Cursor's public SDK (TypeScript `@cursor/sdk` / Python `cursor-sdk`) exposes two
+surfaces that matter for Level C. Neither is wired in the shipped RaceBench
+`cursor` adapter yet (`Agent.prompt` + final usage only).
+
+### Observe: stream tool calls
+
+`agent.send(...)` returns a `Run` whose `stream()` / `messages()` iterator emits
+normalized events, including `tool_call` with `name`, `status`, `args`, and
+`result`. Built-in tools include read / write / edit / shell / grep / glob and
+related workspace actions. Logging these into RaceBench JSONL (or a sidecar)
+upgrades black-box C1 from oracle-only outcomes to auditable trajectories.
+
+Important limits:
+
+- Tool `args` / `result` shapes and even tool **names** are not a stable public
+  contract; parse defensively.
+- A completed `tool_call` is **after or during** the action. Observation alone
+  does not give RaceBench a chance to `stall` / `merge` / `notify` before the
+  workspace mutates, so FP-stall and strategy-column metrics remain unavailable.
+
+### Mediate: project hooks
+
+Cursor [hooks](https://cursor.com/docs/hooks) (`.cursor/hooks.json` in the trial
+cwd, e.g. `preToolUse`, `beforeShellExecution`, `afterFileEdit`) can block,
+modify, or audit tool use. That is the practical bridge to this protocol:
+
+| RaceBench hook | Cursor surface (approximate) |
+|---|---|
+| `on_read` | `preToolUse` / completed `tool_call` for read-like tools |
+| `on_write_intent` + `decision` | `preToolUse` (or edit/write gate) that can **deny** until RaceBench returns `allow` / `stall` / … |
+| `on_write_committed` | `afterFileEdit` or completed write/edit `tool_call` |
+| `on_agent_done` | run completion / agent dispose |
+
+Until that bridge exists, keep Cursor cells as `mode: external` / `ext_cursor`.
+After it exists and emits RaceBench `read` / `write` / `coord` events, a Cursor
+row may enter strategy-style rollups under the same honesty rules as Level A.
+
+See also [`adding-an-external-runtime.md`](adding-an-external-runtime.md)
+(Cursor C1 today; planned stream/hooks upgrades).

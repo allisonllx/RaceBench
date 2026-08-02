@@ -38,7 +38,7 @@ RaceBench is not plug-and-play for arbitrary agents. Black-box runtimes (Cursor,
 
 Known limits: AST and dependency strategies are coarse; the task suite is small; most trials are two-agent races; harness-native strategies are easier to evaluate than external products. I separate Level A and Level C throughout for that reason.
 
-With two more weeks, I would prioritize hybrid coordination, harder multi-agent probes, a mediated Level C adapter, and a Cursor product-orchestrated Level C path ([appendix](#cursor-product-orchestrated-level-c)). The claim stays modest: a reusable benchmark for coordination mechanisms, plus a task suite for black-box runtime checks.
+With two more weeks, I would prioritize hybrid coordination, harder multi-agent probes, and Cursor Level C upgrades via SDK streams/hooks and C2-lite ([appendix](#cursor-level-c-extensions)). The claim stays modest: a reusable benchmark for coordination mechanisms, plus a task suite for black-box runtime checks.
 
 Interactive results: [`results/grid-v1/report.html`](../results/grid-v1/report.html).
 
@@ -212,12 +212,14 @@ This note is appendix material, not part of the 1000-word body.
 
 The current task suite is still useful because it separates destructive races, benign overlap, antidependencies, cascades, and black-box runtime checks. If I had more time, I would add harder probes rather than just more repetitions: 5-8 agent dependency chains, fan-in/fan-out migrations, generated-client schema drift, and cases where one agent's correct patch invalidates another agent's previously passing tests. Those tasks would test whether the benchmark still separates strategies when coordination pressure is closer to real multi-agent development.
 
-### Cursor Product-Orchestrated Level C
+### Cursor Level C Extensions
 
 This note is appendix material, not part of the 1000-word body. It is unbuilt future work.
 
-Shipped Cursor C1 keeps RaceBench in control of the split: the adapter launches one `Agent.prompt` per fixed brief/cwd in parallel, then scores the workspace. That answers whether Cursor's worker loop survives the same uncoordinated floor as Level A `naive`. It does **not** measure Cursor multitask / subagent orchestration.
+Shipped Cursor C1 keeps RaceBench in control of the split: the adapter launches one `Agent.prompt` per fixed brief/cwd in parallel, then scores the workspace from the final tree plus usage tokens. That answers whether Cursor's worker loop survives the same uncoordinated floor as Level A `naive`. It does **not** stream tool actions, mediate writes, or measure Cursor multitask / subagent orchestration.
 
-A natural next step is a product-orchestrated Level C path (C2-lite). Instead of forcing N parallel prompts, give Cursor the RaceBench task context and ask it to spawn subagents for the roles, let them edit, then reunite and check whether the combined workspace passes the oracle. The product stays autonomous about how to parallelize and how to reconcile; RaceBench still owns the seed, oracle, and pass/fail.
+**1. Richer Level C trajectories (observe).** Switch from one-shot `Agent.prompt` to `agent.send` + `run.stream()` / `run.messages()` and log Cursor `tool_call` events (read, write, edit, shell, grep, …). That still keeps `mode: external`, but claims can point at trajectories instead of oracle-only outcomes. Treat tool `args` / `result` / names as unstable; parse defensively.
 
-That is deliberately not C1, and not a Level A strategy column. It confounds worker quality with product planning, spawn behavior, and merge/reconcile choices. The honest use is external validity: does a real agent stack that *chooses* its own parallelization survive RaceBench races? Keep cells out of the strategy heatmap unless the adapter later emits RaceBench-compatible read/write intent events.
+**2. Mediated Level C (control).** Cursor project hooks (`.cursor/hooks.json`: `preToolUse`, `beforeShellExecution`, `afterFileEdit`, …) can block or audit actions before they land. A future adapter would map those into RaceBench's mediation protocol (`on_read`, `on_write_intent`, `decision`, `on_write_committed`, `on_agent_done`) and emit JSONL `read` / `write` / `coord` events. Only then can stalls and false-positive stalls be attributed to a mechanism rather than to Cursor's private loop. Streaming alone is observation; hooks are the path to a strategy-comparable column. See [`docs/external-coordination-protocol.md`](../docs/external-coordination-protocol.md).
+
+**3. Product-orchestrated Level C (C2-lite).** Instead of forcing N parallel prompts, give Cursor the RaceBench task context and ask it to spawn subagents for the roles, let them edit, then reunite and check the oracle. The product stays autonomous about how to parallelize and reconcile; RaceBench still owns the seed, oracle, and pass/fail. That confounds worker quality with product planning and merge choices. Honest use is external validity, not a Level A heatmap cell, unless mediation (2) is also in place.
