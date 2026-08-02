@@ -1,5 +1,7 @@
 # RaceBench: A Neutral Benchmark for Multi-Agent Coordination
 
+**Agnes note.** I used `agnes-2.0-flash` for a scoped Level A provider-sensitivity check on eight high-signal cells ([details](#cross-run-findings)).
+
 ## 1. Problem
 
 Parallel coding agents are easy to launch but hard to trust. When two or more agents edit the same repository, they can clobber each other's work, read stale state, coordinate too much, or waste tokens. Existing proposals usually report gains inside one system or task distribution, making it hard to tell whether the mechanism helped or the product simply gave it easier work.
@@ -26,7 +28,7 @@ After the baseline grid, I evaluated three extensions on the same 16 tasks (`res
 
 ## 4. Constraints
 
-The biggest constraint was cost. I kept the grid small and reused the same logs for the final report instead of buying a larger sweep. I did run a [scoped Agnes sensitivity check](#cross-run-findings), but not a full second-provider grid.
+The biggest constraint was cost. I kept the grid small and reused the same logs for the final report instead of a larger sweep.
 
 Coordination can also trade throughput for safety. Grid-wide, `file_lock` averaged 174s per trial versus 52s for `notify`, mostly because coarse file locks serialize multi-agent cascade and cross-file work (for example, `t04_cascade`: 562s vs 65s), not because tokens differ much. There are also realism constraints: RaceBench uses a local Conduit-style in-process setup, fixed task pairs, and deterministic oracles. That keeps trials reproducible and cheap, but it does not capture long-horizon planning, changing requirements, flaky external services, or heterogeneous agent products.
 
@@ -36,9 +38,9 @@ RaceBench is not plug-and-play for arbitrary agents. Black-box runtimes (Cursor,
 
 Known limits: AST and dependency strategies are coarse; the task suite is small; most trials are two-agent races; harness-native strategies are easier to evaluate than external products. I separate Level A and Level C throughout for that reason.
 
-With two more weeks, I would prioritize hybrid coordination (adaptive leases plus broker only on ambiguous conflicts), harder multi-agent probes, and one mediated Level C adapter. The claim stays modest: a reusable benchmark for coordination mechanisms, plus a task suite for black-box runtime checks.
+With two more weeks, I would prioritize hybrid coordination, harder multi-agent probes, a mediated Level C adapter, and a Cursor product-orchestrated Level C path ([appendix](#cursor-product-orchestrated-level-c)). The claim stays modest: a reusable benchmark for coordination mechanisms, plus a task suite for black-box runtime checks.
 
-Full evidence and long-form reasoning: [`writeup/writeup.md`](writeup.md). Interactive results: [`results/grid-v1/report.html`](../results/grid-v1/report.html).
+Interactive results: [`results/grid-v1/report.html`](../results/grid-v1/report.html).
 
 ---
 
@@ -209,3 +211,13 @@ The honest conclusion is that peer broker should not be a headline success. It i
 This note is appendix material, not part of the 1000-word body.
 
 The current task suite is still useful because it separates destructive races, benign overlap, antidependencies, cascades, and black-box runtime checks. If I had more time, I would add harder probes rather than just more repetitions: 5-8 agent dependency chains, fan-in/fan-out migrations, generated-client schema drift, and cases where one agent's correct patch invalidates another agent's previously passing tests. Those tasks would test whether the benchmark still separates strategies when coordination pressure is closer to real multi-agent development.
+
+### Cursor Product-Orchestrated Level C
+
+This note is appendix material, not part of the 1000-word body. It is unbuilt future work.
+
+Shipped Cursor C1 keeps RaceBench in control of the split: the adapter launches one `Agent.prompt` per fixed brief/cwd in parallel, then scores the workspace. That answers whether Cursor's worker loop survives the same uncoordinated floor as Level A `naive`. It does **not** measure Cursor multitask / subagent orchestration.
+
+A natural next step is a product-orchestrated Level C path (C2-lite). Instead of forcing N parallel prompts, give Cursor the RaceBench task context and ask it to spawn subagents for the roles, let them edit, then reunite and check whether the combined workspace passes the oracle. The product stays autonomous about how to parallelize and how to reconcile; RaceBench still owns the seed, oracle, and pass/fail.
+
+That is deliberately not C1, and not a Level A strategy column. It confounds worker quality with product planning, spawn behavior, and merge/reconcile choices. The honest use is external validity: does a real agent stack that *chooses* its own parallelization survive RaceBench races? Keep cells out of the strategy heatmap unless the adapter later emits RaceBench-compatible read/write intent events.
