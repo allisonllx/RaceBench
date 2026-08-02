@@ -60,17 +60,27 @@ swaps only the coordination mechanism.
 
 ## Levels A / B / C
 
+RaceBench has three plug-in layers:
+
+- **Level A — Strategy benchmark.** Same harness, tools, prompts, tasks, and
+  oracles; only the coordination policy changes. This is the apples-to-apples
+  ranking (`naive`, `file_lock`, …).
+- **Level B — Task and oracle suite.** The reusable race scenarios: seeded
+  repos, agent briefs, collision maps, and hidden verifiers. Strategies and
+  external runtimes replay the same Level B tasks.
+- **Level C — External runtime checks.** A real product (Cursor, MegaAgent, …)
+  edits the workspace; RaceBench scores the result. Black-box correctness and
+  wall clock unless the adapter emits RaceBench read/write/coord events. Do
+  **not** mix Level C cells into the Level A table.
+
 | Level | What you plug in | Guide |
 |---|---|---|
 | **A: Strategy** | `_coordinate_read` / `_coordinate_write` under our agent loop | [`docs/adding-a-strategy.md`](docs/adding-a-strategy.md) |
 | **B: Task** | `tasks/<name>/` repo, collision map, hidden oracle | [`docs/tasks.md`](docs/tasks.md) |
 | **C: External runtime** | Third-party multi-agent system edits the workspace; we score | [`docs/adding-an-external-runtime.md`](docs/adding-an-external-runtime.md) |
 
-**A and B** are the apples-to-apples strategy grid. **C** scores a whole external
-product on the same tasks and oracles (correctness and wall clock unless the
-adapter emits RaceBench events). Do not mix Level C cells into the Level A table.
-C1 (harness-forced role split) vs C2 (product-chosen parallelization) are
-documented in the external-runtime guide.
+C1 (harness-forced role split) vs C2 (product-chosen parallelization) for Level C
+are documented in the external-runtime guide.
 
 ## Strategies (Level A)
 
